@@ -33,7 +33,7 @@ jobs:
           IG_TOKEN_US: ${{ secrets.IG_TOKEN_US }}
           THREADS_USER_ID_US: ${{ secrets.THREADS_USER_ID_US }}
           THREADS_TOKEN_US: ${{ secrets.THREADS_TOKEN_US }}
-        run: python run.py --region us ${{ github.event_name == 'workflow_dispatch' && (inputs.dry_run && '--dry-run --force' || '--force') || '' }}
+        run: python run.py --region us --emit ${{ github.event_name == 'workflow_dispatch' && (inputs.dry_run && '--dry-run --force' || '--force') || '' }}
       - name: 테스트 카드 보관 (dry-run일 때)
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
         uses: actions/upload-artifact@v4

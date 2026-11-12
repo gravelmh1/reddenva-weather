@@ -52,6 +52,7 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--mock")
+    ap.add_argument("--emit", action="store_true", help="게시하지 않고 카드와 캡션 JSON만 저장 (Make 등 외부 도구가 게시)")
     a = ap.parse_args()
     reg = weather.REGIONS[a.region]
     now = dt.datetime.now(ZoneInfo(reg["tz"]))
@@ -88,6 +89,14 @@ def main():
     repo, branch = os.environ["GITHUB_REPOSITORY"], os.environ.get("GITHUB_REF_NAME", "main")
     url = f"https://raw.githubusercontent.com/{repo}/{branch}/{img_rel}"
     wait_url(url)
+
+    if a.emit:
+        import json
+        meta = {"date": day, "image_url": url, "caption": cp["caption"]}
+        with open(f"out/{a.region}-latest.json", "w", encoding="utf-8") as fh:
+            json.dump(meta, fh, ensure_ascii=False)
+        git_push(["out"], f"{a.region} {day} latest.json")
+        print("latest.json 저장 완료 (게시는 외부 도구가 해요)"); return
 
     target = now.replace(hour=POST_HOUR, minute=0, second=0, microsecond=0)
     wait = (target - dt.datetime.now(ZoneInfo(reg["tz"]))).total_seconds()
