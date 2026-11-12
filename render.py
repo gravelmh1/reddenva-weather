@@ -11,11 +11,18 @@ FONT_DIRS = [os.environ.get("FONT_DIR", ""), "/usr/share/fonts/opentype/noto", "
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
+FALLBACK = {"Black": ["Black", "Bold", "Regular"], "Bold": ["Bold", "Regular"],
+            "Medium": ["Medium", "Regular"], "Light": ["Light", "DemiLight", "Regular"],
+            "DemiLight": ["DemiLight", "Regular"], "Regular": ["Regular"]}
+
+
 def font(weight, size):
-    for d in FONT_DIRS:
-        p = os.path.join(d, f"NotoSansCJK-{weight}.ttc") if d else ""
-        if p and os.path.exists(p):
-            return ImageFont.truetype(p, size, index=1)  # index 1 = KR
+    # 굵기 파일이 없으면(우분투 기본 설치에는 Regular/Bold만 있어요) 가장 가까운 굵기로 대체
+    for w in FALLBACK.get(weight, [weight, "Regular"]):
+        for d in FONT_DIRS:
+            p = os.path.join(d, f"NotoSansCJK-{w}.ttc") if d else ""
+            if p and os.path.exists(p):
+                return ImageFont.truetype(p, size, index=1)  # index 1 = KR
     raise RuntimeError("Noto Sans CJK 폰트를 찾지 못했어요 (fonts-noto-cjk 설치 필요)")
 
 
