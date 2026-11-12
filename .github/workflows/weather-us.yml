@@ -1,0 +1,42 @@
+name: weather-us
+on:
+  schedule:
+    - cron: "45 12 * * *"   # LA 05:45 (서머타임 PDT)
+    - cron: "45 13 * * *"   # LA 05:45 (표준시 PST). 둘 중 맞는 시각만 실행돼요
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "테스트만 하기 (체크하면 카드만 만들고 게시하지 않아요)"
+        type: boolean
+        default: true
+permissions:
+  contents: write
+concurrency:
+  group: weather-us
+  cancel-in-progress: false
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 폰트 설치
+        run: sudo apt-get update -y && sudo apt-get install -y fonts-noto-cjk
+      - run: pip install -r requirements.txt
+      - name: 카드 만들고 게시
+        env:
+          OPEN_METEO_API_KEY: ${{ secrets.OPEN_METEO_API_KEY }}
+          IG_USER_ID_US: ${{ secrets.IG_USER_ID_US }}
+          IG_TOKEN_US: ${{ secrets.IG_TOKEN_US }}
+          THREADS_USER_ID_US: ${{ secrets.THREADS_USER_ID_US }}
+          THREADS_TOKEN_US: ${{ secrets.THREADS_TOKEN_US }}
+        run: python run.py --region us ${{ github.event_name == 'workflow_dispatch' && (inputs.dry_run && '--dry-run --force' || '--force') || '' }}
+      - name: 테스트 카드 보관 (dry-run일 때)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: card-us
+          path: out/
