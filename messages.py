@@ -26,7 +26,13 @@ def features(p: dict, unit: str) -> dict:
     order = ["clear", "fog", "rain", "snow", "thunder"]
     grp = max((_group(x["code"]) for x in day_hours), key=order.index)
     c = lambda v: to_c(v, unit)
-    return dict(today=today, tom=tom, days=days, morning=morning, evening=evening, rain_day=rain_day, grp=grp,
+    yd = p.get("yday")
+    d_morn = d_hi = None
+    if yd and yd["date"] in hourly:
+        yh = hourly[yd["date"]]
+        d_morn = morning - round(sum(yh[h]["t"] for h in (7, 8, 9)) / 3)
+        d_hi = today["hi"] - yd["hi"]
+    return dict(d_morn=d_morn, d_hi=d_hi, today=today, tom=tom, days=days, morning=morning, evening=evening, rain_day=rain_day, grp=grp,
                 swing_c=round(c(today["hi"]) - c(today["lo"])), hi_c=c(today["hi"]), lo_c=c(today["lo"]),
                 wind_hi=today["wind"], unit=unit, c=c)
 
@@ -38,6 +44,23 @@ def _outfit(cv: float, lang: str) -> str:
         if cv <= lim:
             return ko if lang == "ko" else en
     return "반팔" if lang == "ko" else "a T-shirt"
+
+
+def _compare(f: dict, lang: str):
+    """어제와 비교한 한 줄. 어제 데이터가 없으면 None."""
+    dm, dh, unit = f["d_morn"], f["d_hi"], f["unit"]
+    if dm is None: return None
+    thr = 1 if unit == "C" else 2
+    if lang == "ko":
+        parts = []
+        if abs(dm) > thr: parts.append(f"아침 {abs(dm)}도 {'높아요' if dm > 0 else '낮아요'}")
+        if abs(dh) > thr: parts.append(f"낮 {abs(dh)}도 {'높아요' if dh > 0 else '낮아요'}")
+        return ("어제보다", ", ".join(parts) if parts else f"거의 같아요 (아침 {f['morning']}도)")
+    parts = []
+    if abs(dm) > thr: parts.append(f"morning {abs(dm)}° {'warmer' if dm > 0 else 'cooler'}")
+    if abs(dh) > thr: parts.append(f"afternoon {abs(dh)}° {'warmer' if dh > 0 else 'cooler'}")
+    txt = ", ".join(parts) if parts else f"about the same ({f['morning']}° this morning)"
+    return ("vs Yesterday", txt[0].upper() + txt[1:])
 
 
 def _pick(options, seed):
@@ -58,6 +81,9 @@ def build(f: dict, region: str, city: str, now: dt.datetime) -> dict:
         elif f["grp"] == "snow": head = _pick(["눈 예보, 걸음은 반 보폭으로 걸어요", "출근길 눈 소식, 10분 일찍 나서요"], seed)
         elif f["rain_day"] >= 60: head = _pick([f"비 올 확률 {f['rain_day']}%, 우산 없이 나가면 도박이에요", f"비 {f['rain_day']}%, 오늘 신발은 방수로 가요"], seed)
         elif f["rain_day"] >= 40: head = f"비 올 확률 {f['rain_day']}%, 접이식 우산은 가방 속에"
+        elif f["d_morn"] is not None and abs(f["d_morn"]) >= (4 if unit == "C" else 7):
+            n, up = abs(f["d_morn"]), f["d_morn"] > 0
+            head = f"어제보다 아침이 {n}도 {'올랐어요, 한 겹 덜 입어요' if up else '내려갔어요, 한 겹 더 입어요'}"
         elif f["swing_c"] >= 8: head = _pick([f"일교차 {f['swing_c']}도, 겉옷은 벗을 수 있게 입는 날", f"아침과 낮이 {f['swing_c']}도 차이, 양파처럼 껴입어요"], seed)
         elif f["hi_c"] >= 30: head = f"최고 {t['hi']}도, 오늘은 그늘이 명당이에요"
         elif f["lo_c"] <= 0: head = _pick([f"최저 {t['lo']}도, 장갑 챙긴 사람이 승자예요", f"영하 {abs(t['lo'])}도, 이불 밖은 위험해요"], seed)
@@ -68,6 +94,9 @@ def build(f: dict, region: str, city: str, now: dt.datetime) -> dict:
         elif f["grp"] == "snow": head = "Snow in the forecast: leave 10 minutes early"
         elif f["rain_day"] >= 60: head = _pick([f"{f['rain_day']}% chance of rain: umbrella day", f"Rain odds {f['rain_day']}%. Waterproof shoes, please."], seed)
         elif f["rain_day"] >= 40: head = f"{f['rain_day']}% rain chance: pack a compact umbrella"
+        elif f["d_morn"] is not None and abs(f["d_morn"]) >= (4 if unit == "C" else 7):
+            n, up = abs(f["d_morn"]), f["d_morn"] > 0
+            head = f"{n}° {'warmer' if up else 'colder'} than yesterday morning: {'lighter' if up else 'heavier'} layer today"
         elif f["swing_c"] >= 8:
             head = f"{f['morning']}° at breakfast, {t['hi']}° at lunch" if f["morning"] != t["hi"] else "Big swing today: dress in layers"
         elif f["hi_c"] >= 30: head = f"High of {t['hi']}°: find the shade"
@@ -116,7 +145,10 @@ def build(f: dict, region: str, city: str, now: dt.datetime) -> dict:
             dd = f["evening"] - f["morning"]
             third = ((("퇴근길", f"{f['evening']}도, 아침보다 {abs(dd)}도 {'높아요' if dd >= 0 else '낮아요'}")) if lang == "ko"
                      else ("Evening", f"{f['evening']}°, {abs(dd)}° {'warmer' if dd >= 0 else 'cooler'} than morning"))
-    rows = [("우산" if lang == "ko" else "Umbrella", umb), ("옷차림" if lang == "ko" else "Wear", wear), third]
+    rows = [("우산" if lang == "ko" else "Umbrella", umb), ("옷차림" if lang == "ko" else "Wear", wear)]
+    cmp_row = _compare(f, lang)
+    # 어제와 비교가 맨 위, 비교 데이터가 없을 때만 내일/퇴근길 미리보기로 대체
+    rows = ([cmp_row] + rows) if cmp_row else (rows + [third])
 
     # ---- 포즈
     if f["grp"] in ("thunder", "snow") or f["rain_day"] >= 50: pose = "a10"
@@ -135,6 +167,6 @@ def build(f: dict, region: str, city: str, now: dt.datetime) -> dict:
         wd = WD_EN[now.weekday()]
         top = f"{city} {wd} {now.month}/{now.day}: high {t['hi']}° · low {t['lo']}°"
         tags = "#LAWeather #LosAngeles #MorningCommute #TodayWeather #RedDenva"
-    body = "\n".join(["· " + (f"{a}: {b}") for a, b in rows])
+    body = "\n".join(["· " + (f"{a} {b}" if a == "어제보다" else f"{a}: {b}") for a, b in rows])
     caption = f"{top}\n{head}\n{body}\n\n{tags}"
     return dict(headline=head, rows=rows, pose=pose, caption=caption, lang=lang)

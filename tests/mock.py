@@ -12,12 +12,17 @@ SCENARIOS = {
 
 
 def make(name: str, start: dt.date) -> dict:
-    s = SCENARIOS[name]
+    s = dict(SCENARIOS[name])
+    # 어제 값(비교용): 시나리오에 없으면 오늘보다 조금 낮게
+    s["hi"] = [s.get("yhi", s["hi"][0] - 4)] + s["hi"]
+    s["lo"] = [s.get("ylo", s["lo"][0] - 3)] + s["lo"]
+    s["rain"] = [0] + s["rain"]
+    N = 8
     daily = dict(time=[], temperature_2m_max=s["hi"], temperature_2m_min=s["lo"], precipitation_probability_max=s["rain"],
-                 weather_code=[s["code"]] * 7, wind_speed_10m_max=[12] * 7)
+                 weather_code=[s["code"]] * N, wind_speed_10m_max=[12] * N)
     hourly = dict(time=[], temperature_2m=[], apparent_temperature=[], precipitation_probability=[], weather_code=[], wind_speed_10m=[])
-    for i in range(7):
-        day = start + dt.timedelta(days=i)
+    for i in range(N):
+        day = start + dt.timedelta(days=i - 1)
         daily["time"].append(day.isoformat())
         for h in range(24):
             t = s["lo"][i] + (s["hi"][i] - s["lo"][i]) * (0.5 - 0.5 * math.cos(2 * math.pi * (h - 3) / 24))

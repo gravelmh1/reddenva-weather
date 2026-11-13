@@ -13,7 +13,7 @@ def fetch(region: str) -> dict:
     key = os.environ.get("OPEN_METEO_API_KEY", "").strip()
     host = "https://customer-api.open-meteo.com" if key else "https://api.open-meteo.com"
     params = {
-        "latitude": r["lat"], "longitude": r["lon"], "timezone": r["tz"], "forecast_days": 7,
+        "latitude": r["lat"], "longitude": r["lon"], "timezone": r["tz"], "forecast_days": 7, "past_days": 1,
         "temperature_unit": "celsius" if r["unit"] == "C" else "fahrenheit",
         "wind_speed_unit": "kmh" if r["unit"] == "C" else "mph",
         "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code,wind_speed_10m_max",
@@ -30,7 +30,8 @@ def to_c(v: float, unit: str) -> float:
     return v if unit == "C" else (v - 32) / 1.8
 
 
-def parse(data: dict) -> dict:
+def parse(data: dict, today: str = None) -> dict:
+    """today(YYYY-MM-DD)를 주면 그 이전 날(어제)은 비교용으로 따로 빼요."""
     d = data["daily"]
     days = []
     for i, date in enumerate(d["time"]):
@@ -44,4 +45,9 @@ def parse(data: dict) -> dict:
         hourly.setdefault(date, {})[int(hh[:2])] = dict(
             t=h["temperature_2m"][i], feel=h["apparent_temperature"][i],
             rain=int(h["precipitation_probability"][i] or 0), code=int(h["weather_code"][i] or 0))
-    return dict(days=days, hourly=hourly)
+    yday = None
+    if today:
+        idx = next(i for i, x in enumerate(days) if x["date"] == today)
+        yday = days[idx - 1] if idx > 0 else None
+        days = days[idx:]
+    return dict(days=days, hourly=hourly, yday=yday)

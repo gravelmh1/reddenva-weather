@@ -71,7 +71,7 @@ def main():
         raw = mock.make(a.mock, now.date())
     else:
         raw = weather.fetch(a.region)
-    p = weather.parse(raw)
+    p = weather.parse(raw, now.date().isoformat())
     f = messages.features(p, reg["unit"])
     cp = messages.build(f, a.region, reg["city"], now)
 
