@@ -1,7 +1,9 @@
 name: weather-kr
 on:
   schedule:
-    - cron: "45 20 * * *"   # 한국 05:45 KST (06:00 게시를 기다림)
+    # 한국 03:45~05:45 KST 사이 여러 번 시도 (GitHub 예약 실행이 늦거나 빠질 때를 대비). 첫 성공 이후는 자동으로 건너뜀
+    - cron: "45 18,19,20 * * *"
+    - cron: "15 19,20 * * *"
   workflow_dispatch:
     inputs:
       dry_run:

@@ -15,6 +15,7 @@ import render
 import weather
 
 POST_HOUR = 6          # 현지 시각 06:00에 게시
+EMIT_WINDOW = (3 * 60 + 30, 5 * 60 + 59)  # --emit 모드: 현지 03:30~05:59 사이 첫 실행만 카드를 만들고, 이후는 건너뜀
 WINDOW = (5 * 60 + 15, 6 * 60 + 50)  # 이 시간대(현지 05:15~06:50)가 아니면 자동 실행을 건너뜀
 
 
@@ -57,10 +58,16 @@ def main():
     reg = weather.REGIONS[a.region]
     now = dt.datetime.now(ZoneInfo(reg["tz"]))
     minutes = now.hour * 60 + now.minute
-    if not (a.force or a.mock) and not (WINDOW[0] <= minutes <= WINDOW[1]):
+    win = EMIT_WINDOW if a.emit else WINDOW
+    if not (a.force or a.mock) and not (win[0] <= minutes <= win[1]):
         print(f"현지 시각 {now:%H:%M}: 게시 시간대가 아니라서 건너뛰어요."); return
 
     day = now.date().isoformat()
+    if a.emit and not (a.force or a.mock or a.dry_run):
+        import json
+        lp = f"out/{a.region}-latest.json"
+        if os.path.exists(lp) and json.load(open(lp, encoding="utf-8")).get("date") == day:
+            print("오늘 카드는 이미 만들어졌어요. 건너뜀."); return
     done = [os.path.exists(f"state/{a.region}_{ch}.txt") and open(f"state/{a.region}_{ch}.txt").read().strip() == day
             for ch in ("instagram", "threads")]
     if all(done) and not (a.force or a.mock or a.dry_run):

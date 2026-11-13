@@ -1,8 +1,9 @@
 name: weather-us
 on:
   schedule:
-    - cron: "45 12 * * *"   # LA 05:45 (서머타임 PDT)
-    - cron: "45 13 * * *"   # LA 05:45 (표준시 PST). 둘 중 맞는 시각만 실행돼요
+    # LA 03:45~05:45 사이 여러 번 시도 (서머타임/표준시 모두 커버, GitHub 지연 대비). 첫 성공 이후는 자동으로 건너뜀
+    - cron: "45 10,11,12,13 * * *"
+    - cron: "15 11,12,13 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
