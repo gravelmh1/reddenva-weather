@@ -3,6 +3,7 @@ import datetime as dt
 import math
 
 SCENARIOS = {
+    "live": dict(unit="C", hi=[15, 12, 16, 17, 16, 12, 6], lo=[8, 9, 7, 6, 8, 0, -1], rain=[16, 78, 0, 0, 98, 96, 0], code=0, yhi=14, ylo=6),
     "kr_mild": dict(unit="C", hi=[18, 14, 16, 15, 14, 10, 6], lo=[9, 10, 9, 9, 10, 2, -1], rain=[0] * 7, code=0),
     "us_warm": dict(unit="F", hi=[78, 67, 71, 73, 68, 68, 67], lo=[60, 57, 57, 58, 57, 52, 53], rain=[5, 75, 10, 10, 30, 15, 15], code=0),
     "rain": dict(unit="C", hi=[14, 12, 15, 16, 17, 15, 14], lo=[9, 8, 9, 10, 11, 9, 8], rain=[80, 60, 20, 10, 10, 30, 20], code=61),

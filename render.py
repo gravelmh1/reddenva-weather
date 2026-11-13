@@ -63,7 +63,7 @@ def card(out, region, now, p, f, cp, city):
     days = p["days"]; t = f["today"]
     c1, c2 = palette(f["grp"], f["hi_c"], f["lo_c"])
     im = grad(c1, c2); d = ImageDraw.Draw(im, "RGBA")
-    d.ellipse([500, 110, 1120, 640], fill=(255, 255, 255, 110))
+    d.ellipse([500, 110, 1120, 585], fill=(255, 255, 255, 110))
     d.rectangle([0, 0, W, 110], fill=NAVY + (255,))
     d.text((60, 30), "Red Denva", font=font("Bold", 44), fill="white")
     tag = "오늘의 날씨" if lang == "ko" else "TODAY'S WEATHER"
@@ -77,15 +77,15 @@ def card(out, region, now, p, f, cp, city):
         datecity = f"{now.strftime('%A')}, {now.strftime('%b')} {now.day} · {city}"
         hi_l, lo_l = "Today's high", "Low"
     d.text((60, 135), datecity, font=font("Bold", 40), fill=NAVY)
-    d.text((60, 192), hi_l, font=font("Medium", 30), fill=GRAY)
+    d.text((60, 186), hi_l, font=font("Bold", 34), fill=(70, 82, 105))
     d.text((56, 222), f"{t['hi']}{u}", font=font("Bold", 160), fill=ORANGE)
     d.text((62, 415), f"{lo_l} {t['lo']}{u}", font=font("Bold", 54), fill=BLUE)
     pose = Image.open(os.path.join(HERE, "assets", "poses", cp["pose"] + ".png")).convert("RGBA")
     s = min(480 / pose.width, 420 / pose.height)
     pose = pose.resize((int(pose.width * s), int(pose.height * s)), Image.LANCZOS).filter(ImageFilter.UnsharpMask(2, 60, 3))
-    im.paste(pose, (560 + (480 - pose.width) // 2, 590 - pose.height), pose)
+    im.paste(pose, (560 + (480 - pose.width) // 2, 578 - pose.height), pose)
     d = ImageDraw.Draw(im, "RGBA")
-    y = 605
+    y = 612
     for ln in wrap(d, cp["headline"], font("Bold", 46), W - 120):
         d.text((60, y), ln, font=font("Bold", 46), fill=NAVY); y += 60
     y += 16
