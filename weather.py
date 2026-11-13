@@ -1,5 +1,6 @@
 """Open-Meteo에서 예보를 가져오고 필요한 값으로 정리한다."""
 import os
+import time
 import requests
 
 REGIONS = {
@@ -21,9 +22,16 @@ def fetch(region: str) -> dict:
     }
     if key:
         params["apikey"] = key
-    resp = requests.get(f"{host}/v1/forecast", params=params, timeout=30)
-    resp.raise_for_status()
-    return resp.json()
+    last = None
+    for i in range(5):  # 일시적인 지연/오류는 몇 번 다시 시도해요
+        try:
+            resp = requests.get(f"{host}/v1/forecast", params=params, timeout=20)
+            resp.raise_for_status()
+            return resp.json()
+        except requests.RequestException as e:
+            last = e
+            time.sleep(5 * (i + 1))
+    raise last
 
 
 def to_c(v: float, unit: str) -> float:
