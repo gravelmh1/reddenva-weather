@@ -148,7 +148,25 @@ def build(f: dict, region: str, city: str, now: dt.datetime) -> dict:
     rows = [("우산" if lang == "ko" else "Umbrella", umb), ("옷차림" if lang == "ko" else "Wear", wear)]
     cmp_row = _compare(f, lang)
     # 어제와 비교가 맨 위, 비교 데이터가 없을 때만 내일/퇴근길 미리보기로 대체
-    rows = ([cmp_row] + rows) if cmp_row else (rows + [third])
+    card_rows = list(rows)              # 카드에는 우산/옷차림 두 줄만 (비교는 큰 띠로 따로 표시)
+    cmp_card = None
+    if cmp_row:
+        dm, dh, thr = f["d_morn"], f["d_hi"], (1 if unit == "C" else 2)
+        tone = 1 if (abs(dm) > thr and dm > 0) or (abs(dm) <= thr and abs(dh) > thr and dh > 0) else \
+              (-1 if abs(dm) > thr or abs(dh) > thr else 0)
+        if lang == "ko":
+            text = "어제보다 " + cmp_row[1]
+        else:  # 영어는 띠에 한 줄로 들어가도록 짧게
+            sg = lambda v: ("+" if v > 0 else "-") + str(abs(v)) + "°"
+            bits = []
+            if abs(dm) > thr: bits.append("AM " + sg(dm))
+            if abs(dh) > thr: bits.append("PM " + sg(dh))
+            text = "vs yesterday: " + " · ".join(bits)
+        if tone == 0: text = "어제와 거의 같아요" if lang == "ko" else "About the same as yesterday"
+        cmp_card = dict(text=text, tone=tone)
+        rows = [cmp_row] + rows
+    else:
+        rows = rows + [third]
 
     # ---- 포즈
     if f["grp"] in ("thunder", "snow") or f["rain_day"] >= 50: pose = "a10"
@@ -169,4 +187,4 @@ def build(f: dict, region: str, city: str, now: dt.datetime) -> dict:
         tags = "#LAWeather #LosAngeles #MorningCommute #TodayWeather #RedDenva"
     body = "\n".join(["· " + (f"{a} {b}" if a == "어제보다" else f"{a}: {b}") for a, b in rows])
     caption = f"{top}\n{head}\n{body}\n\n{tags}"
-    return dict(headline=head, rows=rows, pose=pose, caption=caption, lang=lang)
+    return dict(headline=head, rows=rows, card_rows=card_rows, compare=cmp_card, pose=pose, caption=caption, lang=lang)
