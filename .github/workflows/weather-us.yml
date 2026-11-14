@@ -35,6 +35,16 @@ jobs:
           THREADS_USER_ID_US: ${{ secrets.THREADS_USER_ID_US }}
           THREADS_TOKEN_US: ${{ secrets.THREADS_TOKEN_US }}
         run: python run.py --region us --emit ${{ github.event_name == 'workflow_dispatch' && (inputs.dry_run && '--dry-run --force' || '--force') || '' }}
+      - name: Threads 게시 (Make가 깨운 실행에서만)
+        if: ${{ github.event_name == 'workflow_dispatch' && !inputs.dry_run }}
+        env:
+          THREADS_TOKEN_US: ${{ secrets.THREADS_TOKEN_US }}
+        run: |
+          python threads_post.py --region us
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add state
+          git diff --cached --quiet || (git commit -m "us threads posted" && git pull --rebase -q && git push -q)
       - name: 테스트 카드 보관 (dry-run일 때)
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
         uses: actions/upload-artifact@v4
