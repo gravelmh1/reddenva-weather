@@ -1,0 +1,46 @@
+name: books-us
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "테스트만 하기 (체크하면 카드만 만들고 게시하지 않아요)"
+        type: boolean
+        default: true
+permissions:
+  contents: write
+concurrency:
+  group: books-us
+  cancel-in-progress: false
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 폰트 설치
+        run: sudo apt-get update -y && sudo apt-get install -y fonts-noto-cjk
+      - run: pip install -r requirements.txt
+      - name: 책 카드 만들기
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NYT_API_KEY: ${{ secrets.NYT_API_KEY }}
+        run: python books.py --region us ${{ inputs.dry_run && '--dry-run --force' || '' }}
+      - name: Threads 게시
+        if: ${{ !inputs.dry_run }}
+        env:
+          THREADS_TOKEN_US: ${{ secrets.THREADS_TOKEN_US }}
+        run: |
+          python threads_post.py --region us --kind books-
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add state
+          git diff --cached --quiet || (git commit -m "books us threads posted" && git pull --rebase -q && git push -q)
+      - name: 테스트 카드 보관 (dry-run일 때)
+        if: ${{ inputs.dry_run }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: books-card-us
+          path: out/books-*.jpg

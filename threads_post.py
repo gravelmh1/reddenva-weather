@@ -10,17 +10,17 @@ import publish, weather
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--region", required=True, choices=list(weather.REGIONS))
+    ap.add_argument("--region", required=True, choices=list(weather.REGIONS)); ap.add_argument("--kind", default="", help="books 처럼 접두어(예: books-)")
     a = ap.parse_args()
     reg = weather.REGIONS[a.region]
     day = dt.datetime.now(ZoneInfo(reg["tz"])).date().isoformat()
     token = os.environ.get(f"THREADS_TOKEN_{a.region.upper()}", "").strip()
     if not token:
         print("Threads 토큰이 없어서 건너뜀"); return
-    meta = json.load(open(f"out/{a.region}-latest.json", encoding="utf-8"))
+    meta = json.load(open(f"out/{a.kind}{a.region}-latest.json", encoding="utf-8"))
     if meta.get("date") != day:
         print(f"오늘 카드가 아님({meta.get('date')} != {day}). 건너뜀"); return
-    sf = f"state/{a.region}_threads.txt"
+    sf = f"state/{a.kind.replace('-','_')}{a.region}_threads.txt"
     if os.path.exists(sf) and open(sf).read().strip() == day:
         print("Threads: 오늘 이미 게시함. 건너뜀"); return
     r = requests.get("https://graph.threads.net/v1.0/me", params={"fields": "id,username"},
