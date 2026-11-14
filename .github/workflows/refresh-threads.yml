@@ -1,0 +1,33 @@
+name: refresh-threads-token
+on:
+  schedule:
+    - cron: "17 9 * * 1"   # 매주 월요일: Threads 토큰을 60일씩 연장하고 비밀값을 새 토큰으로 교체
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 토큰 갱신
+        env:
+          GH_TOKEN: ${{ secrets.GH_SECRETS_PAT }}
+          TOKEN_KR: ${{ secrets.THREADS_TOKEN_KR }}
+          TOKEN_US: ${{ secrets.THREADS_TOKEN_US }}
+          REPO: ${{ github.repository }}
+        run: |
+          fail=0
+          for R in KR US; do
+            eval "old=\$TOKEN_$R"
+            if [ -z "$old" ]; then echo "$R: 토큰 없음, 건너뜀"; continue; fi
+            resp=$(curl -sS -G "https://graph.threads.net/refresh_access_token" \
+              --data-urlencode "grant_type=th_refresh_token" \
+              --data-urlencode "access_token=$old") || { echo "$R: 요청 실패"; fail=1; continue; }
+            new=$(echo "$resp" | python3 -c 'import sys,json; print(json.load(sys.stdin).get("access_token",""))' 2>/dev/null)
+            if [ -z "$new" ]; then echo "$R: 갱신 실패 (24시간이 안 지났거나 만료): $(echo "$resp" | head -c 200)"; fail=1; continue; fi
+            echo "::add-mask::$new"
+            printf '%s' "$new" | gh secret set "THREADS_TOKEN_$R" --repo "$REPO"
+            echo "$R: 갱신 완료"
+          done
+          exit $fail
