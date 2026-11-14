@@ -38,10 +38,11 @@ def aladin_list():
         a = box.select_one("a.bo3")
         if not a: continue
         title = re.sub(r"\s*[-(\[].*$", "", a.get_text(strip=True)) if len(a.get_text(strip=True)) > 40 else a.get_text(strip=True)
-        full = box.get_text(" ", strip=True)
-        am = re.search(r"([^|]+?)\s*\(지은이\)", full)
-        author = am.group(1).split(")")[-1].strip() if am else ""
-        author = re.sub(r"^.*?\s{2,}", "", author)
+        author = ""
+        for li in box.find_all("li"):
+            t = li.get_text(" ", strip=True)
+            if "(지은이)" in t:
+                author = t.split("(지은이)")[0].strip(); break
         out.append(dict(title=title, author=author, desc="", period=period))
         if len(out) >= 8: break
     if not out: raise RuntimeError("알라딘 페이지에서 책 목록을 못 읽음 (구조 변경 가능성)")
@@ -61,17 +62,34 @@ def nyt_list():
 # ---------- 2. 줄거리 자료 ----------
 def search(q):
     urls = []
-    try:
-        r = requests.get("https://html.duckduckgo.com/html/", params={"q": q}, headers=UA, timeout=30)
-        for a in BeautifulSoup(r.text, "html.parser").select("a.result__a"):
-            h = a.get("href", ""); m = re.search(r"uddg=([^&]+)", h)
-            urls.append(urllib.parse.unquote(m.group(1)) if m else h)
-    except Exception as e: print("DDG 실패:", e)
-    if len(urls) < 3:
+    def add(label, fn):
         try:
-            r = requests.get("https://www.bing.com/search", params={"q": q}, headers=UA, timeout=30)
-            urls += [a.get("href") for a in BeautifulSoup(r.text, "html.parser").select("li.b_algo h2 a") if a.get("href", "").startswith("http")]
-        except Exception as e: print("Bing 실패:", e)
+            got = fn(); print(f"검색[{label}] {len(got)}건"); urls.extend(got)
+        except Exception as e: print(f"검색[{label}] 실패:", type(e).__name__, str(e)[:100])
+    def ddg():
+        r = requests.post("https://html.duckduckgo.com/html/", data={"q": q}, headers=UA, timeout=30); print("  DDG status", r.status_code)
+        out = []
+        for a in BeautifulSoup(r.text, "html.parser").select("a.result__a"):
+            h = a.get("href", ""); m = re.search(r"uddg=([^&]+)", h); out.append(urllib.parse.unquote(m.group(1)) if m else h)
+        return out
+    def ddg_lite():
+        r = requests.post("https://lite.duckduckgo.com/lite/", data={"q": q}, headers=UA, timeout=30); print("  DDGlite status", r.status_code)
+        out = []
+        for a in BeautifulSoup(r.text, "html.parser").select("a.result-link"):
+            h = a.get("href", ""); m = re.search(r"uddg=([^&]+)", h); out.append(urllib.parse.unquote(m.group(1)) if m else h)
+        return out
+    def bing():
+        r = requests.get("https://www.bing.com/search", params={"q": q, "setlang": "ko" if re.search("[가-힣]", q) else "en"}, headers=UA, timeout=30); print("  Bing status", r.status_code)
+        return [a.get("href") for a in BeautifulSoup(r.text, "html.parser").select("li.b_algo h2 a") if a.get("href", "").startswith("http")]
+    def wiki():
+        out = []
+        for lg in (("ko", "en") if re.search("[가-힣]", q) else ("en",)):
+            r = requests.get(f"https://{lg}.wikipedia.org/w/api.php", params={"action": "opensearch", "search": re.sub(r"(줄거리|내용|정리|후기|plot summary|book synopsis review|나무위키)", "", q).strip(), "limit": 3, "format": "json"}, headers=UA, timeout=20)
+            out += r.json()[3]
+        return out
+    for lab, fn in (("ddg", ddg), ("lite", ddg_lite), ("bing", bing), ("wiki", wiki)):
+        add(lab, fn)
+        if len(urls) >= 6 and lab != "ddg": break
     seen, out = set(), []
     for u in urls:
         if not u.startswith("http") or any(b in u for b in BAD) or u in seen: continue
