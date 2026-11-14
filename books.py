@@ -149,7 +149,15 @@ SOURCE TEXT:
 
 # ---------- 4. 카드/캡션 ----------
 def build(region, book, j, urls, period):
-    ko = region == "kr"
+    ko = region == "kr"; cl = book.get("classic")
+    if cl:
+        c, cap = build(region, {**book, "classic": False, "rank": 1}, j, urls, period)
+        c["badge"] = "이번 주 아는 척 고전" if ko else "This week's classic"
+        c["src"] = "위키백과(CC BY-SA)" if ko else "Wikipedia (CC BY-SA)"
+        c["top"] = "WEEKLY BOOK · 고전" if ko else "WEEKLY BOOK · CLASSIC"
+        c["foot1"] = c["foot1"].replace("순위: 알라딘 한국소설 주간", "고전 코너").replace("Rank: NYT Hardcover Fiction", "Classics corner")
+        cap = re.sub(r"지난주 한국소설 베스트 1위", "이번 주 아는 척 고전", cap); cap = re.sub(r"Last week's #1 on the NYT Hardcover Fiction list", "This week's classic", cap)
+        return c, cap
     if ko:
         c = dict(top=f"WEEKLY BOOK · {period}차", handle="@reddenva.kr", badge="지난주 한국소설 베스트 1위" if book["rank"] == 1 else f"지난주 한국소설 베스트 {book['rank']}위",
                  src=f"알라딘 {period}", title=book["title"], author=book["author"], tag=j.get("tag", ""),
@@ -190,7 +198,15 @@ def main():
         material, urls = gather(cand, lang)
         if len(material) >= 300: pick = cand; break
         print("  자료 부족 → 다음 순위로")
-    if not pick: raise RuntimeError("자료가 충분한 책이 목록에 없음 → 이번 주는 올리지 않음")
+    if not pick:
+        print("베스트셀러에 검증 자료 없음 → 고전 코너")
+        for ln in open(f"classics_{region}.txt", encoding="utf-8").read().splitlines():
+            t, au = ln.split("|")
+            if t in done: continue
+            cand = {"title": t, "author": au, "rank": 0, "classic": True, "period": ""}
+            print("고전 후보:", t); material, urls = gather(cand, lang)
+            if len(material) >= 300: pick = cand; break
+        if not pick: raise RuntimeError("고전에서도 자료를 못 찾음 → 이번 주는 올리지 않음")
     print("선택:", pick["rank"], pick["title"])
     j = summarize(pick, material, lang)
     print(json.dumps(j, ensure_ascii=False, indent=1))
