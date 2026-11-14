@@ -27,6 +27,8 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           NYT_API_KEY: ${{ secrets.NYT_API_KEY }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
         run: python books.py --region kr ${{ inputs.dry_run && '--dry-run --force' || '' }}
       - name: Threads 게시
         if: ${{ !inputs.dry_run }}

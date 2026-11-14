@@ -59,70 +59,50 @@ def nyt_list():
     return out
 
 
-# ---------- 2. 줄거리 자료 ----------
-def search(q):
-    urls = []
-    def add(label, fn):
+# ---------- 2. 줄거리 자료 (공식 API만 사용: 위키백과, Google Books, 네이버 검색 API) ----------
+def wiki_text(title, author, lang):
+    out = []
+    for lg in (("ko", "en") if lang == "ko" else ("en",)):
         try:
-            got = fn(); print(f"검색[{label}] {len(got)}건"); urls.extend(got)
-        except Exception as e: print(f"검색[{label}] 실패:", type(e).__name__, str(e)[:100])
-    def ddg():
-        r = requests.post("https://html.duckduckgo.com/html/", data={"q": q}, headers=UA, timeout=30); print("  DDG status", r.status_code)
-        out = []
-        for a in BeautifulSoup(r.text, "html.parser").select("a.result__a"):
-            h = a.get("href", ""); m = re.search(r"uddg=([^&]+)", h); out.append(urllib.parse.unquote(m.group(1)) if m else h)
-        return out
-    def ddg_lite():
-        r = requests.post("https://lite.duckduckgo.com/lite/", data={"q": q}, headers=UA, timeout=30); print("  DDGlite status", r.status_code)
-        out = []
-        for a in BeautifulSoup(r.text, "html.parser").select("a.result-link"):
-            h = a.get("href", ""); m = re.search(r"uddg=([^&]+)", h); out.append(urllib.parse.unquote(m.group(1)) if m else h)
-        return out
-    def bing():
-        r = requests.get("https://www.bing.com/search", params={"q": q, "setlang": "ko" if re.search("[가-힣]", q) else "en"}, headers=UA, timeout=30); print("  Bing status", r.status_code)
-        return [a.get("href") for a in BeautifulSoup(r.text, "html.parser").select("li.b_algo h2 a") if a.get("href", "").startswith("http")]
-    def wiki():
-        out = []
-        for lg in (("ko", "en") if re.search("[가-힣]", q) else ("en",)):
-            r = requests.get(f"https://{lg}.wikipedia.org/w/api.php", params={"action": "opensearch", "search": re.sub(r"(줄거리|내용|정리|후기|plot summary|book synopsis review|나무위키)", "", q).strip(), "limit": 3, "format": "json"}, headers=UA, timeout=20)
-            out += r.json()[3]
-        return out
-    for lab, fn in (("ddg", ddg), ("lite", ddg_lite), ("bing", bing), ("wiki", wiki)):
-        add(lab, fn)
-        if len(urls) >= 6 and lab != "ddg": break
-    seen, out = set(), []
-    for u in urls:
-        if not u.startswith("http") or any(b in u for b in BAD) or u in seen: continue
-        seen.add(u); out.append(u)
+            h = {"User-Agent": "reddenva-books/1.0 (https://github.com/gravelmh1/reddenva-weather)"}
+            r = requests.get(f"https://{lg}.wikipedia.org/w/api.php", params={"action": "query", "list": "search", "srsearch": f"{title} {author}", "srlimit": 3, "format": "json"}, headers=h, timeout=20)
+            for hit in r.json()["query"]["search"]:
+                if title.split()[0].lower() not in hit["title"].lower() and title.split()[0].lower() not in hit["snippet"].lower(): continue
+                e = requests.get(f"https://{lg}.wikipedia.org/w/api.php", params={"action": "query", "prop": "extracts", "explaintext": 1, "titles": hit["title"], "format": "json"}, headers=h, timeout=20).json()
+                txt = next(iter(e["query"]["pages"].values())).get("extract", "")
+                if len(txt) > 300: out.append(f"[위키백과 {lg}: {hit['title']}]\n{txt[:7000]}"); break
+        except Exception as ex: print("위키 실패", lg, type(ex).__name__)
     return out
 
 
-def page_text(u, limit=7000):
-    r = requests.get(u, headers=UA, timeout=20)
-    if not r.ok: return ""
-    s = BeautifulSoup(r.text, "html.parser")
-    for t in s(["script", "style", "nav", "footer", "header", "aside", "form"]): t.decompose()
-    txt = re.sub(r"\s+", " ", s.get_text(" ")).strip()
-    return txt[:limit]
+def google_books(title, author):
+    try:
+        r = requests.get("https://www.googleapis.com/books/v1/volumes", params={"q": f"intitle:{title} inauthor:{author}", "maxResults": 3}, timeout=20)
+        ds = [i["volumeInfo"].get("description", "") for i in r.json().get("items", [])]
+        ds = [d for d in ds if len(d) > 150]
+        return [f"[Google Books 소개]\n{d}" for d in ds[:2]]
+    except Exception as ex: print("Google Books 실패", type(ex).__name__); return []
+
+
+def naver_snippets(title, author):
+    cid, sec = os.environ.get("NAVER_CLIENT_ID", "").strip(), os.environ.get("NAVER_CLIENT_SECRET", "").strip()
+    if not cid: return []
+    hdr = {"X-Naver-Client-Id": cid, "X-Naver-Client-Secret": sec}; lines = []
+    for kind in ("blog", "webkr", "news", "kin"):
+        try:
+            r = requests.get(f"https://openapi.naver.com/v1/search/{kind}.json", params={"query": f"{title} {author} 줄거리", "display": 20, "sort": "sim"}, headers=hdr, timeout=20)
+            for it in r.json().get("items", []):
+                t = re.sub(r"<[^>]+>|&[a-z]+;", "", it.get("description", ""))
+                if title.split()[0] in t or title.split()[0] in re.sub(r"<[^>]+>", "", it.get("title", "")): lines.append(t)
+        except Exception as ex: print("네이버 실패", kind, type(ex).__name__)
+    return [f"[네이버 검색 요약문 모음]\n" + "\n".join(lines[:60])] if lines else []
 
 
 def gather(book, lang):
-    q = [f"{book['title']} {book['author']} 줄거리 내용 정리 후기", f"{book['title']} 나무위키 줄거리"] if lang == "ko" else \
-        [f"{book['title']} {book['author']} plot summary", f"{book['title']} {book['author']} book synopsis review"]
-    urls = []
-    for qq in q:
-        for u in search(qq):
-            if u not in urls: urls.append(u)
-    if lang == "ko": urls.insert(0, "https://namu.wiki/w/" + urllib.parse.quote(book["title"]))
-    chunks, used = [], []
-    for u in urls[:10]:
-        try: t = page_text(u)
-        except Exception as e: print("건너뜀", u[:70], type(e).__name__); continue
-        if len(t) > 400 and book["title"].split()[0] in t:
-            chunks.append(f"[출처: {u}]\n{t}"); used.append(u)
-        if len(chunks) >= 5: break
-    print(f"자료 {len(chunks)}건:", *used, sep="\n  ")
-    return "\n\n".join(chunks), used
+    chunks = wiki_text(book["title"], book["author"], lang) + google_books(book["title"], book["author"])
+    if lang == "ko": chunks += naver_snippets(book["title"], book["author"])
+    print("자료:", [c.split("]")[0] + "]" for c in chunks])
+    return "\n\n".join(chunks), []
 
 
 # ---------- 3. 요약(Gemini, 검색 기능 없이 일반 요약만) ----------
@@ -207,7 +187,7 @@ def main():
     pick = next((b for b in lst if b["title"] not in done), lst[0])
     print("선택:", pick["rank"], pick["title"])
     material, urls = gather(pick, lang)
-    if len(material) < 500 and not pick.get("desc"):
+    if len(material) < 300 and not pick.get("desc"):
         raise RuntimeError("줄거리 자료를 충분히 못 모음 → 이번 주는 올리지 않음")
     j = summarize(pick, material, lang)
     print(json.dumps(j, ensure_ascii=False, indent=1))
