@@ -100,7 +100,6 @@ def naver_snippets(title, author):
 
 def gather(book, lang):
     chunks = wiki_text(book["title"], book["author"], lang) + google_books(book["title"], book["author"])
-    if lang == "ko": chunks += naver_snippets(book["title"], book["author"])
     print("자료:", [c.split("]")[0] + "]" for c in chunks])
     return "\n\n".join(chunks), []
 
@@ -184,11 +183,15 @@ def main():
     for i, b in enumerate(lst): b["rank"] = i + 1
     print("목록:", *[f"{b['rank']}. {b['title']} / {b['author']}" for b in lst], sep="\n  ")
     done = {l.split("|")[1] for l in posted if "|" in l}
-    pick = next((b for b in lst if b["title"] not in done), lst[0])
+    pick = None
+    for cand in lst:
+        if cand["title"] in done: continue
+        print("후보:", cand["rank"], cand["title"])
+        material, urls = gather(cand, lang)
+        if len(material) >= 300: pick = cand; break
+        print("  자료 부족 → 다음 순위로")
+    if not pick: raise RuntimeError("자료가 충분한 책이 목록에 없음 → 이번 주는 올리지 않음")
     print("선택:", pick["rank"], pick["title"])
-    material, urls = gather(pick, lang)
-    if len(material) < 300 and not pick.get("desc"):
-        raise RuntimeError("줄거리 자료를 충분히 못 모음 → 이번 주는 올리지 않음")
     j = summarize(pick, material, lang)
     print(json.dumps(j, ensure_ascii=False, indent=1))
     c, cap = build(region, pick, j, urls, pick.get("period", ""))
