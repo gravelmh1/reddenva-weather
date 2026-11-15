@@ -88,7 +88,7 @@ def shortlist(items, region):
     """1차: 제목만 보고 '구체적인 사람 이야기' 후보 12개로 압축."""
     lst = "\n".join(f"[{i}] {it['title']}" for i, it in enumerate(items))
     p = f"""From these news titles pick exactly 12, best first, that look like a CONCRETE, specific human story with a clear 'who did what' and a happy outcome, that happened in {'Korea' if region=='kr' else 'the United States'}.
-Reject: rescues from fire/drowning/accidents, vague or syrupy titles, clickbait ('눈물', 'tears', 'you won't believe'), generic campaigns, donations by companies/organizations as PR, politics, sports, awards, openings, celebrities, animals, anything sad, anything unclear.
+Reject: anything about celebrities, entertainers, pro athletes, influencers or famous rich people (even their donations or good deeds; ordinary people only), rescues from fire/drowning/accidents, vague or syrupy titles, clickbait ('눈물', 'tears', 'you won't believe'), generic campaigns, donations by companies/organizations as PR, politics, sports, awards, openings, celebrities, animals, anything sad, anything unclear.
 This is only a first pass (a stricter check on the full article comes later), so always return 12 ids: fill the remaining slots with the closest acceptable ones rather than returning fewer.
 Return ONLY JSON: {{"ids":[numbers]}}
 
@@ -143,7 +143,7 @@ MUST: genuinely heartwarming AND concrete — a real, specific episode (who did 
 MUST: desc states the concrete facts (who, what, outcome) in plain, calm words; no exaggeration, no 'touching'/'moving' adjectives, no tear-jerking tone. Skip any candidate whose text does not make the story clear. {place}; three DIFFERENT kinds of stories (never two rescues, never two of the same theme such as firefighters/donations/reunions); prefer everyday relatable moments over dramatic emergencies; avoid near-death rescue and fire/drowning/accident stories altogether.
 STRICTLY AVOID as dry/neutral news: sports results and championships, awards and prizes, restorations, openings, product/tech/industry announcements, economy/export figures, government programs, institutional press releases. If fewer than 3 truly heartwarming stories exist, still pick the 3 warmest.
 MUST: the story happens in the same country as the card (KR card = Korea only, US card = United States only; foreign stories are not allowed even if the outlet is local).
-MUST NOT: animals/pets/wildlife; deaths, crime, disasters, wars, tragedy-with-silver-lining; politics, elections, parties, policy fights or anything disputed; shops/products/ads/promotions; celebrity gossip; investing/stock tips; anything not clearly stated in the candidate text.
+MUST NOT: ANY story involving a celebrity, entertainer, TV/film/music personality, pro athlete, influencer, or famous rich person, even if it is a good deed or donation (only ordinary people); animals/pets/wildlife; deaths, crime, disasters, wars, tragedy-with-silver-lining; politics, elections, parties, policy fights or anything disputed; shops/products/ads/promotions; celebrity gossip; investing/stock tips; anything not clearly stated in the candidate text.
 Use ONLY facts in the candidate text. Never invent numbers, names or places. If a story is thin, write a shorter desc.
 Return ONLY JSON: {spec}
 
@@ -232,8 +232,8 @@ def main():
         if time.time() - t0 > 70 or sum(len(x["text"]) >= 400 for x in items) >= 8: break
         if len(it["text"]) < 400: enrich(it)   # RSS에 본문이 충분히 실려 온 기사는 다시 받지 않음
     # 본문까지 본 뒤 다시 거르기: 동물, 연예·유명인 (제목만으로는 안 걸리는 경우가 있음)
-    DROP = {"kr": r"동물|강아지|반려|고양이|댕댕|멍멍|펫|새끼|야생|배우|가수|아이돌|연예|개그맨|방송인|예능|드라마|출연|소속사|팬미팅|유튜버|인플루언서",
-            "us": r"\b(dog|dogs|cat|cats|puppy|pup|kitten|pet|pets|animal|animals|horse|wildlife|actor|actress|singer|rapper|celebrity|celebrities|hollywood|nfl|nba|mlb)\b"}[region]
+    DROP = {"kr": r"동물|강아지|반려|고양이|댕댕|멍멍|펫|새끼|야생|배우|가수|아이돌|연예|개그맨|개그우먼|방송인|예능|드라마|출연|소속사|팬미팅|팬클럽|유튜버|인플루언서|셀럽|스타|모델|MC|아나운서|트로트|래퍼|걸그룹|보이그룹|선수|감독|구단|프로야구|프로축구|재벌|회장님",
+            "us": r"\b(dog|dogs|cat|cats|puppy|pup|kitten|pet|pets|animal|animals|horse|wildlife|actor|actress|singer|rapper|celebrity|celebrities|celeb|star|stars|hollywood|nfl|nba|mlb|nhl|quarterback|athlete|billionaire|influencer|youtuber|tiktoker|pop star|band|grammy|oscar)\b"}[region]
     items = [it for it in items if len(it["text"]) > 150 and not re.search(DROP, it["title"] + " " + it["text"][:600], re.I)
              and not re.search(r"entertain|/star/|/ent/|sports", it["link"], re.I)]; print("본문 확보", len(items))
     if len(items) < 3: raise RuntimeError("본문 확보 기사 부족")
