@@ -125,6 +125,7 @@ def summarize(book, material, lang):
         rule = "Write in English. No ending or twist spoilers."
     prompt = f"""You summarize books for a social card. Use ONLY the facts in SOURCE TEXT (and METADATA). Never invent plot, names or events.
 If the sources are thin, write less and stay general. {rule}
+QUOTE STYLE: the quote is what someone who FINISHED the book would say in conversation: a confident statement of the book's point or a sharp take/interpretation (e.g. what it is really about, what the author is saying). NEVER a question, a teaser, or anything that makes people want to read it (no 'what will happen', no 'worth reading'). Do not reveal the ending.
 PLOT STYLE: first introduce the main characters by who they are (job/role/relationship) so a reader who never heard of the book understands, then what happens. Never use a term (like 'fiancée' or a name) without making clear who it is. Avoid vague filler like 'a complicated love story'; state the concrete conflict instead.
 Return ONLY JSON: {spec}
 
