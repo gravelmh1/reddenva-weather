@@ -186,6 +186,8 @@ def main():
     a = ap.parse_args(); region = a.region; lang = "ko" if region == "kr" else "en"
     tz = ZoneInfo(weather.REGIONS[region]["tz"]); day = dt.datetime.now(tz).date().isoformat()
     os.makedirs("out", exist_ok=True); os.makedirs("state", exist_ok=True)
+    if not a.force and dt.date.fromisoformat(day).weekday() != 0:
+        print("월요일이 아님 → 건너뜀"); return
     sf = f"state/books_{region}.txt"; posted = open(sf, encoding="utf-8").read().splitlines() if os.path.exists(sf) else []
     if posted and posted[-1].split("|")[0] == day and not a.force:
         print("오늘 이미 만들었음. 건너뜀"); return
