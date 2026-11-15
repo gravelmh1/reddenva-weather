@@ -99,28 +99,8 @@ def naver_snippets(title, author):
     return [f"[네이버 검색 요약문 모음]\n" + "\n".join(lines[:60])] if lines else []
 
 
-def naver_book(title, author):
-    """네이버 책 검색 API(공식)의 출판사 책소개. 새로 나온 한국 소설은 위키백과에 없어서 이게 주 자료."""
-    cid, sec = os.environ.get("NAVER_CLIENT_ID", "").strip(), os.environ.get("NAVER_CLIENT_SECRET", "").strip()
-    if not cid: print("네이버 키 없음"); return []
-    norm = lambda s: re.sub(r"\W+", "", re.sub(r"<[^>]+>", "", s).lower())
-    t0 = re.sub(r"\s*[\(\[].*$", "", title).strip() or title
-    try:
-        r = requests.get("https://openapi.naver.com/v1/search/book.json", params={"query": t0, "display": 10},
-                         headers={"X-Naver-Client-Id": cid, "X-Naver-Client-Secret": sec}, timeout=20)
-        if not r.ok: print("네이버 책 검색 응답", r.status_code, r.text[:100]); return []
-        a0 = norm(re.split(r"[,(]", author)[0])
-        for it in r.json().get("items", []):
-            d = re.sub(r"<[^>]+>", "", it.get("description", "")).strip()
-            if norm(t0) in norm(it.get("title", "")) and (not a0 or a0 in norm(it.get("author", ""))) and len(d) > 150:
-                return [f"[출판사 책소개 (네이버 책 검색)]\n{d[:4000]}"]
-    except Exception as ex: print("네이버 책 검색 실패", type(ex).__name__)
-    return []
-
-
 def gather(book, lang):
     chunks = wiki_text(book["title"], book["author"], lang) + google_books(book["title"], book["author"])
-    if lang == "ko" and len("".join(chunks)) < 300: chunks += naver_book(book["title"], book["author"])
     print("자료:", [c.split("]")[0] + "]" for c in chunks])
     return "\n\n".join(chunks), []
 
