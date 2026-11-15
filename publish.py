@@ -29,8 +29,18 @@ def instagram(region: str, image_url: str, caption: str) -> str:
     return _post(f"{IG}/{uid}/media_publish", {"creation_id": c}, token)["id"]
 
 
+def fit_threads(text: str, limit: int = 500) -> str:
+    """Threads 글자 수 제한(500자)에 맞춘다. 넘치면 해시태그 줄 → 💬 줄 순서로 빼고, 그래도 넘치면 끝을 …로 자른다."""
+    paras = text.split("\n\n")
+    for drop in ("#", "💬"):
+        if len("\n\n".join(paras)) <= limit: break
+        if len(paras) > 1 and paras[-1].lstrip().startswith(drop): paras.pop()
+    out = "\n\n".join(paras)
+    return out if len(out) <= limit else out[: limit - 1].rstrip() + "…"
+
+
 def threads(region: str, image_url: str, text: str) -> str:
     uid, token = os.environ[f"THREADS_USER_ID_{region.upper()}"], os.environ[f"THREADS_TOKEN_{region.upper()}"]
-    c = _post(f"{TH}/{uid}/threads", {"media_type": "IMAGE", "image_url": image_url, "text": text[:480]}, token)["id"]
+    c = _post(f"{TH}/{uid}/threads", {"media_type": "IMAGE", "image_url": image_url, "text": fit_threads(text)}, token)["id"]
     time.sleep(10)  # 컨테이너 준비 대기
     return _post(f"{TH}/{uid}/threads_publish", {"creation_id": c}, token)["id"]

@@ -17,7 +17,10 @@ def main():
     token = os.environ.get(f"THREADS_TOKEN_{a.region.upper()}", "").strip()
     if not token:
         print("Threads 토큰이 없어서 건너뜀"); return
-    meta = json.load(open(f"out/{a.kind}{a.region}-latest.json", encoding="utf-8"))
+    lp = f"out/{a.kind}{a.region}-latest.json"
+    if not os.path.exists(lp):
+        print(f"{lp} 아직 없음. 건너뜀"); return
+    meta = json.load(open(lp, encoding="utf-8"))
     if meta.get("date") != day:
         print(f"오늘 카드가 아님({meta.get('date')} != {day}). 건너뜀"); return
     sf = f"state/{a.kind.replace('-','_')}{a.region}_threads.txt"

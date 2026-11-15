@@ -77,7 +77,7 @@ def gem(prompt, temp=0.3):
     key = os.environ["GEMINI_API_KEY"].strip(); last = None
     for m in (models(key)[:4] * 2):
         r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent", headers={"x-goog-api-key": key},
-                          json={"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"temperature": temp, "responseMimeType": "application/json"}}, timeout=120)
+                          json={"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"temperature": temp, "responseMimeType": "application/json"}}, timeout=40)
         if not r.ok: last = f"{m} {r.status_code}"; continue
         try: return json.loads(re.sub(r"^```json|```$", "", r.json()["candidates"][0]["content"]["parts"][0]["text"].strip()).strip())
         except Exception as e: last = f"{m} {e}"
@@ -103,12 +103,12 @@ def enrich(it):
         if "news.google.com" in link:
             from googlenewsdecoder import gnewsdecoder
             d = {}
-            for wait in (0, 6, 12):
-                time.sleep(wait); d = gnewsdecoder(link, interval=2)
+            for wait in (0, 5):
+                time.sleep(wait); d = gnewsdecoder(link, interval=1)
                 if d.get("success"): break
             if not d.get("success"): print("  디코드 실패:", str(d)[:100]); return
             link = d["decoded_url"]
-        r = requests.get(link, headers=UA, timeout=25); r.raise_for_status()
+        r = requests.get(link, headers=UA, timeout=12); r.raise_for_status()
         r.encoding = r.apparent_encoding if not r.encoding or r.encoding.lower() == "iso-8859-1" else r.encoding
         soup = BeautifulSoup(r.text, "html.parser")
         for t in soup(["script", "style", "nav", "header", "footer", "aside"]): t.decompose()
@@ -147,7 +147,7 @@ CANDIDATES:
     last = None
     for m in (models(key)[:4] * 2):
         r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent", headers={"x-goog-api-key": key},
-                          json={"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"temperature": 0.5, "responseMimeType": "application/json"}}, timeout=120)
+                          json={"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"temperature": 0.5, "responseMimeType": "application/json"}}, timeout=40)
         if not r.ok: last = f"{m} {r.status_code} {r.text[:150]}"; print("모델 건너뜀:", last); continue
         try:
             j = json.loads(re.sub(r"^```json|```$", "", r.json()["candidates"][0]["content"]["parts"][0]["text"].strip()).strip())
@@ -221,7 +221,10 @@ def main():
     print(f"후보 {len(items)}건")
     if len(items) < 8: raise RuntimeError("후보 기사가 너무 적음 → 이번 주는 올리지 않음")
     sl = shortlist(items, region); items = [items[i] for i in sl]; print("1차 후보", len(items))
-    for it in items: enrich(it)
+    t0 = time.time(); items.sort(key=lambda it: "news.google.com" in it["link"])  # 원문 주소가 바로 있는 기사부터
+    for it in items:   # Make가 3분 20초 뒤에 결과를 읽으므로 본문 수집은 70초 안에서만
+        if time.time() - t0 > 70 or sum(len(x["text"]) >= 400 for x in items) >= 8: break
+        if len(it["text"]) < 400: enrich(it)   # RSS에 본문이 충분히 실려 온 기사는 다시 받지 않음
     ANIMAL = {"kr": r"동물|강아지|반려|고양이|댕댕|멍멍|펫|새끼|야생", "us": r"\b(dog|dogs|cat|cats|puppy|pup|kitten|pet|pets|animal|animals|horse|wildlife)\b"}[region]
     items = [it for it in items if len(it["text"]) > 150 and not re.search(ANIMAL, it["title"] + " " + it["text"][:600], re.I)]; print("본문 확보", len(items))
     if len(items) < 3: raise RuntimeError("본문 확보 기사 부족")

@@ -25,12 +25,12 @@ def fetch(region: str) -> dict:
     last = None
     for i in range(5):  # 일시적인 지연/오류는 몇 번 다시 시도해요
         try:
-            resp = requests.get(f"{host}/v1/forecast", params=params, timeout=20)
+            resp = requests.get(f"{host}/v1/forecast", params=params, timeout=12)
             resp.raise_for_status()
             return resp.json()
         except requests.RequestException as e:
             last = e
-            time.sleep(5 * (i + 1))
+            if i < 4: time.sleep(4 * (i + 1))
     raise last
 
 

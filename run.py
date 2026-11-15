@@ -15,7 +15,7 @@ import render
 import weather
 
 POST_HOUR = 6          # 현지 시각 06:00에 게시
-EMIT_WINDOW = (3 * 60 + 30, 5 * 60 + 59)  # --emit 모드: 현지 03:30~05:59 사이 첫 실행만 카드를 만들고, 이후는 건너뜀
+EMIT_WINDOW = (5, 5 * 60 + 59)  # --emit 모드: 현지 00:05~05:59 사이 첫 예약 실행만 예비 카드를 만들고, 이후는 건너뜀 (GitHub 예약이 몇 시간씩 늦게 와서 넓게 잡음)
 WINDOW = (5 * 60 + 15, 6 * 60 + 50)  # 이 시간대(현지 05:15~06:50)가 아니면 자동 실행을 건너뜀
 
 
@@ -77,7 +77,14 @@ def main():
         sys.path.insert(0, os.path.join(os.path.dirname(__file__), "tests")); import mock
         raw = mock.make(a.mock, now.date())
     else:
-        raw = weather.fetch(a.region)
+        try:
+            raw = weather.fetch(a.region)
+        except Exception as e:
+            import json
+            lp = f"out/{a.region}-latest.json"
+            if a.emit and not a.dry_run and os.path.exists(lp) and json.load(open(lp, encoding="utf-8")).get("date") == day:
+                print(f"날씨 서버 응답 없음({type(e).__name__}) → 새벽에 만들어 둔 오늘 카드를 그대로 써요."); return
+            raise
     p = weather.parse(raw, now.date().isoformat())
     f = messages.features(p, reg["unit"])
     cp = messages.build(f, a.region, reg["city"], now)
@@ -89,12 +96,14 @@ def main():
     if a.dry_run:
         print("(dry-run: 게시하지 않았어요)"); return
 
-    for old in os.listdir("out"):  # 7일 지난 이미지 정리
-        fp = os.path.join("out", old)
-        if old.endswith(".jpg") and time.time() - os.path.getmtime(fp) > 7 * 86400: os.remove(fp)
-    git_push(["out", "state"], f"{a.region} {day} card")
-    repo, branch = os.environ["GITHUB_REPOSITORY"], os.environ.get("GITHUB_REF_NAME", "main")
-    url = f"https://raw.githubusercontent.com/{repo}/{branch}/{img_rel}"
+    import re
+    for old in os.listdir("out"):  # 14일 지난 이미지 정리 (파일 이름의 날짜 기준. 체크아웃하면 수정시각이 새로 찍혀서 시각으로는 못 걸러요)
+        m = re.search(r"(\d{4}-\d\d-\d\d)\.jpg$", old)
+        if m and (now.date() - dt.date.fromisoformat(m.group(1))).days > 14: os.remove(os.path.join("out", old))
+    git_push(["-A", "out", "state"], f"{a.region} {day} card")
+    repo = os.environ["GITHUB_REPOSITORY"]
+    sha = sh("git", "rev-parse", "HEAD").stdout.strip()  # 커밋 고정 주소: 같은 날 카드를 다시 만들어도 예전 이미지가 캐시로 나오지 않아요
+    url = f"https://raw.githubusercontent.com/{repo}/{sha}/{img_rel}"
     wait_url(url)
 
     if a.emit:
