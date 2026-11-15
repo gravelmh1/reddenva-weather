@@ -56,7 +56,7 @@ def fetch_feed(url, since):
     print(f"  {url[:60]}… → {len(out)}건"); return out
 
 
-BAD = {"kr": r"동물|강아지|고양이|반려|코알라|판다|새끼|펫|멸종|야생|구조견|비단뱀|호랑이|고래|사망|숨져|숨진|사고|화재|살인|구속|재판|논란|선거|대통령|국회|정당|투표|수사|검찰|의혹|전쟁|참사|폭행|사기|우승|수상|개관|복원|출시|계약|투자|선정|협약|대상|MVP|챔피언|발표|공개|착공|준공|MOU",
+BAD = {"kr": r"동물|강아지|고양이|반려|코알라|판다|새끼|펫|멸종|야생|구조견|비단뱀|호랑이|고래|사망|숨져|숨진|사고|화재|살인|구속|재판|논란|선거|대통령|국회|정당|투표|수사|검찰|의혹|전쟁|참사|폭행|사기|우승|수상|개관|복원|출시|계약|투자|선정|협약|대상|MVP|챔피언|발표|공개|착공|준공|MOU|배우|가수|아이돌|연예|개그맨|방송인|예능|드라마|팬들|출연|열애|결혼|이혼|스타",
        "us": r"\b(dog|dogs|cat|cats|puppy|kitten|animal|animals|zoo|wildlife|pet|pets|horse|bird|birds|whale|bear|otter|elephant|turtle|dies|died|death|wins|win|award|awarded|championship|opens|opening|launch|launches|killed|shooting|murder|trump|biden|election|congress|senate|ice|immigration|lawsuit|war|crash|fire)\b"}
 
 
@@ -66,7 +66,7 @@ def gather(region, since):
         for it in fetch_feed(u, since):
             k = re.sub(r"\W+", "", it["title"].lower())[:40]
             if not k or k in seen: continue
-            if re.search(BAD[region], it["title"] + " " + it["text"][:300], re.I): continue
+            if re.search(BAD[region], it["title"] + " " + it["text"][:300] + " " + it["src"], re.I): continue
             seen.add(k); items.append(it)
     return items
 
