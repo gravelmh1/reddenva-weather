@@ -29,7 +29,7 @@ def commons(q):
         ii = (p.get("imageinfo") or [{}])[0]; em = ii.get("extmetadata", {}); lic = em.get("LicenseShortName", {}).get("value", "")
         if ii.get("mime") != "image/jpeg" or ii.get("width", 0) < 1200 or ii.get("height", 0) < 900: continue
         if not re.match(r"(CC0|CC BY|Public domain)", lic, re.I): continue
-        artist = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", em.get("Artist", {}).get("value", ""))).strip()[:40] or "Wikimedia Commons"
+        artist = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", em.get("Artist", {}).get("value", ""))).strip(); artist = re.split(r"\s+\.\s+|Photo uploaded|\(talk\)| from ", artist)[0].strip()[:32] or "Wikimedia Commons"
         out.append({"id": "wm:" + p["title"], "url": ii["thumburl"], "artist": artist, "license": "퍼블릭 도메인" if re.match(r"(CC0|Public)", lic, re.I) else lic, "src": "Wikimedia Commons"})
     return out
 
@@ -50,7 +50,7 @@ def judge(cands, en, ko):
 Look at each photo. Be a strict photo editor. A photo qualifies ONLY if ALL are true: it is a real photograph of a real BABY puppy that visibly looks only a few weeks or months old
 (round face, small soft body; NOT an adolescent or adult dog, NOT a statue/toy/drawing; reject if the caption says 6 months or older);
 the puppy is the clear main subject, sharp, well lit, with a pleasant background, and is the kind of photo that makes people say "aww" at first glance
-(soft expression; reject bared teeth, awkward poses, harsh flash, messy or dirty settings); no people's faces, no watermark or big text, nothing sad (no injury, cage, shelter misery, raw-looking newborn litter).
+(soft expression; reject bared teeth, awkward poses, harsh flash, messy or dirty settings); no people's faces, no watermark or big text, nothing sad (no injury, cage, shelter misery); reject newborns whose eyes are still closed, and reject photos where the puppy is held in or covered by human hands.
 Rate the best qualifying photo's cuteness 1-10 as "score" honestly (10 = calendar-cover quality). If none qualifies or the best is below 8, return {{"best": -1, "why": "..."}}.
 Then write the card text about what THIS puppy is visibly doing in the photo. Tone: deadpan, dry, sleek humor, like a bored narrator. Not childish, not gushing, no emoji, no exclamation marks.
 Return ONLY JSON:
@@ -59,7 +59,7 @@ Return ONLY JSON:
  "name_ko": "아기 {ko}" (use the actual breed if clearly different; max 12 chars), "name_en": "{en.title()} puppy" (max 26 chars),
  "lines_ko": ["첫 줄 (max 17 chars, 명사형/~중. ~음. 식의 건조한 말투. 한국 사람이 읽어 자연스럽고 뜻이 바로 통하는 문장)", "둘째 줄 (max 17 chars)"],
  "lines_en": ["line 1 (max 32 chars)", "line 2 (max 32 chars)"],
- "aside_ko": "빨간 마스코트 레드덴바의 시큰둥한 한마디 (max 8 chars)", "aside_en": "same, max 14 chars"}}
+ "aside_ko": "이 사진을 본 마스코트 레드덴바의 시큰둥한 반응 한마디. 사진·문구와 뜻이 이어져야 함 (max 8 chars, 예: 졌다 / 부럽다 / 나도 말 안 함)", "aside_en": "same idea, max 14 chars (e.g. I lost / Jealous / Not telling)"}}
 Example of tone — lines_ko: ["코에 눈 묻은 줄 모름.", "알려주는 사람도 없음."], aside_ko: "나도 말 안 함"; lines_en: ["Paws up, waiting for a treat.", "Saying no is not an option."], aside_en: "I lost"."""
     last = None
     for m in (models(key)[:4] * 2):
