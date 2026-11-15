@@ -20,7 +20,8 @@ def gnews(q, ko):
 
 FEEDS = {
     "kr": [gnews("훈훈 OR 미담 OR 선행 OR 감동", True), gnews("기부 OR 나눔 OR 의인 OR 재회 OR 기적", True),
-           gnews("따뜻한 OR 눈물 OR 고마워 OR 깜짝 선물 OR 감사", True), gnews("완치 OR 생명 구한 OR 장학금 OR 봉사", True)],
+           gnews("따뜻한 OR 눈물 OR 고마워 OR 깜짝 선물 OR 감사", True), gnews("완치 OR 생명 구한 OR 장학금 OR 봉사", True),
+           "https://www.yna.co.kr/rss/society.xml", "https://www.hani.co.kr/rss/society/", "https://www.khan.co.kr/rss/rssdata/society_news.xml", "https://rss.nocutnews.co.kr/nocutnews.xml"],
     "us": [gnews("heartwarming OR \"good news\" OR kindness", False), gnews("generosity OR donated OR reunited OR surprise OR \"paid it forward\"", False),
            "https://www.goodnewsnetwork.org/feed/", "https://www.positive.news/feed/",
            "https://www.goodgoodgood.co/articles/rss.xml"],
@@ -67,6 +68,7 @@ def gather(region, since):
             k = re.sub(r"\W+", "", it["title"].lower())[:40]
             if not k or k in seen: continue
             if re.search(BAD[region], it["title"] + " " + it["text"][:300] + " " + it["src"], re.I): continue
+            if region == "kr" and "news.google" not in u and not re.search(r"훈훈|미담|선행|기부|나눔|의인|재회|기적|감사|선물|장학금|봉사|완치|구했|도왔|양보", it["title"]): continue
             seen.add(k); items.append(it)
     return items
 
@@ -100,7 +102,10 @@ def enrich(it):
     try:
         if "news.google.com" in link:
             from googlenewsdecoder import gnewsdecoder
-            d = gnewsdecoder(link, interval=1)
+            d = {}
+            for wait in (0, 6, 12):
+                time.sleep(wait); d = gnewsdecoder(link, interval=2)
+                if d.get("success"): break
             if not d.get("success"): print("  디코드 실패:", str(d)[:100]); return
             link = d["decoded_url"]
         r = requests.get(link, headers=UA, timeout=25); r.raise_for_status()
