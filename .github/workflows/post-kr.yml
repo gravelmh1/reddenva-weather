@@ -1,0 +1,81 @@
+name: post-kr
+# Make가 깨우는 단 하나의 워크플로. 아침에는 날씨, 낮 12~13시대에는 주간 카드(월: 책, 화: 좋은 뉴스)를 만들고
+# out/kr-post.json 에 "지금 올릴 카드"를 적어 둔다. Make는 3분 20초 뒤 그 파일만 읽어 Instagram에 올린다.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "테스트만 하기 (체크하면 카드만 만들고 게시하지 않아요)"
+        type: boolean
+        default: true
+      slot:
+        description: "auto(현지 시각으로 자동) / weather / weekly"
+        type: string
+        default: auto
+permissions:
+  contents: write
+concurrency:
+  group: post-kr
+  cancel-in-progress: false
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 어떤 카드 차례인지 정하기
+        id: slot
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          if [ "${{ inputs.slot }}" = "weather" ] || [ "${{ inputs.slot }}" = "weekly" ]; then echo "slot=${{ inputs.slot }}" >> "$GITHUB_OUTPUT"; else python post_slot.py kr >> "$GITHUB_OUTPUT"; fi
+          cat "$GITHUB_OUTPUT"
+      - name: (주간) 시작할 때 post.json 비우기
+        if: ${{ steps.slot.outputs.slot == 'weekly' && !inputs.dry_run }}
+        run: |
+          python post_slot.py kr --clear
+          git add out
+          git diff --cached --quiet || (git commit -q -m "kr post cleared" && git pull --rebase -q && git push -q)
+      - name: 폰트 설치
+        run: sudo apt-get update -y && sudo apt-get install -y fonts-noto-cjk
+      - run: pip install -r requirements.txt
+      - name: (날씨) 카드 만들기
+        if: ${{ steps.slot.outputs.slot == 'weather' }}
+        env:
+          OPEN_METEO_API_KEY: ${{ secrets.OPEN_METEO_API_KEY }}
+        run: python run.py --region kr --emit ${{ inputs.dry_run && '--dry-run --force' || '--force' }}
+      - name: (주간) 책 카드 만들기
+        if: ${{ steps.slot.outputs.slot == 'weekly' }}
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NYT_API_KEY: ${{ secrets.NYT_API_KEY }}
+        run: python books.py --region kr ${{ inputs.dry_run && '--dry-run --force' || '' }}
+      - name: (주간) 뉴스 카드 만들기
+        if: ${{ steps.slot.outputs.slot == 'weekly' }}
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python news.py --region kr ${{ inputs.dry_run && '--dry-run --force' || '' }}
+      - name: Make가 읽을 파일(post.json) 쓰기
+        if: ${{ always() && !inputs.dry_run && steps.slot.outputs.slot != '' }}
+        run: |
+          git pull --rebase -q || true
+          python post_slot.py kr --write ${{ steps.slot.outputs.slot }}
+          git add out
+          git diff --cached --quiet || (git commit -q -m "kr post.json" && git pull --rebase -q && git push -q)
+      - name: Threads 게시
+        if: ${{ !inputs.dry_run }}
+        env:
+          THREADS_TOKEN_KR: ${{ secrets.THREADS_TOKEN_KR }}
+        run: |
+          if [ "${{ steps.slot.outputs.slot }}" = "weather" ]; then python threads_post.py --region kr; else python threads_post.py --region kr --kind books-; python threads_post.py --region kr --kind news-; fi
+          git add state
+          git diff --cached --quiet || (git commit -q -m "kr threads posted" && git pull --rebase -q && git push -q)
+      - name: 테스트 카드 보관 (dry-run일 때)
+        if: ${{ inputs.dry_run }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-card-kr
+          path: out/*.jpg
