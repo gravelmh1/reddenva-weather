@@ -85,7 +85,7 @@ def gem(prompt, temp=0.3):
 def shortlist(items, region):
     """1차: 제목만 보고 '구체적인 사람 이야기' 후보 12개로 압축."""
     lst = "\n".join(f"[{i}] {it['title']}" for i, it in enumerate(items))
-    p = f"""From these news titles pick up to 12 that look like a CONCRETE, specific human story with a clear 'who did what' and a happy outcome, that happened in {'Korea' if region=='kr' else 'the United States'}.
+    p = f"""From these news titles pick the 12 best (at least 8 if available) that look like a CONCRETE, specific human story with a clear 'who did what' and a happy outcome, that happened in {'Korea' if region=='kr' else 'the United States'}.
 Reject: vague or syrupy titles, clickbait ('눈물', 'tears', 'you won't believe'), generic campaigns, donations by companies/organizations as PR, politics, sports, awards, openings, celebrities, animals, anything sad, anything unclear.
 Return ONLY JSON: {{"ids":[numbers]}}
 
@@ -101,7 +101,7 @@ def enrich(it):
         if "news.google.com" in link:
             from googlenewsdecoder import gnewsdecoder
             d = gnewsdecoder(link, interval=1)
-            if not d.get("status"): print("  디코드 실패:", str(d)[:100]); return
+            if not d.get("success"): print("  디코드 실패:", str(d)[:100]); return
             link = d["decoded_url"]
         r = requests.get(link, headers=UA, timeout=25); r.raise_for_status()
         r.encoding = r.apparent_encoding if not r.encoding or r.encoding.lower() == "iso-8859-1" else r.encoding
