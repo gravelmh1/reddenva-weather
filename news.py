@@ -123,12 +123,12 @@ def build(region, j, items, day):
     rows = [dict(hero=x["hero"], head=x["head"], desc=x["desc"], src=(f"출처: {items[x['id']]['src']}" if ko else f"Source: {items[x['id']]['src']}")) for x in j["items"]]
     q = ["보고 싶은 것만 보는 세상,", "좋은 것만 보자"] if ko else ["A world of seeing only what we want to see.", "Let's see the good."]
     if ko:
-        c = dict(top=f"WEEKLY GOOD NEWS · {d:%Y.%m.%d}", handle="@reddenva.kr", badge="이번 주 좋은 뉴스", title="이번 주 TOP 3", items=rows,
+        c = dict(top=f"WEEKLY GOOD NEWS · {d:%Y.%m.%d} ({'월화수목금토일'[d.weekday()]})", handle="@reddenva.kr", badge="이번 주 좋은 뉴스", title="이번 주 TOP 3", items=rows,
                  head="레드덴바 생각", quote=q, foot=["공개 보도를 요약했어요.", "AI 요약이라 오류가 있을 수 있어요."])
         cap = "📰 이번 주 좋은 뉴스 TOP 3\n\n" + "\n".join(f"{i+1}. {r['head']}\n{r['desc']}" for i, r in enumerate(rows)) + \
               f"\n\n💬 {q[0]} {q[1]}\n\n#좋은뉴스 #훈훈한소식 #긍정뉴스 #레드덴바"
     else:
-        c = dict(top=f"WEEKLY GOOD NEWS · {d:%b %d, %Y}".upper(), handle="@reddenva.us", badge="This week's good news", title="This Week's Top 3", items=rows,
+        c = dict(top=f"WEEKLY GOOD NEWS · {d:%b %d, %Y} ({d:%a})".upper(), handle="@reddenva.us", badge="This week's good news", title="This Week's Top 3", items=rows,
                  head="Red Denva thinks", quote=q, foot=["Summarized from public reports.", "AI summary may contain errors."])
         cap = "📰 This week's good news: Top 3\n\n" + "\n".join(f"{i+1}. {r['head']}\n{r['desc']}" for i, r in enumerate(rows)) + \
               f"\n\n💬 {q[0]} {q[1]}\n\n#goodnews #positivenews #uplifting #reddenva"

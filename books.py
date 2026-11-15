@@ -170,7 +170,7 @@ def build(region, book, j, urls, period):
                f"💬 이렇게 말하면 읽은 척 가능\n“{j['quote'][0].strip('“”\"')} {j['quote'][1].strip('“”\"')}”\n\n#베스트셀러 #책추천 #소설추천 #아는척가이드 #레드덴바")
     else:
         d = dt.date.fromisoformat(book["period"]) if re.match(r"\d{4}-\d\d-\d\d", book.get("period", "")) else dt.date.today()
-        c = dict(top=f"WEEKLY BOOK · NYT {d.strftime('%b %d').upper()}", handle="@reddenva.us", badge=f"Last week's #{book['rank']} fiction",
+        c = dict(top=f"WEEKLY BOOK · NYT {d.strftime('%b %d (%a)').upper()}", handle="@reddenva.us", badge=f"Last week's #{book['rank']} fiction",
                  src="NYT Hardcover Fiction", title=book["title"], author=book["author"], tag=j.get("tag", ""),
                  l1="THE STORY", plot=j["plot"], l2="KEY POINTS", keys=j["keys"], head="Say this to sound like you read it", headsub="",
                  quote=[f"“{j['quote'][0].strip('“”\"')}", f"{j['quote'][1].strip('“”\"')}”"],
