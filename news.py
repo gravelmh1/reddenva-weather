@@ -19,9 +19,9 @@ def gnews(q, ko):
 
 
 FEEDS = {
-    "kr": [gnews("훈훈 OR 미담 OR 선행 OR 감동", True), gnews("쾌거 OR 세계 최초 OR 국내 최초 OR 개발 성공", True),
-           gnews("기부 OR 나눔 OR 의인 OR 구조 OR 기적", True), gnews("합격 OR 수상 OR 우승 OR 신기록 OR 복원", True)],
-    "us": [gnews("heartwarming OR \"good news\" OR kindness", False), gnews("breakthrough OR \"first ever\" OR milestone OR \"record low\"", False),
+    "kr": [gnews("훈훈 OR 미담 OR 선행 OR 감동", True), gnews("기부 OR 나눔 OR 의인 OR 재회 OR 기적", True),
+           gnews("따뜻한 OR 눈물 OR 고마워 OR 깜짝 선물 OR 감사", True), gnews("완치 OR 생명 구한 OR 장학금 OR 봉사", True)],
+    "us": [gnews("heartwarming OR \"good news\" OR kindness", False), gnews("generosity OR donated OR reunited OR surprise OR \"paid it forward\"", False),
            "https://www.goodnewsnetwork.org/feed/", "https://www.positive.news/feed/",
            "https://www.goodgoodgood.co/articles/rss.xml"],
 }
@@ -56,8 +56,8 @@ def fetch_feed(url, since):
     print(f"  {url[:60]}… → {len(out)}건"); return out
 
 
-BAD = {"kr": r"동물|강아지|고양이|반려|코알라|판다|새끼|펫|멸종|야생|구조견|비단뱀|호랑이|고래|사망|숨져|숨진|사고|화재|살인|구속|재판|논란|선거|대통령|국회|정당|투표|수사|검찰|의혹|전쟁|참사|폭행|사기",
-       "us": r"\b(dog|dogs|cat|cats|puppy|kitten|animal|animals|zoo|wildlife|pet|pets|horse|bird|birds|whale|bear|otter|elephant|turtle|dies|died|death|killed|shooting|murder|trump|biden|election|congress|senate|ice|immigration|lawsuit|war|crash|fire)\b"}
+BAD = {"kr": r"동물|강아지|고양이|반려|코알라|판다|새끼|펫|멸종|야생|구조견|비단뱀|호랑이|고래|사망|숨져|숨진|사고|화재|살인|구속|재판|논란|선거|대통령|국회|정당|투표|수사|검찰|의혹|전쟁|참사|폭행|사기|우승|수상|개관|복원|출시|계약|투자|선정|협약|대상|MVP|챔피언|발표|공개|착공|준공|MOU",
+       "us": r"\b(dog|dogs|cat|cats|puppy|kitten|animal|animals|zoo|wildlife|pet|pets|horse|bird|birds|whale|bear|otter|elephant|turtle|dies|died|death|wins|win|award|awarded|championship|opens|opening|launch|launches|killed|shooting|murder|trump|biden|election|congress|senate|ice|immigration|lawsuit|war|crash|fire)\b"}
 
 
 def gather(region, since):
@@ -76,21 +76,17 @@ def pick(region, items, lang):
     lst = "\n".join(f"[{i}] ({it['src']}) {it['title']}" + (f" — {it['text'][:500]}" if it["text"] else "") for i, it in enumerate(items))
     if ko:
         spec = ('{"items":[{"id":번호,"hero":"소제목 12자 이내(키워드)","head":"헤드라인 18자 이내, 반드시 ~어요 체(예: ~했어요, ~성공했어요), ~습니다 금지","desc":"설명 1~2문장 70자 이내, 반드시 ~어요 체(~했어요), ~습니다 금지, 헤드라인을 그대로 반복하지 말고 후보 글의 추가 사실을 담기, 후보 글에 있는 사실만","country":"소식이 일어난 나라 코드(KR/US/기타)"}] (정확히 3개),'
-                ' "quote":["한마디 첫 줄 16자 이내","둘째 줄 16자 이내"]}')
+                '}')
         place = "한국에서 일어난 소식"
-        tone = '핵심 메시지는 "좋은 것만 보고 삽시다"(나쁜 소식은 안 봐도 된다, 좋은 것만 챙기자). 무심하고 건조한 한 마디(말투는 ~입니다/~죠). 예시 느낌(그대로 베끼지 말 것): "오늘은 이 정도면 충분합니다 / 좋은 소식만 챙겨 가시죠", "세상 괜찮은 구석이 꽤 있네요 / 이것만 보고 삽시다". 느낌표·이모지·"힘내요"·오글거리는 표현 금지'
     else:
-        spec = ('{"items":[{"id":number,"hero":"short label max 22 chars","head":"headline max 40 chars","desc":"1-2 sentences max 100 chars, only facts in the candidate text","country":"country code where it happened (KR/US/other)"}] (exactly 3),'
-                ' "quote":["line 1 max 30 chars","line 2 max 30 chars"]}')
+        spec = ('{"items":[{"id":number,"hero":"short label max 22 chars","head":"headline max 40 chars","desc":"1-2 sentences max 100 chars, only facts in the candidate text","country":"country code where it happened (KR/US/other)"}] (exactly 3)}')
         place = "something that happened in the United States"
-        tone = 'core message: "let\'s only look at the good stuff" (we can skip the bad news). A deadpan, dry two-line remark. Style examples, do not copy: "Good things happened. Noted. / That is enough news for today.", "Plenty of decent corners out there. / Let\'s just look at these." No exclamation marks, emojis, "stay strong" or cringe'
     prompt = f"""You curate a weekly feel-good news card. From the CANDIDATES pick exactly 3 stories.
-MUST: positive and uplifting (kindness, achievements, discoveries, milestones, cultural wins, community good); {place}; different topics from each other.
-PREFER: warm human stories and small acts of kindness, discoveries and real achievements over ribbon-cuttings, awards ceremonies, openings or generic announcements.
+MUST: genuinely heartwarming — a story that makes an ordinary reader smile or feel warm (acts of kindness, reunions, generosity, someone helped, a small joy, a recovery, a surprise). Not merely 'not negative'. {place}; different topics from each other.
+STRICTLY AVOID as dry/neutral news: sports results and championships, awards and prizes, restorations, openings, product/tech/industry announcements, economy/export figures, government programs, institutional press releases. If fewer than 3 truly heartwarming stories exist, still pick the 3 warmest.
 MUST: the story happens in the same country as the card (KR card = Korea only, US card = United States only; foreign stories are not allowed even if the outlet is local).
 MUST NOT: animals/pets/wildlife; deaths, crime, disasters, wars, tragedy-with-silver-lining; politics, elections, parties, policy fights or anything disputed; shops/products/ads/promotions; celebrity gossip; investing/stock tips; anything not clearly stated in the candidate text.
 Use ONLY facts in the candidate text. Never invent numbers, names or places. If a story is thin, write a shorter desc.
-QUOTE: {tone}. Do not just repeat the example phrase; write a fresh line each time.
 Return ONLY JSON: {spec}
 
 CANDIDATES:
@@ -116,7 +112,7 @@ CANDIDATES:
                             else: break
                         x[k] = acc
                     assert x[k] and len(x[k]) <= n + (0 if k == "desc" else 4), f"{k} 길이 {len(x[k])}"
-            assert len(its) == 3 and len(j["quote"]) >= 2 and all(len(q) <= (20 if ko else 36) for q in j["quote"][:2])
+            assert len(its) == 3
             print("요약 모델:", m); j["items"] = its; return j
         except Exception as e: last = f"{m} 검증 실패 {e}"; print("모델 건너뜀:", last)
     raise RuntimeError(f"Gemini 선별 실패: {last}")
@@ -125,15 +121,15 @@ CANDIDATES:
 def build(region, j, items, day):
     ko = region == "kr"; d = dt.date.fromisoformat(day)
     rows = [dict(hero=x["hero"], head=x["head"], desc=x["desc"], src=(f"출처: {items[x['id']]['src']}" if ko else f"Source: {items[x['id']]['src']}")) for x in j["items"]]
-    q = [s.strip().strip("“”\"") for s in j["quote"][:2]]
+    q = ["보고 싶은 것만 보는 세상,", "좋은 것만 보자"] if ko else ["A world of seeing only what we want to see.", "Let's see the good."]
     if ko:
         c = dict(top=f"WEEKLY GOOD NEWS · {d:%Y.%m.%d}", handle="@reddenva.kr", badge="이번 주 좋은 뉴스", title="이번 주 TOP 3", items=rows,
-                 head="오늘의 레드덴바 한마디", quote=q, foot=["공개 보도를 요약했어요.", "AI 요약이라 오류가 있을 수 있어요."])
+                 head="레드덴바 생각", quote=q, foot=["공개 보도를 요약했어요.", "AI 요약이라 오류가 있을 수 있어요."])
         cap = "📰 이번 주 좋은 뉴스 TOP 3\n\n" + "\n".join(f"{i+1}. {r['head']}\n{r['desc']}" for i, r in enumerate(rows)) + \
               f"\n\n💬 {q[0]} {q[1]}\n\n#좋은뉴스 #훈훈한소식 #긍정뉴스 #레드덴바"
     else:
         c = dict(top=f"WEEKLY GOOD NEWS · {d:%b %d, %Y}".upper(), handle="@reddenva.us", badge="This week's good news", title="This Week's Top 3", items=rows,
-                 head="Red Denva says", quote=q, foot=["Summarized from public reports.", "AI summary may contain errors."])
+                 head="Red Denva thinks", quote=q, foot=["Summarized from public reports.", "AI summary may contain errors."])
         cap = "📰 This week's good news: Top 3\n\n" + "\n".join(f"{i+1}. {r['head']}\n{r['desc']}" for i, r in enumerate(rows)) + \
               f"\n\n💬 {q[0]} {q[1]}\n\n#goodnews #positivenews #uplifting #reddenva"
     return c, cap
