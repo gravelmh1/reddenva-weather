@@ -67,7 +67,7 @@ def wiki_text(title, author, lang):
             h = {"User-Agent": "reddenva-books/1.0 (https://github.com/gravelmh1/reddenva-weather)"}
             r = requests.get(f"https://{lg}.wikipedia.org/w/api.php", params={"action": "query", "list": "search", "srsearch": f"{title} {author}", "srlimit": 3, "format": "json"}, headers=h, timeout=20)
             for hit in r.json()["query"]["search"]:
-                if title.split()[0].lower() not in hit["title"].lower(): continue
+                if re.sub(r"\W+", "", title.lower()) not in re.sub(r"\W+", "", re.sub(r"\(.*?\)", "", hit["title"]).lower()): continue
                 e = requests.get(f"https://{lg}.wikipedia.org/w/api.php", params={"action": "query", "prop": "extracts", "explaintext": 1, "titles": hit["title"], "format": "json"}, headers=h, timeout=20).json()
                 txt = next(iter(e["query"]["pages"].values())).get("extract", "")
                 if len(txt) > 300: out.append(f"[위키백과 {lg}: {hit['title']}]\n{txt[:7000]}"); break
