@@ -87,8 +87,9 @@ def gem(prompt, temp=0.3):
 def shortlist(items, region):
     """1차: 제목만 보고 '구체적인 사람 이야기' 후보 12개로 압축."""
     lst = "\n".join(f"[{i}] {it['title']}" for i, it in enumerate(items))
-    p = f"""From these news titles pick the 12 best (at least 8 if available) that look like a CONCRETE, specific human story with a clear 'who did what' and a happy outcome, that happened in {'Korea' if region=='kr' else 'the United States'}.
+    p = f"""From these news titles pick exactly 12, best first, that look like a CONCRETE, specific human story with a clear 'who did what' and a happy outcome, that happened in {'Korea' if region=='kr' else 'the United States'}.
 Reject: rescues from fire/drowning/accidents, vague or syrupy titles, clickbait ('눈물', 'tears', 'you won't believe'), generic campaigns, donations by companies/organizations as PR, politics, sports, awards, openings, celebrities, animals, anything sad, anything unclear.
+This is only a first pass (a stricter check on the full article comes later), so always return 12 ids: fill the remaining slots with the closest acceptable ones rather than returning fewer.
 Return ONLY JSON: {{"ids":[numbers]}}
 
 {lst[:20000]}"""
@@ -230,8 +231,11 @@ def main():
     for it in items:   # Make가 3분 20초 뒤에 결과를 읽으므로 본문 수집은 70초 안에서만
         if time.time() - t0 > 70 or sum(len(x["text"]) >= 400 for x in items) >= 8: break
         if len(it["text"]) < 400: enrich(it)   # RSS에 본문이 충분히 실려 온 기사는 다시 받지 않음
-    ANIMAL = {"kr": r"동물|강아지|반려|고양이|댕댕|멍멍|펫|새끼|야생", "us": r"\b(dog|dogs|cat|cats|puppy|pup|kitten|pet|pets|animal|animals|horse|wildlife)\b"}[region]
-    items = [it for it in items if len(it["text"]) > 150 and not re.search(ANIMAL, it["title"] + " " + it["text"][:600], re.I)]; print("본문 확보", len(items))
+    # 본문까지 본 뒤 다시 거르기: 동물, 연예·유명인 (제목만으로는 안 걸리는 경우가 있음)
+    DROP = {"kr": r"동물|강아지|반려|고양이|댕댕|멍멍|펫|새끼|야생|배우|가수|아이돌|연예|개그맨|방송인|예능|드라마|출연|소속사|팬미팅|유튜버|인플루언서",
+            "us": r"\b(dog|dogs|cat|cats|puppy|pup|kitten|pet|pets|animal|animals|horse|wildlife|actor|actress|singer|rapper|celebrity|celebrities|hollywood|nfl|nba|mlb)\b"}[region]
+    items = [it for it in items if len(it["text"]) > 150 and not re.search(DROP, it["title"] + " " + it["text"][:600], re.I)
+             and not re.search(r"entertain|/star/|/ent/|sports", it["link"], re.I)]; print("본문 확보", len(items))
     if len(items) < 3: raise RuntimeError("본문 확보 기사 부족")
     j = pick(region, items, lang)
     print(json.dumps(j, ensure_ascii=False, indent=1))
