@@ -169,21 +169,38 @@ CANDIDATES:
         except Exception as e: last = f"{m} 검증 실패 {e}"; print("모델 건너뜀:", last)
     raise RuntimeError(f"Gemini 선별 실패: {last}")
 
+QUOTES = {
+    "kr": [("세상에서 가장 아름다운 것은", "마음으로 느껴야 해요", "헬렌 켈러"),
+           ("아무리 작은 친절도", "결코 헛되지 않아요", "이솝"),
+           ("천 리 길도", "한 걸음부터 시작해요", "노자"),
+           ("어둠을 저주하기보다", "촛불 하나를 켜요", "속담"),
+           ("친절은 듣지 못해도 들리고", "보지 못해도 보이는 말이에요", "마크 트웨인"),
+           ("행복은 나눌수록", "두 배가 돼요", "속담"),
+           ("세상을 좋게 만드는 일은", "지금 바로 시작할 수 있어요", "안네 프랑크")],
+    "us": [("The best and most beautiful things", "must be felt with the heart.", "Helen Keller"),
+           ("No act of kindness,", "no matter how small, is wasted.", "Aesop"),
+           ("A journey of a thousand miles", "begins with a single step.", "Lao Tzu"),
+           ("Better to light a candle", "than to curse the darkness.", "Proverb"),
+           ("Kindness is the language the deaf", "can hear and the blind can see.", "Mark Twain"),
+           ("Happiness shared", "is happiness doubled.", "Proverb"),
+           ("Nobody need wait a moment", "before starting to improve the world.", "Anne Frank")],
+}
+
 
 def build(region, j, items, day):
     ko = region == "kr"; d = dt.date.fromisoformat(day)
     rows = [dict(hero=x["hero"], head=x["head"], desc=x["desc"], src=(f"출처: {items[x['id']]['src']}" if ko else f"Source: {items[x['id']]['src']}")) for x in j["items"]]
-    q = ["보고 싶은 것만 보는 세상,", "좋은 것만 보자"] if ko else ["A world of seeing only what we want to see.", "Let's see the good."]
+    ql = QUOTES[region]; qa, qb, who = ql[d.isocalendar()[1] % len(ql)]; q = [qa, qb]
     if ko:
         c = dict(top=f"WEEKLY GOOD NEWS · {d:%Y.%m.%d} ({'월화수목금토일'[d.weekday()]})", handle="@reddenva.kr", badge="이번 주 좋은 뉴스", title="이번 주 TOP 3", items=rows,
-                 head="레드덴바 생각", quote=q, foot=["공개 보도를 요약했어요.", "AI 요약이라 오류가 있을 수 있어요."])
+                 head=f"이번 주 한 줄 · {who}", quote=q, foot=["공개 보도를 요약했어요.", "AI 요약이라 오류가 있을 수 있어요."])
         cap = "📰 이번 주 좋은 뉴스 TOP 3\n\n" + "\n".join(f"{i+1}. {r['head']}\n{r['desc']}" for i, r in enumerate(rows)) + \
-              f"\n\n💬 {q[0]} {q[1]}\n\n#좋은뉴스 #훈훈한소식 #긍정뉴스 #레드덴바"
+              f"\n\n💬 \"{q[0]} {q[1]}\" — {who}\n\n#좋은뉴스 #훈훈한소식 #긍정뉴스 #레드덴바"
     else:
         c = dict(top=f"WEEKLY GOOD NEWS · {d:%b %d, %Y} ({d:%a})".upper(), handle="@reddenva.us", badge="This week's good news", title="This Week's Top 3", items=rows,
-                 head="Red Denva thinks", quote=q, foot=["Summarized from public reports.", "AI summary may contain errors."])
+                 head=f"Quote of the week · {who}", quote=q, foot=["Summarized from public reports.", "AI summary may contain errors."])
         cap = "📰 This week's good news: Top 3\n\n" + "\n".join(f"{i+1}. {r['head']}\n{r['desc']}" for i, r in enumerate(rows)) + \
-              f"\n\n💬 {q[0]} {q[1]}\n\n#goodnews #positivenews #uplifting #reddenva"
+              f"\n\n💬 \"{q[0]} {q[1]}\" — {who}\n\n#goodnews #positivenews #uplifting #reddenva"
     return c, cap
 
 
