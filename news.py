@@ -75,18 +75,19 @@ def pick(region, items, lang):
     key = os.environ["GEMINI_API_KEY"].strip(); ko = lang == "ko"
     lst = "\n".join(f"[{i}] ({it['src']}) {it['title']}" + (f" — {it['text'][:500]}" if it["text"] else "") for i, it in enumerate(items))
     if ko:
-        spec = ('{"items":[{"id":번호,"hero":"소제목 12자 이내(키워드)","head":"헤드라인 18자 이내, ~어요 체","desc":"설명 1~2문장 70자 이내, ~어요 체, 후보 글에 있는 사실만"}] (정확히 3개),'
+        spec = ('{"items":[{"id":번호,"hero":"소제목 12자 이내(키워드)","head":"헤드라인 18자 이내, ~어요 체","desc":"설명 1~2문장 70자 이내, ~어요 체, 후보 글에 있는 사실만","country":"소식이 일어난 나라 코드(KR/US/기타)"}] (정확히 3개),'
                 ' "quote":["한마디 첫 줄 16자 이내","둘째 줄 16자 이내"]}')
         place = "한국에서 일어난 소식"
         tone = '핵심 메시지는 "좋은 것만 보고 삽시다"(나쁜 소식은 안 봐도 된다, 좋은 것만 챙기자). 무심하고 건조한 한 마디(말투는 ~입니다/~죠). 예시 느낌(그대로 베끼지 말 것): "오늘은 이 정도면 충분합니다 / 좋은 소식만 챙겨 가시죠", "세상 괜찮은 구석이 꽤 있네요 / 이것만 보고 삽시다". 느낌표·이모지·"힘내요"·오글거리는 표현 금지'
     else:
-        spec = ('{"items":[{"id":number,"hero":"short label max 22 chars","head":"headline max 40 chars","desc":"1-2 sentences max 105 chars, only facts in the candidate text"}] (exactly 3),'
+        spec = ('{"items":[{"id":number,"hero":"short label max 22 chars","head":"headline max 40 chars","desc":"1-2 sentences max 100 chars, only facts in the candidate text","country":"country code where it happened (KR/US/other)"}] (exactly 3),'
                 ' "quote":["line 1 max 30 chars","line 2 max 30 chars"]}')
         place = "something that happened in the United States"
         tone = 'core message: "let\'s only look at the good stuff" (we can skip the bad news). A deadpan, dry two-line remark. Style examples, do not copy: "Good things happened. Noted. / That is enough news for today.", "Plenty of decent corners out there. / Let\'s just look at these." No exclamation marks, emojis, "stay strong" or cringe'
     prompt = f"""You curate a weekly feel-good news card. From the CANDIDATES pick exactly 3 stories.
 MUST: positive and uplifting (kindness, achievements, discoveries, milestones, cultural wins, community good); {place}; different topics from each other.
 PREFER: warm human stories and small acts of kindness, discoveries and real achievements over ribbon-cuttings, awards ceremonies, openings or generic announcements.
+MUST: the story happens in the same country as the card (KR card = Korea only, US card = United States only; foreign stories are not allowed even if the outlet is local).
 MUST NOT: animals/pets/wildlife; deaths, crime, disasters, wars, tragedy-with-silver-lining; politics, elections, parties, policy fights or anything disputed; shops/products/ads/promotions; celebrity gossip; investing/stock tips; anything not clearly stated in the candidate text.
 Use ONLY facts in the candidate text. Never invent numbers, names or places. If a story is thin, write a shorter desc.
 QUOTE: {tone}. Do not just repeat the example phrase; write a fresh line each time.
@@ -96,18 +97,25 @@ CANDIDATES:
 {lst[:30000]}"""
     lim = dict(hero=12, head=18, desc=70) if ko else dict(hero=22, head=40, desc=105)
     last = None
-    for m in models(key)[:5]:
+    for m in (models(key)[:4] * 2):
         r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent", headers={"x-goog-api-key": key},
-                          json={"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"temperature": 0.4, "responseMimeType": "application/json"}}, timeout=120)
+                          json={"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"temperature": 0.5, "responseMimeType": "application/json"}}, timeout=120)
         if not r.ok: last = f"{m} {r.status_code} {r.text[:150]}"; print("모델 건너뜀:", last); continue
         try:
             j = json.loads(re.sub(r"^```json|```$", "", r.json()["candidates"][0]["content"]["parts"][0]["text"].strip()).strip())
             its, ids = j["items"][:3], set()
             for x in its:
                 x["id"] = int(x["id"]); assert 0 <= x["id"] < len(items) and x["id"] not in ids; ids.add(x["id"])
+                assert str(x.get("country", "")).strip().upper() == region.upper(), f"나라 {x.get('country')}"
                 for k, n in lim.items():
                     x[k] = x[k].strip()
-                    assert x[k] and len(x[k]) <= n + 6, f"{k} 길이 {len(x[k])}"
+                    if k == "desc" and len(x[k]) > n:   # 문장 단위로 줄이기
+                        acc = ""
+                        for sn in re.split(r"(?<=[.!?])\s+", x[k]):
+                            if len((acc + " " + sn).strip()) <= n: acc = (acc + " " + sn).strip()
+                            else: break
+                        x[k] = acc
+                    assert x[k] and len(x[k]) <= n + (0 if k == "desc" else 4), f"{k} 길이 {len(x[k])}"
             assert len(its) == 3 and len(j["quote"]) >= 2 and all(len(q) <= (20 if ko else 36) for q in j["quote"][:2])
             print("요약 모델:", m); j["items"] = its; return j
         except Exception as e: last = f"{m} 검증 실패 {e}"; print("모델 건너뜀:", last)
