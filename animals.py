@@ -45,17 +45,19 @@ def judge(cands, en, ko):
     key = os.environ["GEMINI_API_KEY"].strip(); parts = []
     for i, c in enumerate(cands):
         im = c["im"].copy(); im.thumbnail((640, 640)); b = io.BytesIO(); im.save(b, "JPEG", quality=80)
-        parts += [{"text": f"[photo {i}]"}, {"inline_data": {"mime_type": "image/jpeg", "data": base64.b64encode(b.getvalue()).decode()}}]
+        parts += [{"text": f"[photo {i}] caption: {c['id'][:90]}"}, {"inline_data": {"mime_type": "image/jpeg", "data": base64.b64encode(b.getvalue()).decode()}}]
     prompt = f"""You are picking ONE photo for a weekly Instagram card "Puppy of the week" (breed this week: {en} / {ko}).
-Look at each photo. A photo qualifies ONLY if ALL are true: it is a real photograph of a real, clearly YOUNG puppy (not an adult dog, not a statue/toy/drawing);
-the puppy is the clear main subject, in focus, well lit, and genuinely cute; no people's faces, no watermark or big text, nothing sad (no injury, cage, shelter misery, newborn litter that looks raw).
-Pick the single best qualifying photo. If none qualifies, return {{"best": -1}}.
+Look at each photo. Be a strict photo editor. A photo qualifies ONLY if ALL are true: it is a real photograph of a real BABY puppy that visibly looks only a few weeks or months old
+(round face, small soft body; NOT an adolescent or adult dog, NOT a statue/toy/drawing; reject if the caption says 6 months or older);
+the puppy is the clear main subject, sharp, well lit, with a pleasant background, and is the kind of photo that makes people say "aww" at first glance
+(soft expression; reject bared teeth, awkward poses, harsh flash, messy or dirty settings); no people's faces, no watermark or big text, nothing sad (no injury, cage, shelter misery, raw-looking newborn litter).
+Rate the best qualifying photo's cuteness 1-10 as "score" honestly (10 = calendar-cover quality). If none qualifies or the best is below 8, return {{"best": -1, "why": "..."}}.
 Then write the card text about what THIS puppy is visibly doing in the photo. Tone: deadpan, dry, sleek humor, like a bored narrator. Not childish, not gushing, no emoji, no exclamation marks.
 Return ONLY JSON:
-{{"best": index, "why": "short reason",
+{{"best": index, "score": 1..10, "why": "short reason",
  "focus_x": 0..1, "focus_y": 0..1,   // where the puppy's face is in the photo (fraction of width/height)
  "name_ko": "아기 {ko}" (use the actual breed if clearly different; max 12 chars), "name_en": "{en.title()} puppy" (max 26 chars),
- "lines_ko": ["첫 줄 (max 17 chars, 명사형/~중. ~음. 식의 건조한 말투)", "둘째 줄 (max 17 chars)"],
+ "lines_ko": ["첫 줄 (max 17 chars, 명사형/~중. ~음. 식의 건조한 말투. 한국 사람이 읽어 자연스럽고 뜻이 바로 통하는 문장)", "둘째 줄 (max 17 chars)"],
  "lines_en": ["line 1 (max 32 chars)", "line 2 (max 32 chars)"],
  "aside_ko": "빨간 마스코트 레드덴바의 시큰둥한 한마디 (max 8 chars)", "aside_en": "same, max 14 chars"}}
 Example of tone — lines_ko: ["코에 눈 묻은 줄 모름.", "알려주는 사람도 없음."], aside_ko: "나도 말 안 함"; lines_en: ["Paws up, waiting for a treat.", "Saying no is not an option."], aside_en: "I lost"."""
@@ -66,7 +68,7 @@ Example of tone — lines_ko: ["코에 눈 묻은 줄 모름.", "알려주는 �
         if not r.ok: last = f"{m} {r.status_code}"; continue
         try:
             j = json.loads(re.sub(r"^```json|```$", "", r.json()["candidates"][0]["content"]["parts"][0]["text"].strip()).strip())
-            if int(j.get("best", -1)) < 0: print("  쓸 만한 사진 없음:", j.get("why", "")); return None
+            if int(j.get("best", -1)) < 0 or int(j.get("score", 0)) < 8: print("  쓸 만한 사진 없음:", j.get("score"), j.get("why", "")); return None
             assert 0 <= int(j["best"]) < len(cands)
             assert len(j["lines_ko"]) == 2 and len(j["lines_en"]) == 2 and all(0 < len(x) <= 20 for x in j["lines_ko"]) and all(0 < len(x) <= 36 for x in j["lines_en"])
             assert 0 < len(j["name_ko"]) <= 14 and 0 < len(j["name_en"]) <= 30 and len(j["aside_ko"]) <= 10 and len(j["aside_en"]) <= 16
@@ -79,9 +81,9 @@ Example of tone — lines_ko: ["코에 눈 묻은 줄 모름.", "알려주는 �
 def choose(week_no, used):
     """이번 주 견종부터 차례로(최대 4종) 후보를 받아 고른다."""
     key = os.environ.get("PEXELS_API_KEY", "").strip(); t0 = time.time()
-    for k in range(4):
+    for k in range(5):
         en, ko = BREEDS[(week_no + k) % len(BREEDS)]; q = f"{en} puppy"
-        cands = [c for c in (pexels(q, key) if key else commons(q)) if c["id"] not in used][:8]; got = []
+        cands = [c for c in (pexels(q, key) if key else commons(q)) if c["id"] not in used][:10]; got = []
         for c in cands:
             try:
                 r = requests.get(c["url"], headers=UA, timeout=25); r.raise_for_status(); c["im"] = Image.open(io.BytesIO(r.content)).convert("RGB"); got.append(c)
@@ -127,7 +129,7 @@ def main():
         c["im"].save(photo, quality=92)
         pick = {"week": week, "id": c["id"], "artist": c["artist"], "license": c["license"], "src": c["src"], **{k: j[k] for k in ("focus_x", "focus_y", "name_ko", "name_en", "lines_ko", "lines_en", "aside_ko", "aside_en")}}
         hist = {"used": (hist.get("used", []) + [c["id"]])[-300:], "pick": pick}
-        print("선택:", c["id"], "|", j.get("why", "")); print(json.dumps(pick, ensure_ascii=False))
+        print("선택:", c["id"], "|", j.get("score"), j.get("why", "")); print(json.dumps(pick, ensure_ascii=False))
     card, cap = build(region, pick, day, photo)
     img_rel = f"out/puppy-{region}-{day}.jpg"; animals_render.card(card, img_rel)
     json.dump(hist, open(pf, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
