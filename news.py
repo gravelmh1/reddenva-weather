@@ -88,7 +88,7 @@ def shortlist(items, region):
     """1차: 제목만 보고 '구체적인 사람 이야기' 후보 12개로 압축."""
     lst = "\n".join(f"[{i}] {it['title']}" for i, it in enumerate(items))
     p = f"""From these news titles pick the 12 best (at least 8 if available) that look like a CONCRETE, specific human story with a clear 'who did what' and a happy outcome, that happened in {'Korea' if region=='kr' else 'the United States'}.
-Reject: vague or syrupy titles, clickbait ('눈물', 'tears', 'you won't believe'), generic campaigns, donations by companies/organizations as PR, politics, sports, awards, openings, celebrities, animals, anything sad, anything unclear.
+Reject: rescues from fire/drowning/accidents, vague or syrupy titles, clickbait ('눈물', 'tears', 'you won't believe'), generic campaigns, donations by companies/organizations as PR, politics, sports, awards, openings, celebrities, animals, anything sad, anything unclear.
 Return ONLY JSON: {{"ids":[numbers]}}
 
 {lst[:20000]}"""
@@ -134,7 +134,7 @@ def pick(region, items, lang):
         place = "something that happened in the United States"
     prompt = f"""You curate a weekly feel-good news card. From the CANDIDATES pick exactly 3 stories.
 MUST: genuinely heartwarming AND concrete — a real, specific episode (who did what, where, what happened) that makes an ordinary reader smile naturally. NOT forced or syrupy sentimentality, NOT vague, NOT promotional. Prefer stories with a clear, understandable plot a reader can retell in one sentence.
-MUST: desc states the concrete facts (who, what, outcome) in plain, calm words; no exaggeration, no 'touching'/'moving' adjectives, no tear-jerking tone. Skip any candidate whose text does not make the story clear. {place}; different topics from each other.
+MUST: desc states the concrete facts (who, what, outcome) in plain, calm words; no exaggeration, no 'touching'/'moving' adjectives, no tear-jerking tone. Skip any candidate whose text does not make the story clear. {place}; three DIFFERENT kinds of stories (never two rescues, never two of the same theme such as firefighters/donations/reunions); prefer everyday relatable moments over dramatic emergencies; avoid near-death rescue and fire/drowning/accident stories altogether.
 STRICTLY AVOID as dry/neutral news: sports results and championships, awards and prizes, restorations, openings, product/tech/industry announcements, economy/export figures, government programs, institutional press releases. If fewer than 3 truly heartwarming stories exist, still pick the 3 warmest.
 MUST: the story happens in the same country as the card (KR card = Korea only, US card = United States only; foreign stories are not allowed even if the outlet is local).
 MUST NOT: animals/pets/wildlife; deaths, crime, disasters, wars, tragedy-with-silver-lining; politics, elections, parties, policy fights or anything disputed; shops/products/ads/promotions; celebrity gossip; investing/stock tips; anything not clearly stated in the candidate text.
