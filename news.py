@@ -205,7 +205,8 @@ def main():
     if len(items) < 8: raise RuntimeError("후보 기사가 너무 적음 → 이번 주는 올리지 않음")
     sl = shortlist(items, region); items = [items[i] for i in sl]; print("1차 후보", len(items))
     for it in items: enrich(it)
-    items = [it for it in items if len(it["text"]) > 150]; print("본문 확보", len(items))
+    ANIMAL = {"kr": r"동물|강아지|반려|고양이|댕댕|멍멍|펫|새끼|야생", "us": r"\b(dog|dogs|cat|cats|puppy|pup|kitten|pet|pets|animal|animals|horse|wildlife)\b"}[region]
+    items = [it for it in items if len(it["text"]) > 150 and not re.search(ANIMAL, it["title"] + " " + it["text"][:600], re.I)]; print("본문 확보", len(items))
     if len(items) < 3: raise RuntimeError("본문 확보 기사 부족")
     j = pick(region, items, lang)
     print(json.dumps(j, ensure_ascii=False, indent=1))
