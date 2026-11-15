@@ -101,7 +101,7 @@ def enrich(it):
         if "news.google.com" in link:
             from googlenewsdecoder import gnewsdecoder
             d = gnewsdecoder(link, interval=1)
-            if not d.get("status"): return
+            if not d.get("status"): print("  디코드 실패:", str(d)[:100]); return
             link = d["decoded_url"]
         r = requests.get(link, headers=UA, timeout=25); r.raise_for_status()
         r.encoding = r.apparent_encoding if not r.encoding or r.encoding.lower() == "iso-8859-1" else r.encoding
@@ -111,6 +111,7 @@ def enrich(it):
         body = " ".join(p for p in paras if len(p) > 40)
         og = soup.find("meta", property="og:description")
         txt = ((og.get("content") + " ") if og and og.get("content") else "") + body
+        print("  본문", len(txt), link[:70])
         if len(txt) > 150: it["text"] = txt[:1200]; it["link"] = link
     except Exception as e:
         print("  본문 실패:", it["title"][:30], str(e)[:60])
