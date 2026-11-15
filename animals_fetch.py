@@ -1,7 +1,7 @@
 """시안용: 위키미디어 공용에서 아기 동물 사진 후보를 받아 samples/ 에 저장 (라이선스·저작자 정보 포함)."""
 import json, os, re, sys, requests
 UA = {"User-Agent": "RedDenvaBot/1.0 (https://github.com/gravelmh1/reddenva-weather)"}
-QUERIES = sys.argv[1:] or ["red panda cub", "sea otter pup", "duckling", "baby elephant", "lamb spring", "fox kit", "baby hedgehog", "seal pup"]
+QUERIES = [q.strip() for q in os.environ.get("Q", "").split("|") if q.strip()] or sys.argv[1:] or ["red panda cub", "sea otter pup", "duckling", "baby elephant", "lamb spring", "fox kit", "baby hedgehog", "seal pup"]
 os.makedirs("samples", exist_ok=True); meta = []
 for q in QUERIES:
     r = requests.get("https://commons.wikimedia.org/w/api.php", headers=UA, timeout=30, params={

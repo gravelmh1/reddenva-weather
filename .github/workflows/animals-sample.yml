@@ -2,6 +2,11 @@ name: animals-sample
 # 수요일 아기 동물 시리즈 시안용: 사진 후보를 받아 samples 브랜치에 올린다 (게시하지 않음)
 on:
   workflow_dispatch:
+    inputs:
+      queries:
+        description: "검색어 (| 로 구분)"
+        type: string
+        default: ""
 permissions:
   contents: write
 jobs:
@@ -14,7 +19,9 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install requests
-      - run: python animals_fetch.py
+      - env:
+          Q: ${{ inputs.queries }}
+        run: python animals_fetch.py
       - run: |
           git config user.name "github-actions"
           git config user.email "actions@users.noreply.github.com"
