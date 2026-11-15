@@ -56,12 +56,17 @@ def fetch_feed(url, since):
     print(f"  {url[:60]}… → {len(out)}건"); return out
 
 
+BAD = {"kr": r"동물|강아지|고양이|반려|코알라|판다|새끼|펫|멸종|야생|구조견|비단뱀|호랑이|고래|사망|숨져|숨진|사고|화재|살인|구속|재판|논란|선거|대통령|국회|정당|투표|수사|검찰|의혹|전쟁|참사|폭행|사기",
+       "us": r"\b(dog|dogs|cat|cats|puppy|kitten|animal|animals|zoo|wildlife|pet|pets|horse|bird|birds|whale|bear|otter|elephant|turtle|dies|died|death|killed|shooting|murder|trump|biden|election|congress|senate|ice|immigration|lawsuit|war|crash|fire)\b"}
+
+
 def gather(region, since):
     seen, items = set(), []
     for u in FEEDS[region]:
         for it in fetch_feed(u, since):
             k = re.sub(r"\W+", "", it["title"].lower())[:40]
             if not k or k in seen: continue
+            if re.search(BAD[region], it["title"] + " " + it["text"][:300], re.I): continue
             seen.add(k); items.append(it)
     return items
 
@@ -73,12 +78,12 @@ def pick(region, items, lang):
         spec = ('{"items":[{"id":번호,"hero":"소제목 12자 이내(키워드)","head":"헤드라인 18자 이내, ~어요 체","desc":"설명 1~2문장 70자 이내, ~어요 체, 후보 글에 있는 사실만"}] (정확히 3개),'
                 ' "quote":["한마디 첫 줄 16자 이내","둘째 줄 16자 이내"]}')
         place = "한국에서 일어난 소식"
-        tone = '"좋은 것만 보고 삽시다"라는 마음을 담은, 무심하고 건조한 한 마디(말투는 ~입니다/~죠). 느낌표·이모지·"힘내요"·오글거리는 표현 금지. 이번 주 소식과 은근히 이어지면 더 좋음'
+        tone = '핵심 메시지는 "좋은 것만 보고 삽시다"(나쁜 소식은 안 봐도 된다, 좋은 것만 챙기자). 무심하고 건조한 한 마디(말투는 ~입니다/~죠). 예시 느낌(그대로 베끼지 말 것): "오늘은 이 정도면 충분합니다 / 좋은 소식만 챙겨 가시죠", "세상 괜찮은 구석이 꽤 있네요 / 이것만 보고 삽시다". 느낌표·이모지·"힘내요"·오글거리는 표현 금지'
     else:
         spec = ('{"items":[{"id":number,"hero":"short label max 22 chars","head":"headline max 40 chars","desc":"1-2 sentences max 105 chars, only facts in the candidate text"}] (exactly 3),'
                 ' "quote":["line 1 max 30 chars","line 2 max 30 chars"]}')
         place = "something that happened in the United States"
-        tone = 'a deadpan, dry two-line remark in the spirit of "let\'s only look at the good stuff". No exclamation marks, emojis, "stay strong" or cringe. Better if it quietly relates to this week\'s items'
+        tone = 'core message: "let\'s only look at the good stuff" (we can skip the bad news). A deadpan, dry two-line remark. Style examples, do not copy: "Good things happened. Noted. / That is enough news for today.", "Plenty of decent corners out there. / Let\'s just look at these." No exclamation marks, emojis, "stay strong" or cringe'
     prompt = f"""You curate a weekly feel-good news card. From the CANDIDATES pick exactly 3 stories.
 MUST: positive and uplifting (kindness, achievements, discoveries, milestones, cultural wins, community good); {place}; different topics from each other.
 PREFER: warm human stories and small acts of kindness, discoveries and real achievements over ribbon-cuttings, awards ceremonies, openings or generic announcements.
