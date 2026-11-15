@@ -117,7 +117,7 @@ def summarize(book, material, lang):
     key = os.environ["GEMINI_API_KEY"].strip()
     if lang == "ko":
         spec = ('{"plot": 줄거리 한국어 4~5문장, 최대 170자, 설정과 전개 중심(결말 금지), "keys": [가장 중요한 핵심 1개만, 30자 이내 짧은 문장],'
-                ' "quote": [읽은 척 멘트 두 줄, 각 줄 16자 이내, 큰따옴표 없이, 대화하듯 자연스럽게 이어지는 한 문장을 둘로 나눔], "tag": 12자 이내 한 줄 요약}')
+                ' "quote": [읽은 척 멘트 두 줄, 각 줄 16자 이내, 큰따옴표 없이, 다 읽은 사람이 하는 말투의 완결된 한 문장(예: "결국 ~한 이야기죠", "~가 핵심이에요")을 둘로 나눔, 명사구로 끝내지 말 것], "tag": 12자 이내 한 줄 요약}')
         rule = "한국어로 쓰세요. 결말·반전은 쓰지 마세요."
     else:
         spec = ('{"plot": 4-5 sentences, max 330 characters, premise and setup only (no ending), "keys": [only the single most important key point, max 55 chars],'
