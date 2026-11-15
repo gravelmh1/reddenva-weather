@@ -180,16 +180,16 @@ QUOTES = {
            ("아무리 작은 친절도", "결코 헛되지 않아요", "이솝"),
            ("천 리 길도", "한 걸음부터 시작해요", "노자"),
            ("혼자서는 할 수 있는 일이 적지만", "함께하면 많은 일을 해요", "헬렌 켈러"),
-           ("친절은 듣지 못해도 들리고", "보지 못해도 보이는 말이에요", "마크 트웨인"),
+           ("사람이 있는 곳 어디에나", "친절을 베풀 기회가 있어요", "세네카"),
            ("행복한 사람은", "다른 사람도 행복하게 해요", "안네 프랑크"),
            ("세상을 좋게 만드는 일은", "지금 바로 시작할 수 있어요", "안네 프랑크")],
     "us": [("The best and most beautiful things", "must be felt with the heart.", "Helen Keller"),
            ("No act of kindness,", "no matter how small, is wasted.", "Aesop"),
            ("A journey of a thousand miles", "begins with a single step.", "Lao Tzu"),
            ("Alone we can do so little;", "together we can do so much.", "Helen Keller"),
-           ("Kindness is the language the deaf", "can hear and the blind can see.", "Mark Twain"),
+           ("Wherever there is a human being,", "there is an opportunity for a kindness.", "Seneca"),
            ("Whoever is happy", "will make others happy too.", "Anne Frank"),
-           ("Nobody need wait a moment", "before starting to improve the world.", "Anne Frank")],
+           ("Nobody need wait a single moment", "before starting to improve the world.", "Anne Frank")],
 }
 
 
