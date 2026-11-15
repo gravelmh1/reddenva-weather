@@ -1,0 +1,32 @@
+name: puppy-test
+# 수요일 강아지 카드 시험: 게시하지 않고 카드만 만들어 samples 브랜치에 올린다
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: sudo apt-get update -y && sudo apt-get install -y fonts-noto-cjk
+      - run: pip install -r requirements.txt
+      - env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: |
+          python animals.py --region kr --dry-run --force
+          python animals.py --region us --dry-run --force
+      - run: |
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          mkdir -p samples && cp out/puppy-*.jpg samples/
+          git checkout -q --orphan samples-tmp
+          git rm -rq --cached .
+          git add -f samples
+          git commit -q -m "puppy test cards"
+          git push -q -f origin samples-tmp:samples

@@ -20,13 +20,13 @@ def today(path):
 
 
 if len(sys.argv) == 2:
-    # 낮 12~13시대 = 주간(책·뉴스) 시각. 한국판은 미국 서머타임 때 12시에 깨워지므로 12시도 포함.
+    # 낮 12~13시대 = 주간(월 책·화 뉴스·수 강아지) 시각. 한국판은 미국 서머타임 때 12시에 깨워지므로 12시도 포함.
     print("slot=" + ("weekly" if now.hour in (12, 13) else "weather"))
 elif sys.argv[2] == "--clear":
     json.dump(NONE, open(post, "w", encoding="utf-8")); print("post.json 비움")
 elif sys.argv[2] == "--write":
     slot = sys.argv[3]
-    src = [f"out/{region}-latest.json"] if slot == "weather" else [f"out/books-{region}-latest.json", f"out/news-{region}-latest.json"]
+    src = [f"out/{region}-latest.json"] if slot == "weather" else [f"out/books-{region}-latest.json", f"out/news-{region}-latest.json", f"out/puppy-{region}-latest.json"]
     for p in src:
         if today(p):
             shutil.copy(p, post); print("post.json ←", p); break
