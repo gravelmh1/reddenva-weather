@@ -51,6 +51,7 @@ def fetch_feed(url, since):
         except Exception: d = None
         if d and d < since: continue
         if not name: name = urllib.parse.urlparse(url).netloc.replace("www.", "").split(".")[0]
+        name = {"goodnewsnetwork": "Good News Network", "goodgoodgood": "Good Good Good"}.get(name, name)
         out.append(dict(title=title, text=body[:900], src=name, link=g("link")))
     print(f"  {url[:60]}… → {len(out)}건"); return out
 
@@ -80,9 +81,10 @@ def pick(region, items, lang):
         tone = 'a deadpan, dry two-line remark in the spirit of "let\'s only look at the good stuff". No exclamation marks, emojis, "stay strong" or cringe. Better if it quietly relates to this week\'s items'
     prompt = f"""You curate a weekly feel-good news card. From the CANDIDATES pick exactly 3 stories.
 MUST: positive and uplifting (kindness, achievements, discoveries, milestones, cultural wins, community good); {place}; different topics from each other.
+PREFER: warm human stories and small acts of kindness, discoveries and real achievements over ribbon-cuttings, awards ceremonies, openings or generic announcements.
 MUST NOT: animals/pets/wildlife; deaths, crime, disasters, wars, tragedy-with-silver-lining; politics, elections, parties, policy fights or anything disputed; shops/products/ads/promotions; celebrity gossip; investing/stock tips; anything not clearly stated in the candidate text.
 Use ONLY facts in the candidate text. Never invent numbers, names or places. If a story is thin, write a shorter desc.
-QUOTE: {tone}
+QUOTE: {tone}. Do not just repeat the example phrase; write a fresh line each time.
 Return ONLY JSON: {spec}
 
 CANDIDATES:
@@ -145,7 +147,7 @@ def main():
     for x in j["items"]: print("  ·", items[x["id"]]["src"], "|", items[x["id"]]["title"], "|", items[x["id"]]["link"][:80])
     c, cap = build(region, j, items, day)
     img_rel = f"out/news-{region}-{day}.jpg"; news_render.card3(c, img_rel)
-    if a.dry_run: print("(dry-run) 카드 저장:", img_rel); print(cap); return
+    if a.dry_run: print("(dry-run) 카드 저장:", img_rel); print("CARDJSON " + json.dumps(c, ensure_ascii=False)); print(cap); return
     with open(sf, "a", encoding="utf-8") as fh: fh.write(f"{day}|" + "|".join(items[x["id"]]["title"] for x in j["items"]) + "\n")
     git_push(["out", "state"], f"news {region} {day} card")
     repo, br = os.environ["GITHUB_REPOSITORY"], os.environ.get("GITHUB_REF_NAME", "main")
