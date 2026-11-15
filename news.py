@@ -23,7 +23,7 @@ FEEDS = {
            gnews("따뜻한 OR 눈물 OR 고마워 OR 깜짝 선물 OR 감사", True), gnews("완치 OR 생명 구한 OR 장학금 OR 봉사", True),
            "https://www.yna.co.kr/rss/society.xml", "https://www.hani.co.kr/rss/society/", "https://www.khan.co.kr/rss/rssdata/society_news.xml", "https://rss.nocutnews.co.kr/nocutnews.xml"],
     "us": [gnews("heartwarming OR \"good news\" OR kindness", False), gnews("generosity OR donated OR reunited OR surprise OR \"paid it forward\"", False),
-           "https://www.goodnewsnetwork.org/feed/", "https://www.positive.news/feed/",
+           "https://www.goodnewsnetwork.org/feed/",
            "https://www.goodgoodgood.co/articles/rss.xml"],
 }
 
@@ -92,8 +92,13 @@ Reject: rescues from fire/drowning/accidents, vague or syrupy titles, clickbait 
 Return ONLY JSON: {{"ids":[numbers]}}
 
 {lst[:20000]}"""
-    ids = gem(p)["ids"]
-    return [i for i in dict.fromkeys(int(x) for x in ids) if 0 <= i < len(items)][:12]
+    ids = []
+    for temp in (0.3, 0.7):   # 한 번에 너무 적게 고르면 한 번 더 물어서 합침 (3개 미만이면 그 주는 발행을 못 하므로)
+        try: ids += gem(p, temp)["ids"]
+        except Exception as e: print("1차 선별 실패:", str(e)[:80])
+        ids = [i for i in dict.fromkeys(int(x) for x in ids) if 0 <= i < len(items)]
+        if len(ids) >= 8: break
+    return ids[:12]
 
 
 def enrich(it):
