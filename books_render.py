@@ -29,11 +29,11 @@ def card(c: dict, out: str):
     p = p.resize((int(p.width * .62), int(p.height * .62)), Image.LANCZOS); im.paste(p, (W - M - p.width, 222), p)
     y = 430
     d.text((M, y), c["l1"], font=font("Bold", 28), fill=OR)
-    f3 = font("Medium", 33); lines = wrap(d, c["plot"], f3, W - 2 * M)[:4]
+    f3 = font("Medium", 33); lines = wrap(d, c["plot"], f3, W - 2 * M)[:7]
     for j, ln in enumerate(lines): d.text((M, y + 46 + j * 46), ln, font=f3, fill=NAVY)
     y += 46 + len(lines) * 46 + 30
     d.text((M, y), c["l2"], font=font("Bold", 28), fill=OR); y += 44
-    for i, t in enumerate(c["keys"][:3]):
+    for i, t in enumerate(c["keys"][:1]):
         d.line([(M, y), (W - M, y)], fill=LINE, width=2)
         d.text((M, y + 33), f"0{i+1}", font=font("Black", 32), fill=OR, anchor="lm")
         d.text((M + 86, y + 33), t, font=fit(d, t, "Bold", 33, W - 2 * M - 86, 22), fill=NAVY, anchor="lm")

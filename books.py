@@ -116,11 +116,11 @@ def models(key):
 def summarize(book, material, lang):
     key = os.environ["GEMINI_API_KEY"].strip()
     if lang == "ko":
-        spec = ('{"plot": 줄거리 한국어 2~3문장, 최대 95자, 설정과 전개 중심(결말 금지), "keys": [핵심 3개, 각 22자 이내 명사형/짧은 문장],'
+        spec = ('{"plot": 줄거리 한국어 4~5문장, 최대 170자, 설정과 전개 중심(결말 금지), "keys": [가장 중요한 핵심 1개만, 30자 이내 짧은 문장],'
                 ' "quote": [읽은 척 멘트 두 줄, 각 줄 16자 이내, 큰따옴표 없이, 대화하듯 자연스럽게 이어지는 한 문장을 둘로 나눔], "tag": 12자 이내 한 줄 요약}')
         rule = "한국어로 쓰세요. 결말·반전은 쓰지 마세요."
     else:
-        spec = ('{"plot": 2-3 sentences, max 170 characters, premise and setup only (no ending), "keys": [3 key points, max 42 chars each],'
+        spec = ('{"plot": 4-5 sentences, max 330 characters, premise and setup only (no ending), "keys": [only the single most important key point, max 55 chars],'
                 ' "quote": [a casual one-sentence line someone could say to sound like they read it, split into 2 lines, each max 32 chars, no quote marks], "tag": max 24 chars tagline}')
         rule = "Write in English. No ending or twist spoilers."
     prompt = f"""You summarize books for a social card. Use ONLY the facts in SOURCE TEXT (and METADATA). Never invent plot, names or events.
@@ -140,7 +140,7 @@ SOURCE TEXT:
             try:
                 txt = r.json()["candidates"][0]["content"]["parts"][0]["text"]
                 j = json.loads(re.sub(r"^```json|```$", "", txt.strip()).strip())
-                if j.get("plot") and len(j.get("keys", [])) >= 3 and len(j.get("quote", [])) >= 2:
+                if j.get("plot") and len(j.get("keys", [])) >= 1 and len(j.get("quote", [])) >= 2:
                     print("요약 모델:", m); return j
             except Exception as e: last = f"{m} 파싱 실패 {e}"
         else: last = f"{m} {r.status_code} {r.text[:150]}"
