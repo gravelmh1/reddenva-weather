@@ -71,6 +71,51 @@ def gather(region, since):
     return items
 
 
+def gem(prompt, temp=0.3):
+    key = os.environ["GEMINI_API_KEY"].strip(); last = None
+    for m in (models(key)[:4] * 2):
+        r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent", headers={"x-goog-api-key": key},
+                          json={"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"temperature": temp, "responseMimeType": "application/json"}}, timeout=120)
+        if not r.ok: last = f"{m} {r.status_code}"; continue
+        try: return json.loads(re.sub(r"^```json|```$", "", r.json()["candidates"][0]["content"]["parts"][0]["text"].strip()).strip())
+        except Exception as e: last = f"{m} {e}"
+    raise RuntimeError(f"Gemini 실패: {last}")
+
+
+def shortlist(items, region):
+    """1차: 제목만 보고 '구체적인 사람 이야기' 후보 12개로 압축."""
+    lst = "\n".join(f"[{i}] {it['title']}" for i, it in enumerate(items))
+    p = f"""From these news titles pick up to 12 that look like a CONCRETE, specific human story with a clear 'who did what' and a happy outcome, that happened in {'Korea' if region=='kr' else 'the United States'}.
+Reject: vague or syrupy titles, clickbait ('눈물', 'tears', 'you won't believe'), generic campaigns, donations by companies/organizations as PR, politics, sports, awards, openings, celebrities, animals, anything sad, anything unclear.
+Return ONLY JSON: {{"ids":[numbers]}}
+
+{lst[:20000]}"""
+    ids = gem(p)["ids"]
+    return [i for i in dict.fromkeys(int(x) for x in ids) if 0 <= i < len(items)][:12]
+
+
+def enrich(it):
+    """구글뉴스 링크를 원문 주소로 풀고 본문 앞부분을 가져온다. 실패하면 기존 text 유지."""
+    link = it["link"]
+    try:
+        if "news.google.com" in link:
+            from googlenewsdecoder import gnewsdecoder
+            d = gnewsdecoder(link, interval=1)
+            if not d.get("status"): return
+            link = d["decoded_url"]
+        r = requests.get(link, headers=UA, timeout=25); r.raise_for_status()
+        r.encoding = r.apparent_encoding if not r.encoding or r.encoding.lower() == "iso-8859-1" else r.encoding
+        soup = BeautifulSoup(r.text, "html.parser")
+        for t in soup(["script", "style", "nav", "header", "footer", "aside"]): t.decompose()
+        paras = [clean(p.get_text(" ")) for p in soup.find_all("p")]
+        body = " ".join(p for p in paras if len(p) > 40)
+        og = soup.find("meta", property="og:description")
+        txt = ((og.get("content") + " ") if og and og.get("content") else "") + body
+        if len(txt) > 150: it["text"] = txt[:1200]; it["link"] = link
+    except Exception as e:
+        print("  본문 실패:", it["title"][:30], str(e)[:60])
+
+
 def pick(region, items, lang):
     key = os.environ["GEMINI_API_KEY"].strip(); ko = lang == "ko"
     lst = "\n".join(f"[{i}] ({it['src']}) {it['title']}" + (f" — {it['text'][:500]}" if it["text"] else "") for i, it in enumerate(items))
@@ -82,7 +127,8 @@ def pick(region, items, lang):
         spec = ('{"items":[{"id":number,"hero":"short label max 22 chars","head":"headline max 40 chars","desc":"1-2 sentences max 100 chars, only facts in the candidate text","country":"country code where it happened (KR/US/other)"}] (exactly 3)}')
         place = "something that happened in the United States"
     prompt = f"""You curate a weekly feel-good news card. From the CANDIDATES pick exactly 3 stories.
-MUST: genuinely heartwarming — a story that makes an ordinary reader smile or feel warm (acts of kindness, reunions, generosity, someone helped, a small joy, a recovery, a surprise). Not merely 'not negative'. {place}; different topics from each other.
+MUST: genuinely heartwarming AND concrete — a real, specific episode (who did what, where, what happened) that makes an ordinary reader smile naturally. NOT forced or syrupy sentimentality, NOT vague, NOT promotional. Prefer stories with a clear, understandable plot a reader can retell in one sentence.
+MUST: desc states the concrete facts (who, what, outcome) in plain, calm words; no exaggeration, no 'touching'/'moving' adjectives, no tear-jerking tone. Skip any candidate whose text does not make the story clear. {place}; different topics from each other.
 STRICTLY AVOID as dry/neutral news: sports results and championships, awards and prizes, restorations, openings, product/tech/industry announcements, economy/export figures, government programs, institutional press releases. If fewer than 3 truly heartwarming stories exist, still pick the 3 warmest.
 MUST: the story happens in the same country as the card (KR card = Korea only, US card = United States only; foreign stories are not allowed even if the outlet is local).
 MUST NOT: animals/pets/wildlife; deaths, crime, disasters, wars, tragedy-with-silver-lining; politics, elections, parties, policy fights or anything disputed; shops/products/ads/promotions; celebrity gossip; investing/stock tips; anything not clearly stated in the candidate text.
@@ -151,6 +197,10 @@ def main():
     items = [it for it in gather(region, since) if re.sub(r"\W+", "", it["title"].lower())[:40] not in done]
     print(f"후보 {len(items)}건")
     if len(items) < 8: raise RuntimeError("후보 기사가 너무 적음 → 이번 주는 올리지 않음")
+    sl = shortlist(items, region); items = [items[i] for i in sl]; print("1차 후보", len(items))
+    for it in items: enrich(it)
+    items = [it for it in items if len(it["text"]) > 150]; print("본문 확보", len(items))
+    if len(items) < 3: raise RuntimeError("본문 확보 기사 부족")
     j = pick(region, items, lang)
     print(json.dumps(j, ensure_ascii=False, indent=1))
     for x in j["items"]: print("  ·", items[x["id"]]["src"], "|", items[x["id"]]["title"], "|", items[x["id"]]["link"][:80])
