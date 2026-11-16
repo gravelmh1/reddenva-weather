@@ -1,0 +1,26 @@
+name: us-deriv-sample
+# 미국 파생 브리핑 시안용 자료 수집 (게시하지 않음). 결과는 samples 브랜치에.
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pandas lxml
+      - run: python us_deriv_fetch.py
+      - run: |
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          mkdir -p samples && cp out/us_deriv_data.json samples/
+          git checkout -q --orphan samples-tmp
+          git rm -rq --cached .
+          git add -f samples
+          git commit -q -m "us deriv data"
+          git push -q -f origin samples-tmp:samples
