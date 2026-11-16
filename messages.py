@@ -186,5 +186,5 @@ def build(f: dict, region: str, city: str, now: dt.datetime) -> dict:
         top = f"{city} {wd} {now.month}/{now.day}: high {t['hi']}° · low {t['lo']}°"
         tags = "#LAWeather #LosAngeles #MorningCommute #TodayWeather #RedDenva"
     body = "\n".join(["· " + (f"{a} {b}" if a == "어제보다" else f"{a}: {b}") for a, b in rows])
-    caption = f"{top}\n{head}\n{body}\n\n{tags}"
+    caption = f"{top}\n\n{tags}"  # 정보는 카드에 다 있으니 캡션은 검색용 핵심 한 줄 + 해시태그만
     return dict(headline=head, rows=rows, card_rows=card_rows, compare=cmp_card, pose=pose, caption=caption, lang=lang)

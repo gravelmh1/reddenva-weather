@@ -167,8 +167,8 @@ def build(region, book, j, urls, period):
                  l1="줄거리", plot=j["plot"], l2="핵심", keys=j["keys"], head="이렇게 말하면 읽은 척 가능", headsub="(결론)",
                  quote=[f"“{j['quote'][0].strip('“”\"')}", f"{j['quote'][1].strip('“”\"')}”"],
                  foot1="순위: 알라딘 한국소설 주간 / 줄거리: 웹 자료 기반 AI 요약(결말 제외, 오류 가능)", foot2="마음에 들면 책도 읽어보세요")
-        cap = (f"📚 지난주 한국소설 베스트 {book['rank']}위\n《{book['title']}》 {book['author']}\n\n{j['plot']}\n\n"
-               f"💬 이렇게 말하면 읽은 척 가능\n“{j['quote'][0].strip('“”\"')} {j['quote'][1].strip('“”\"')}”\n\n#베스트셀러 #책추천 #소설추천 #아는척가이드 #레드덴바")
+        cap = (f"📚 지난주 한국소설 베스트 {book['rank']}위 《{book['title']}》 {book['author']}\n\n"
+               f"#{re.sub(r'[^0-9A-Za-z가-힣]', '', book['title'])} #{re.sub(r'[^0-9A-Za-z가-힣]', '', book['author'])} #베스트셀러 #책추천 #소설추천 #아는척가이드 #레드덴바")
     else:
         d = dt.date.fromisoformat(book["period"]) if re.match(r"\d{4}-\d\d-\d\d", book.get("period", "")) else dt.date.today()
         c = dict(top=f"WEEKLY BOOK · NYT {d.strftime('%b %d (%a)').upper()}", handle="@reddenva.us", badge=f"Last week's #{book['rank']} fiction",
@@ -176,8 +176,8 @@ def build(region, book, j, urls, period):
                  l1="THE STORY", plot=j["plot"], l2="KEY POINTS", keys=j["keys"], head="Say this to sound like you read it", headsub="",
                  quote=[f"“{j['quote'][0].strip('“”\"')}", f"{j['quote'][1].strip('“”\"')}”"],
                  foot1="Rank: NYT Hardcover Fiction / Summary: AI from public sources, no ending, may contain errors", foot2="If you like it, read the book")
-        cap = (f"📚 Last week's #{book['rank']} on the NYT Hardcover Fiction list\n{book['title']} by {book['author']}\n\n{j['plot']}\n\n"
-               f"💬 Say this to sound like you read it:\n“{j['quote'][0].strip('“”\"')} {j['quote'][1].strip('“”\"')}”\n\n#bookstagram #bestseller #booktok #reddenva")
+        cap = (f"📚 Last week's #{book['rank']} on the NYT Hardcover Fiction list: {book['title']} by {book['author']}\n\n"
+               f"#{re.sub(r'[^0-9A-Za-z]', '', book['title'])} #{re.sub(r'[^0-9A-Za-z]', '', book['author'])} #bookstagram #bestseller #booktok #reddenva")
     return c, cap
 
 

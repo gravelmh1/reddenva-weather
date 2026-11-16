@@ -157,14 +157,8 @@ def render(D, out1, out2):
     T(0.055, Hp - 34, "Sources: CFTC Traders in Financial Futures, FINRA margin statistics  ·  Not investment advice", 11.5, c=GR)
     fig.savefig("/tmp/_d2.png", facecolor=BG); plt.close(fig)
     for src, dst in (("/tmp/_d1.png", out1), ("/tmp/_d2.png", out2)): Image.open(src).convert("RGB").save(dst, quality=92)
-    lev = net["lev"][-1] - net["lev"][i0]; am = net["am"][-1] - net["am"][i0]
-    cap = (f"📊 Thursday Derivatives Briefing — as of {lab(BASE)}\n\n"
-           f"• ES {last['fut']:,.2f} ({dF:+,.2f}) / S&P 500 {last['spot']:,.2f} ({dS:+,.2f}), basis {last['basis']:+.2f}\n"
-           f"• VIX {v_last[1]:.2f} ({dV:+.2f}) · US 10Y {t_last[1]:.2f}%\n"
-           f"• {nm} expiry in {bd} trading days ({lab(NEXT)})\n"
-           f"• CFTC ({lab(cd[-1])}): leveraged funds {lev:+,} and asset managers {am:+,} contracts since the {xm} expiry\n"
-           f"• FINRA margin debt ${debit[-1]:.2f}T ({fmo[-1]:%b %Y})\n\n"
-           "Swipe for positioning & margin debt →\nNot investment advice.\n\n#SP500 #futures #derivatives #VIX #COT #marketdata #reddenva")
+    cap = (f"📊 Thursday Derivatives Briefing · S&P 500 futures, basis, VIX, CFTC positioning, margin debt · as of {lab(BASE)}\n\n"
+           "#SP500 #ESfutures #futures #derivatives #VIX #COT #margindebt #reddenva")
     return cap
 
 

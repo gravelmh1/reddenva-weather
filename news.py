@@ -200,13 +200,11 @@ def build(region, j, items, day):
     if ko:
         c = dict(top=f"WEEKLY GOOD NEWS · {d:%Y.%m.%d} ({'월화수목금토일'[d.weekday()]})", handle="@reddenva.kr", badge="이번 주 좋은 뉴스", title="이번 주 TOP 3", items=rows,
                  head="", author=who, quote=q, foot=["공개 보도를 요약했어요.", "AI 요약이라 오류가 있을 수 있어요."])
-        cap = "📰 이번 주 좋은 뉴스 TOP 3\n\n" + "\n".join(f"{i+1}. {r['head']}\n{r['desc']}" for i, r in enumerate(rows)) + \
-              f"\n\n💬 \"{q[0]} {q[1]}\" — {who}\n\n#좋은뉴스 #훈훈한소식 #긍정뉴스 #레드덴바"
+        cap = f"📰 이번 주 좋은 뉴스 TOP 3 · {d:%Y.%m.%d}\n\n#좋은뉴스 #훈훈한소식 #긍정뉴스 #미담 #레드덴바"
     else:
         c = dict(top=f"WEEKLY GOOD NEWS · {d:%b %d, %Y} ({d:%a})".upper(), handle="@reddenva.us", badge="This week's good news", title="This Week's Top 3", items=rows,
                  head="", author=who, quote=q, foot=["Summarized from public reports.", "AI summary may contain errors."])
-        cap = "📰 This week's good news: Top 3\n\n" + "\n".join(f"{i+1}. {r['head']}\n{r['desc']}" for i, r in enumerate(rows)) + \
-              f"\n\n💬 \"{q[0]} {q[1]}\" — {who}\n\n#goodnews #positivenews #uplifting #reddenva"
+        cap = f"📰 This week's good news: Top 3 · {d:%b %d, %Y}\n\n#goodnews #positivenews #uplifting #kindness #reddenva"
     return c, cap
 
 

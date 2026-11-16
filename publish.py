@@ -41,9 +41,23 @@ def fit_threads(text: str, limit: int = 500) -> str:
 
 def threads(region: str, image_url: str, text: str) -> str:
     uid, token = os.environ[f"THREADS_USER_ID_{region.upper()}"], os.environ[f"THREADS_TOKEN_{region.upper()}"]
-    c = _post(f"{TH}/{uid}/threads", {"media_type": "IMAGE", "image_url": image_url, "text": fit_threads(text)}, token)["id"]
+    c = _post(f"{TH}/{uid}/threads", {"media_type": "IMAGE", "image_url": image_url}, token)["id"]
     time.sleep(10)  # 컨테이너 준비 대기
-    return _post(f"{TH}/{uid}/threads_publish", {"creation_id": c}, token)["id"]
+    pid = _post(f"{TH}/{uid}/threads_publish", {"creation_id": c}, token)["id"]
+    _caption_below(uid, token, pid, text)
+    return pid
+
+
+def _caption_below(uid, token, pid, text):
+    """Threads는 글이 사진 위에 붙으므로, 사진만 먼저 올리고 캡션(핵심+해시태그)은 바로 아래 댓글로 단다."""
+    if not text.strip(): return
+    try:
+        time.sleep(5)
+        r = _post(f"{TH}/{uid}/threads", {"media_type": "TEXT", "text": fit_threads(text), "reply_to_id": pid}, token)["id"]
+        time.sleep(5)
+        _post(f"{TH}/{uid}/threads_publish", {"creation_id": r}, token)
+    except Exception as e:
+        print("Threads 캡션 댓글 실패(사진은 게시됨):", e)
 
 
 def threads_carousel(region: str, image_urls: list, text: str) -> str:
@@ -51,6 +65,8 @@ def threads_carousel(region: str, image_urls: list, text: str) -> str:
     uid, token = os.environ[f"THREADS_USER_ID_{region.upper()}"], os.environ[f"THREADS_TOKEN_{region.upper()}"]
     kids = [_post(f"{TH}/{uid}/threads", {"media_type": "IMAGE", "image_url": u, "is_carousel_item": "true"}, token)["id"] for u in image_urls]
     time.sleep(10)
-    c = _post(f"{TH}/{uid}/threads", {"media_type": "CAROUSEL", "children": ",".join(kids), "text": fit_threads(text)}, token)["id"]
+    c = _post(f"{TH}/{uid}/threads", {"media_type": "CAROUSEL", "children": ",".join(kids)}, token)["id"]
     time.sleep(10)
-    return _post(f"{TH}/{uid}/threads_publish", {"creation_id": c}, token)["id"]
+    pid = _post(f"{TH}/{uid}/threads_publish", {"creation_id": c}, token)["id"]
+    _caption_below(uid, token, pid, text)
+    return pid

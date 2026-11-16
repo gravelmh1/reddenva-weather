@@ -118,8 +118,8 @@ def build(region, pick, day, photo):
              handle=f"@reddenva.{region}", photo=photo, focus=(pick["focus_x"], pick["focus_y"]),
              badge="이번 주 아기 동물" if ko else "Baby animal of the week", name=pick[f"name_{L}"], lines=pick[f"lines_{L}"], aside=pick[f"aside_{L}"],
              foot=[("사진: " if ko else "Photo: ") + credit, "레드덴바 · 매주 수요일, 귀여운 것만 봅니다" if ko else "Red Denva · Every Wednesday, cute things only"])
-    cap = (f"🐾 이번 주 아기 동물: {c['name']}\n{c['lines'][0]} {c['lines'][1]}\n\n사진: {credit}\n\n#아기동물 #귀여운동물 #수요일 #귀여운것만 #레드덴바" if ko else
-           f"🐾 Baby animal of the week: {c['name']}\n{c['lines'][0]} {c['lines'][1]}\n\nPhoto: {credit}\n\n#babyanimals #cuteanimals #wednesday #cute #reddenva")
+    cap = (f"🐾 이번 주 아기 동물: {c['name']}\n\n#{re.sub(r'[^0-9A-Za-z가-힣]', '', c['name'])} #아기동물 #귀여운동물 #수요일 #귀여운것만 #레드덴바" if ko else
+           f"🐾 Baby animal of the week: {c['name']}\n\n#{re.sub(r'[^0-9A-Za-z]', '', c['name'])} #babyanimals #cuteanimals #wednesday #cute #reddenva")
     return c, cap
 
 
