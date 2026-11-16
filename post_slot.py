@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 region = sys.argv[1]
 now = dt.datetime.now(ZoneInfo({"kr": "Asia/Seoul", "us": "America/Los_Angeles"}[region])); day = now.date().isoformat()
 post = f"out/{region}-post.json"
-NONE = {"date": "none", "image_url": "", "caption": "", "title": ""}
+NONE = {"date": "none", "image_url": "", "image_url2": "", "caption": "", "title": ""}
 
 
 def today(path):
@@ -20,15 +20,16 @@ def today(path):
 
 
 if len(sys.argv) == 2:
-    # 낮 12~13시대 = 주간(월 책·화 뉴스·수 강아지) 시각. 한국판은 미국 서머타임 때 12시에 깨워지므로 12시도 포함.
+    # 낮 12~13시대 = 주간(월 책·화 뉴스·수 강아지·목 파생 브리핑) 시각. 한국판은 미국 서머타임 때 12시에 깨워지므로 12시도 포함.
     print("slot=" + ("weekly" if now.hour in (12, 13) else "weather"))
 elif sys.argv[2] == "--clear":
     json.dump(NONE, open(post, "w", encoding="utf-8")); print("post.json 비움")
 elif sys.argv[2] == "--write":
     slot = sys.argv[3]
-    src = [f"out/{region}-latest.json"] if slot == "weather" else [f"out/books-{region}-latest.json", f"out/news-{region}-latest.json", f"out/puppy-{region}-latest.json"]
+    src = [f"out/{region}-latest.json"] if slot == "weather" else [f"out/books-{region}-latest.json", f"out/news-{region}-latest.json", f"out/puppy-{region}-latest.json", f"out/deriv-{region}-latest.json"]
     for p in src:
         if today(p):
-            shutil.copy(p, post); print("post.json ←", p); break
+            m = json.load(open(p, encoding="utf-8")); m.setdefault("image_url2", "")  # 2장이면 Make가 캐러셀로
+            json.dump(m, open(post, "w", encoding="utf-8"), ensure_ascii=False); print("post.json ←", p); break
     else:
         json.dump(NONE, open(post, "w", encoding="utf-8")); print("오늘 게시할 카드 없음 → post.json 비움")

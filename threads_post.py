@@ -31,7 +31,10 @@ def main():
     r.raise_for_status()
     me = r.json()
     os.environ[f"THREADS_USER_ID_{a.region.upper()}"] = me["id"]
-    pid = publish.threads(a.region, meta["image_url"], meta["caption"])
+    if meta.get("image_url2"):
+        pid = publish.threads_carousel(a.region, [meta["image_url"], meta["image_url2"]], meta["caption"])
+    else:
+        pid = publish.threads(a.region, meta["image_url"], meta["caption"])
     print(f"Threads 게시 완료: @{me.get('username')} {pid}")
     os.makedirs("state", exist_ok=True)
     open(sf, "w").write(day)

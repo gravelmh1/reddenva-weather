@@ -44,3 +44,13 @@ def threads(region: str, image_url: str, text: str) -> str:
     c = _post(f"{TH}/{uid}/threads", {"media_type": "IMAGE", "image_url": image_url, "text": fit_threads(text)}, token)["id"]
     time.sleep(10)  # 컨테이너 준비 대기
     return _post(f"{TH}/{uid}/threads_publish", {"creation_id": c}, token)["id"]
+
+
+def threads_carousel(region: str, image_urls: list, text: str) -> str:
+    """여러 장(목요일 파생 브리핑 2장 등)을 Threads 캐러셀로."""
+    uid, token = os.environ[f"THREADS_USER_ID_{region.upper()}"], os.environ[f"THREADS_TOKEN_{region.upper()}"]
+    kids = [_post(f"{TH}/{uid}/threads", {"media_type": "IMAGE", "image_url": u, "is_carousel_item": "true"}, token)["id"] for u in image_urls]
+    time.sleep(10)
+    c = _post(f"{TH}/{uid}/threads", {"media_type": "CAROUSEL", "children": ",".join(kids), "text": fit_threads(text)}, token)["id"]
+    time.sleep(10)
+    return _post(f"{TH}/{uid}/threads_publish", {"creation_id": c}, token)["id"]

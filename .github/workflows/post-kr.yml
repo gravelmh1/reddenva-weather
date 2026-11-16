@@ -76,7 +76,7 @@ jobs:
         env:
           THREADS_TOKEN_KR: ${{ secrets.THREADS_TOKEN_KR }}
         run: |
-          if [ "${{ steps.slot.outputs.slot }}" = "weather" ]; then python threads_post.py --region kr; else python threads_post.py --region kr --kind books-; python threads_post.py --region kr --kind news-; python threads_post.py --region kr --kind puppy-; fi
+          if [ "${{ steps.slot.outputs.slot }}" = "weather" ]; then python threads_post.py --region kr; else python threads_post.py --region kr --kind books-; python threads_post.py --region kr --kind news-; python threads_post.py --region kr --kind puppy-; python threads_post.py --region kr --kind deriv-; fi
           git add state
           git diff --cached --quiet || (git commit -q -m "kr threads posted" && git pull --rebase -q && git push -q)
       - name: 테스트 카드 보관 (dry-run일 때)
