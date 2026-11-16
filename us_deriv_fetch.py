@@ -6,14 +6,18 @@ out = {"fetched_at": dt.datetime.utcnow().isoformat() + "Z"}
 def log(*a): print(*a, flush=True)
 # 1) FRED: S&P500, VIX, 미국채 10년
 try:
-    r = requests.get("https://fred.stlouisfed.org/graph/fredgraph.csv", params={"id": "SP500,VIXCLS,DGS10", "cosd": "2026-08-15"}, headers=UA, timeout=40); r.raise_for_status()
-    rows = list(csv.DictReader(io.StringIO(r.text))); out["fred"] = rows; log("FRED", len(rows), rows[-1])
+    out["fred"] = {}
+    for sid in ("SP500", "VIXCLS", "DGS10"):
+        r = requests.get("https://fred.stlouisfed.org/graph/fredgraph.csv", params={"id": sid, "cosd": "2026-08-15"}, headers=UA, timeout=40); r.raise_for_status()
+        log(sid, r.headers.get("content-type"), repr(r.text[:120]))
+        rows = [ln.split(",") for ln in r.text.strip().splitlines()[1:]]
+        out["fred"][sid] = [[d, v] for d, v in rows if v not in (".", "")]; log(sid, len(rows), out["fred"][sid][-3:])
 except Exception as e: log("FRED 실패", e)
 # 2) CFTC TFF (금융선물 트레이더 분류) E-mini S&P 500 (code 13874A)
 try:
     r = requests.get("https://publicreporting.cftc.gov/resource/gpe5-46if.json", params={"cftc_contract_market_code": "13874A", "$order": "report_date_as_yyyy_mm_dd DESC", "$limit": 20}, headers=UA, timeout=40); r.raise_for_status()
     j = r.json(); keep = ["report_date_as_yyyy_mm_dd", "market_and_exchange_names", "open_interest_all", "dealer_positions_long_all", "dealer_positions_short_all", "asset_mgr_positions_long", "asset_mgr_positions_short", "lev_money_positions_long", "lev_money_positions_short", "other_rept_positions_long", "other_rept_positions_short", "nonrept_positions_long_all", "nonrept_positions_short_all"]
-    out["cot"] = [{k: x.get(k) for k in keep} for x in j]; log("COT", len(j), json.dumps(out["cot"][0])[:400])
+    out["cot"] = [{k: x.get(k) for k in keep + ["change_in_lev_money_long", "change_in_lev_money_short", "change_in_asset_mgr_long", "change_in_asset_mgr_short", "change_in_dealer_long_all", "change_in_dealer_short_all"]} for x in j]; log("COT", len(j), json.dumps(out["cot"][0])[:400])
     if j: log("COT keys", sorted(j[0].keys())[:80])
 except Exception as e: log("COT 실패", e)
 # 3) ES 선물 (Yahoo 차트, 비공식)
