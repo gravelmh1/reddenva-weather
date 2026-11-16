@@ -1,0 +1,1789 @@
+{
+ "fetched_at": "2026-11-16T03:57:33.558625Z",
+ "fred": {
+  "SP500": [
+   [
+    "2026-08-17",
+    "7745.06"
+   ],
+   [
+    "2026-08-18",
+    "7691.76"
+   ],
+   [
+    "2026-08-19",
+    "7707.98"
+   ],
+   [
+    "2026-08-20",
+    "7641.16"
+   ],
+   [
+    "2026-08-21",
+    "7674.37"
+   ],
+   [
+    "2026-08-24",
+    "7652.86"
+   ],
+   [
+    "2026-08-25",
+    "7677.28"
+   ],
+   [
+    "2026-08-26",
+    "7675.70"
+   ],
+   [
+    "2026-08-27",
+    "7730.99"
+   ],
+   [
+    "2026-08-28",
+    "7711.76"
+   ],
+   [
+    "2026-08-31",
+    "7686.14"
+   ],
+   [
+    "2026-09-01",
+    "7631.47"
+   ],
+   [
+    "2026-09-02",
+    "7666.60"
+   ],
+   [
+    "2026-09-03",
+    "7747.71"
+   ],
+   [
+    "2026-09-04",
+    "7718.60"
+   ],
+   [
+    "2026-09-08",
+    "7673.52"
+   ],
+   [
+    "2026-09-09",
+    "7636.36"
+   ],
+   [
+    "2026-09-10",
+    "7591.70"
+   ],
+   [
+    "2026-09-11",
+    "7656.98"
+   ],
+   [
+    "2026-09-14",
+    "7619.98"
+   ],
+   [
+    "2026-09-15",
+    "7585.73"
+   ],
+   [
+    "2026-09-16",
+    "7551.81"
+   ],
+   [
+    "2026-09-17",
+    "7637.76"
+   ],
+   [
+    "2026-09-18",
+    "7650.50"
+   ],
+   [
+    "2026-09-21",
+    "7764.70"
+   ],
+   [
+    "2026-09-22",
+    "7764.64"
+   ],
+   [
+    "2026-09-23",
+    "7706.03"
+   ],
+   [
+    "2026-09-24",
+    "7704.13"
+   ],
+   [
+    "2026-09-25",
+    "7743.41"
+   ],
+   [
+    "2026-09-28",
+    "7683.69"
+   ],
+   [
+    "2026-09-29",
+    "7670.84"
+   ],
+   [
+    "2026-09-30",
+    "7651.54"
+   ],
+   [
+    "2026-10-01",
+    "7666.45"
+   ],
+   [
+    "2026-10-02",
+    "7722.72"
+   ],
+   [
+    "2026-10-05",
+    "7773.95"
+   ],
+   [
+    "2026-10-06",
+    "7818.93"
+   ],
+   [
+    "2026-10-07",
+    "7801.77"
+   ],
+   [
+    "2026-10-08",
+    "7765.36"
+   ],
+   [
+    "2026-10-09",
+    "7811.54"
+   ],
+   [
+    "2026-10-12",
+    "7807.24"
+   ],
+   [
+    "2026-10-13",
+    "7805.45"
+   ],
+   [
+    "2026-10-14",
+    "7718.94"
+   ],
+   [
+    "2026-10-15",
+    "7744.06"
+   ],
+   [
+    "2026-10-16",
+    "7659.44"
+   ],
+   [
+    "2026-10-19",
+    "7690.73"
+   ],
+   [
+    "2026-10-20",
+    "7712.57"
+   ],
+   [
+    "2026-10-21",
+    "7757.17"
+   ],
+   [
+    "2026-10-22",
+    "7663.43"
+   ],
+   [
+    "2026-10-23",
+    "7623.68"
+   ],
+   [
+    "2026-10-26",
+    "7676.77"
+   ],
+   [
+    "2026-10-27",
+    "7722.60"
+   ],
+   [
+    "2026-10-28",
+    "7743.98"
+   ],
+   [
+    "2026-10-29",
+    "7720.39"
+   ],
+   [
+    "2026-10-30",
+    "7580.07"
+   ],
+   [
+    "2026-11-02",
+    "7541.40"
+   ],
+   [
+    "2026-11-03",
+    "7568.92"
+   ],
+   [
+    "2026-11-04",
+    "7688.62"
+   ],
+   [
+    "2026-11-05",
+    "7353.73"
+   ],
+   [
+    "2026-11-06",
+    "7376.86"
+   ],
+   [
+    "2026-11-09",
+    "7549.94"
+   ],
+   [
+    "2026-11-10",
+    "7520.93"
+   ],
+   [
+    "2026-11-11",
+    "7619.38"
+   ],
+   [
+    "2026-11-12",
+    "7592.40"
+   ],
+   [
+    "2026-11-13",
+    "7561.67"
+   ]
+  ],
+  "VIXCLS": [
+   [
+    "2026-08-17",
+    "15.19"
+   ],
+   [
+    "2026-08-18",
+    "15.84"
+   ],
+   [
+    "2026-08-19",
+    "14.89"
+   ],
+   [
+    "2026-08-20",
+    "16.01"
+   ],
+   [
+    "2026-08-21",
+    "15.13"
+   ],
+   [
+    "2026-08-24",
+    "15.85"
+   ],
+   [
+    "2026-08-25",
+    "15.45"
+   ],
+   [
+    "2026-08-26",
+    "15.21"
+   ],
+   [
+    "2026-08-27",
+    "14.51"
+   ],
+   [
+    "2026-08-28",
+    "14.43"
+   ],
+   [
+    "2026-08-31",
+    "14.92"
+   ],
+   [
+    "2026-09-01",
+    "16.34"
+   ],
+   [
+    "2026-09-02",
+    "15.20"
+   ],
+   [
+    "2026-09-03",
+    "14.32"
+   ],
+   [
+    "2026-09-04",
+    "14.53"
+   ],
+   [
+    "2026-09-07",
+    "15.30"
+   ],
+   [
+    "2026-09-08",
+    "15.72"
+   ],
+   [
+    "2026-09-09",
+    "16.46"
+   ],
+   [
+    "2026-09-10",
+    "17.84"
+   ],
+   [
+    "2026-09-11",
+    "15.84"
+   ],
+   [
+    "2026-09-14",
+    "17.10"
+   ],
+   [
+    "2026-09-15",
+    "17.20"
+   ],
+   [
+    "2026-09-16",
+    "17.71"
+   ],
+   [
+    "2026-09-17",
+    "15.44"
+   ],
+   [
+    "2026-09-18",
+    "14.81"
+   ],
+   [
+    "2026-09-21",
+    "14.87"
+   ],
+   [
+    "2026-09-22",
+    "14.21"
+   ],
+   [
+    "2026-09-23",
+    "15.18"
+   ],
+   [
+    "2026-09-24",
+    "15.67"
+   ],
+   [
+    "2026-09-25",
+    "14.87"
+   ],
+   [
+    "2026-09-28",
+    "16.07"
+   ],
+   [
+    "2026-09-29",
+    "16.04"
+   ],
+   [
+    "2026-09-30",
+    "16.34"
+   ],
+   [
+    "2026-10-01",
+    "16.39"
+   ],
+   [
+    "2026-10-02",
+    "15.31"
+   ],
+   [
+    "2026-10-05",
+    "15.52"
+   ],
+   [
+    "2026-10-06",
+    "15.01"
+   ],
+   [
+    "2026-10-07",
+    "15.08"
+   ],
+   [
+    "2026-10-08",
+    "15.41"
+   ],
+   [
+    "2026-10-09",
+    "14.84"
+   ],
+   [
+    "2026-10-12",
+    "15.21"
+   ],
+   [
+    "2026-10-13",
+    "15.27"
+   ],
+   [
+    "2026-10-14",
+    "16.87"
+   ],
+   [
+    "2026-10-15",
+    "16.46"
+   ],
+   [
+    "2026-10-16",
+    "19.99"
+   ],
+   [
+    "2026-10-19",
+    "18.44"
+   ],
+   [
+    "2026-10-20",
+    "17.31"
+   ],
+   [
+    "2026-10-21",
+    "16.68"
+   ],
+   [
+    "2026-10-22",
+    "19.03"
+   ],
+   [
+    "2026-10-23",
+    "19.45"
+   ],
+   [
+    "2026-10-26",
+    "18.39"
+   ],
+   [
+    "2026-10-27",
+    "17.52"
+   ],
+   [
+    "2026-10-28",
+    "16.91"
+   ],
+   [
+    "2026-10-29",
+    "17.20"
+   ],
+   [
+    "2026-10-30",
+    "19.42"
+   ],
+   [
+    "2026-11-02",
+    "21.15"
+   ],
+   [
+    "2026-11-03",
+    "20.83"
+   ],
+   [
+    "2026-11-04",
+    "16.61"
+   ],
+   [
+    "2026-11-05",
+    "28.18"
+   ],
+   [
+    "2026-11-06",
+    "25.64"
+   ],
+   [
+    "2026-11-09",
+    "19.92"
+   ],
+   [
+    "2026-11-10",
+    "19.46"
+   ],
+   [
+    "2026-11-11",
+    "17.49"
+   ],
+   [
+    "2026-11-12",
+    "18.70"
+   ]
+  ],
+  "DGS10": [
+   [
+    "2026-08-17",
+    "4.72"
+   ],
+   [
+    "2026-08-18",
+    "4.71"
+   ],
+   [
+    "2026-08-19",
+    "4.65"
+   ],
+   [
+    "2026-08-20",
+    "4.69"
+   ],
+   [
+    "2026-08-21",
+    "4.74"
+   ],
+   [
+    "2026-08-24",
+    "4.70"
+   ],
+   [
+    "2026-08-25",
+    "4.64"
+   ],
+   [
+    "2026-08-26",
+    "4.66"
+   ],
+   [
+    "2026-08-27",
+    "4.67"
+   ],
+   [
+    "2026-08-28",
+    "4.73"
+   ],
+   [
+    "2026-08-31",
+    "4.75"
+   ],
+   [
+    "2026-09-01",
+    "4.79"
+   ],
+   [
+    "2026-09-02",
+    "4.79"
+   ],
+   [
+    "2026-09-03",
+    "4.77"
+   ],
+   [
+    "2026-09-04",
+    "4.78"
+   ],
+   [
+    "2026-09-08",
+    "4.80"
+   ],
+   [
+    "2026-09-09",
+    "4.83"
+   ],
+   [
+    "2026-09-10",
+    "4.95"
+   ],
+   [
+    "2026-09-11",
+    "4.96"
+   ],
+   [
+    "2026-09-14",
+    "4.97"
+   ],
+   [
+    "2026-09-15",
+    "5.00"
+   ],
+   [
+    "2026-09-16",
+    "5.01"
+   ],
+   [
+    "2026-09-17",
+    "4.94"
+   ],
+   [
+    "2026-09-18",
+    "5.01"
+   ],
+   [
+    "2026-09-21",
+    "4.96"
+   ],
+   [
+    "2026-09-22",
+    "4.96"
+   ],
+   [
+    "2026-09-23",
+    "5.11"
+   ],
+   [
+    "2026-09-24",
+    "5.18"
+   ],
+   [
+    "2026-09-25",
+    "5.17"
+   ],
+   [
+    "2026-09-28",
+    "5.24"
+   ],
+   [
+    "2026-09-29",
+    "5.26"
+   ],
+   [
+    "2026-09-30",
+    "5.29"
+   ],
+   [
+    "2026-10-01",
+    "5.24"
+   ],
+   [
+    "2026-10-02",
+    "5.28"
+   ],
+   [
+    "2026-10-05",
+    "5.31"
+   ],
+   [
+    "2026-10-06",
+    "5.27"
+   ],
+   [
+    "2026-10-07",
+    "5.28"
+   ],
+   [
+    "2026-10-08",
+    "5.22"
+   ],
+   [
+    "2026-10-09",
+    "5.24"
+   ],
+   [
+    "2026-10-13",
+    "5.21"
+   ],
+   [
+    "2026-10-14",
+    "5.19"
+   ],
+   [
+    "2026-10-15",
+    "5.10"
+   ],
+   [
+    "2026-10-16",
+    "5.09"
+   ],
+   [
+    "2026-10-19",
+    "5.15"
+   ],
+   [
+    "2026-10-20",
+    "5.12"
+   ],
+   [
+    "2026-10-21",
+    "5.13"
+   ],
+   [
+    "2026-10-22",
+    "4.96"
+   ],
+   [
+    "2026-10-23",
+    "5.00"
+   ],
+   [
+    "2026-10-26",
+    "5.00"
+   ],
+   [
+    "2026-10-27",
+    "4.99"
+   ],
+   [
+    "2026-10-28",
+    "5.05"
+   ],
+   [
+    "2026-10-29",
+    "4.98"
+   ],
+   [
+    "2026-10-30",
+    "4.94"
+   ],
+   [
+    "2026-11-02",
+    "4.91"
+   ],
+   [
+    "2026-11-03",
+    "4.95"
+   ],
+   [
+    "2026-11-04",
+    "4.90"
+   ],
+   [
+    "2026-11-05",
+    "4.84"
+   ],
+   [
+    "2026-11-06",
+    "4.86"
+   ],
+   [
+    "2026-11-09",
+    "4.88"
+   ],
+   [
+    "2026-11-10",
+    "4.98"
+   ],
+   [
+    "2026-11-12",
+    "5.10"
+   ]
+  ]
+ },
+ "cot": [
+  {
+   "report_date_as_yyyy_mm_dd": "2026-11-03T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "1986532",
+   "dealer_positions_long_all": "182419",
+   "dealer_positions_short_all": "870993",
+   "asset_mgr_positions_long": "1111721",
+   "asset_mgr_positions_short": "183137",
+   "lev_money_positions_long": "125269",
+   "lev_money_positions_short": "497587",
+   "other_rept_positions_long": "70819",
+   "other_rept_positions_short": "62730",
+   "nonrept_positions_long_all": "260152",
+   "nonrept_positions_short_all": "135933",
+   "change_in_lev_money_long": "23190",
+   "change_in_lev_money_short": "-5096",
+   "change_in_asset_mgr_long": "666",
+   "change_in_asset_mgr_short": "-4469",
+   "change_in_dealer_long_all": "-11429",
+   "change_in_dealer_short_all": "37552"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-10-27T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "1955711",
+   "dealer_positions_long_all": "193848",
+   "dealer_positions_short_all": "833441",
+   "asset_mgr_positions_long": "1111055",
+   "asset_mgr_positions_short": "187606",
+   "lev_money_positions_long": "102079",
+   "lev_money_positions_short": "502683",
+   "other_rept_positions_long": "61346",
+   "other_rept_positions_short": "61665",
+   "nonrept_positions_long_all": "253501",
+   "nonrept_positions_short_all": "136434",
+   "change_in_lev_money_long": "-32955",
+   "change_in_lev_money_short": "-3596",
+   "change_in_asset_mgr_long": "9413",
+   "change_in_asset_mgr_short": "-12659",
+   "change_in_dealer_long_all": "9108",
+   "change_in_dealer_short_all": "11770"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-10-20T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "1935470",
+   "dealer_positions_long_all": "184740",
+   "dealer_positions_short_all": "821671",
+   "asset_mgr_positions_long": "1101642",
+   "asset_mgr_positions_short": "200265",
+   "lev_money_positions_long": "135034",
+   "lev_money_positions_short": "506279",
+   "other_rept_positions_long": "58950",
+   "other_rept_positions_short": "60900",
+   "nonrept_positions_long_all": "245017",
+   "nonrept_positions_short_all": "136268",
+   "change_in_lev_money_long": "13630",
+   "change_in_lev_money_short": "-23851",
+   "change_in_asset_mgr_long": "-8742",
+   "change_in_asset_mgr_short": "5716",
+   "change_in_dealer_long_all": "-16220",
+   "change_in_dealer_short_all": "18353"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-10-13T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "1931607",
+   "dealer_positions_long_all": "200960",
+   "dealer_positions_short_all": "803318",
+   "asset_mgr_positions_long": "1110384",
+   "asset_mgr_positions_short": "194549",
+   "lev_money_positions_long": "121404",
+   "lev_money_positions_short": "530130",
+   "other_rept_positions_long": "62418",
+   "other_rept_positions_short": "73497",
+   "nonrept_positions_long_all": "244009",
+   "nonrept_positions_short_all": "137681",
+   "change_in_lev_money_long": "8181",
+   "change_in_lev_money_short": "1820",
+   "change_in_asset_mgr_long": "3667",
+   "change_in_asset_mgr_short": "-5553",
+   "change_in_dealer_long_all": "-205",
+   "change_in_dealer_short_all": "1312"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-10-06T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "1932227",
+   "dealer_positions_long_all": "201165",
+   "dealer_positions_short_all": "802006",
+   "asset_mgr_positions_long": "1106717",
+   "asset_mgr_positions_short": "200102",
+   "lev_money_positions_long": "113223",
+   "lev_money_positions_short": "528310",
+   "other_rept_positions_long": "72787",
+   "other_rept_positions_short": "74479",
+   "nonrept_positions_long_all": "248117",
+   "nonrept_positions_short_all": "137112",
+   "change_in_lev_money_long": "-12230",
+   "change_in_lev_money_short": "30368",
+   "change_in_asset_mgr_long": "2283",
+   "change_in_asset_mgr_short": "-329",
+   "change_in_dealer_long_all": "22574",
+   "change_in_dealer_short_all": "16427"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-09-29T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "1895922",
+   "dealer_positions_long_all": "178591",
+   "dealer_positions_short_all": "785579",
+   "asset_mgr_positions_long": "1104434",
+   "asset_mgr_positions_short": "200431",
+   "lev_money_positions_long": "125453",
+   "lev_money_positions_short": "497942",
+   "other_rept_positions_long": "55473",
+   "other_rept_positions_short": "87217",
+   "nonrept_positions_long_all": "246863",
+   "nonrept_positions_short_all": "139645",
+   "change_in_lev_money_long": "5320",
+   "change_in_lev_money_short": "2235",
+   "change_in_asset_mgr_long": "-14221",
+   "change_in_asset_mgr_short": "16231",
+   "change_in_dealer_long_all": "10459",
+   "change_in_dealer_short_all": "-16756"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-09-22T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "1890653",
+   "dealer_positions_long_all": "168132",
+   "dealer_positions_short_all": "802335",
+   "asset_mgr_positions_long": "1118655",
+   "asset_mgr_positions_short": "184200",
+   "lev_money_positions_long": "120133",
+   "lev_money_positions_short": "495707",
+   "other_rept_positions_long": "49621",
+   "other_rept_positions_short": "78647",
+   "nonrept_positions_long_all": "250187",
+   "nonrept_positions_short_all": "145839",
+   "change_in_lev_money_long": "-41043",
+   "change_in_lev_money_short": "41388",
+   "change_in_asset_mgr_long": "-23420",
+   "change_in_asset_mgr_short": "-53191",
+   "change_in_dealer_long_all": "-51880",
+   "change_in_dealer_short_all": "-120615"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-09-15T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "2446519",
+   "dealer_positions_long_all": "220012",
+   "dealer_positions_short_all": "922950",
+   "asset_mgr_positions_long": "1142075",
+   "asset_mgr_positions_short": "237391",
+   "lev_money_positions_long": "161176",
+   "lev_money_positions_short": "454319",
+   "other_rept_positions_long": "62588",
+   "other_rept_positions_short": "62461",
+   "nonrept_positions_long_all": "284440",
+   "nonrept_positions_short_all": "193170",
+   "change_in_lev_money_long": "5659",
+   "change_in_lev_money_short": "-42302",
+   "change_in_asset_mgr_long": "-11230",
+   "change_in_asset_mgr_short": "-3553",
+   "change_in_dealer_long_all": "6828",
+   "change_in_dealer_short_all": "24424"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-09-08T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "2071836",
+   "dealer_positions_long_all": "213184",
+   "dealer_positions_short_all": "898526",
+   "asset_mgr_positions_long": "1153305",
+   "asset_mgr_positions_short": "240944",
+   "lev_money_positions_long": "155517",
+   "lev_money_positions_short": "496621",
+   "other_rept_positions_long": "56464",
+   "other_rept_positions_short": "68432",
+   "nonrept_positions_long_all": "263462",
+   "nonrept_positions_short_all": "137409",
+   "change_in_lev_money_long": "-9794",
+   "change_in_lev_money_short": "13746",
+   "change_in_asset_mgr_long": "-3488",
+   "change_in_asset_mgr_short": "18331",
+   "change_in_dealer_long_all": "11225",
+   "change_in_dealer_short_all": "-24180"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-09-01T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "2046914",
+   "dealer_positions_long_all": "201959",
+   "dealer_positions_short_all": "922706",
+   "asset_mgr_positions_long": "1156793",
+   "asset_mgr_positions_short": "222613",
+   "lev_money_positions_long": "165311",
+   "lev_money_positions_short": "482875",
+   "other_rept_positions_long": "57147",
+   "other_rept_positions_short": "63070",
+   "nonrept_positions_long_all": "256699",
+   "nonrept_positions_short_all": "146645",
+   "change_in_lev_money_long": "14785",
+   "change_in_lev_money_short": "17145",
+   "change_in_asset_mgr_long": "-9291",
+   "change_in_asset_mgr_short": "9757",
+   "change_in_dealer_long_all": "-5318",
+   "change_in_dealer_short_all": "-45607"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-08-25T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "2045669",
+   "dealer_positions_long_all": "207277",
+   "dealer_positions_short_all": "968313",
+   "asset_mgr_positions_long": "1166084",
+   "asset_mgr_positions_short": "212856",
+   "lev_money_positions_long": "150526",
+   "lev_money_positions_short": "465730",
+   "other_rept_positions_long": "60277",
+   "other_rept_positions_short": "69324",
+   "nonrept_positions_long_all": "270688",
+   "nonrept_positions_short_all": "138629",
+   "change_in_lev_money_long": "-15765",
+   "change_in_lev_money_short": "18037",
+   "change_in_asset_mgr_long": "725",
+   "change_in_asset_mgr_short": "8063",
+   "change_in_dealer_long_all": "-12709",
+   "change_in_dealer_short_all": "-36088"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-08-18T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "2072358",
+   "dealer_positions_long_all": "219986",
+   "dealer_positions_short_all": "1004401",
+   "asset_mgr_positions_long": "1165359",
+   "asset_mgr_positions_short": "204793",
+   "lev_money_positions_long": "166291",
+   "lev_money_positions_short": "447693",
+   "other_rept_positions_long": "54636",
+   "other_rept_positions_short": "73498",
+   "nonrept_positions_long_all": "268530",
+   "nonrept_positions_short_all": "144417",
+   "change_in_lev_money_long": "-39453",
+   "change_in_lev_money_short": "-38497",
+   "change_in_asset_mgr_long": "10659",
+   "change_in_asset_mgr_short": "-1426",
+   "change_in_dealer_long_all": "3823",
+   "change_in_dealer_short_all": "8606"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-08-11T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "2119506",
+   "dealer_positions_long_all": "216163",
+   "dealer_positions_short_all": "995795",
+   "asset_mgr_positions_long": "1154700",
+   "asset_mgr_positions_short": "206219",
+   "lev_money_positions_long": "205744",
+   "lev_money_positions_short": "486190",
+   "other_rept_positions_long": "52037",
+   "other_rept_positions_short": "71600",
+   "nonrept_positions_long_all": "272563",
+   "nonrept_positions_short_all": "141403",
+   "change_in_lev_money_long": "-295",
+   "change_in_lev_money_short": "-49848",
+   "change_in_asset_mgr_long": "-7620",
+   "change_in_asset_mgr_short": "-19068",
+   "change_in_dealer_long_all": "-20012",
+   "change_in_dealer_short_all": "42794"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-08-04T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "2116079",
+   "dealer_positions_long_all": "236175",
+   "dealer_positions_short_all": "953001",
+   "asset_mgr_positions_long": "1162320",
+   "asset_mgr_positions_short": "225287",
+   "lev_money_positions_long": "206039",
+   "lev_money_positions_short": "536038",
+   "other_rept_positions_long": "52902",
+   "other_rept_positions_short": "54744",
+   "nonrept_positions_long_all": "265488",
+   "nonrept_positions_short_all": "153854",
+   "change_in_lev_money_long": "50075",
+   "change_in_lev_money_short": "82598",
+   "change_in_asset_mgr_long": "3079",
+   "change_in_asset_mgr_short": "10816",
+   "change_in_dealer_long_all": "70074",
+   "change_in_dealer_short_all": "29706"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-07-28T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "1984408",
+   "dealer_positions_long_all": "166101",
+   "dealer_positions_short_all": "923295",
+   "asset_mgr_positions_long": "1159241",
+   "asset_mgr_positions_short": "214471",
+   "lev_money_positions_long": "155964",
+   "lev_money_positions_short": "453440",
+   "other_rept_positions_long": "49486",
+   "other_rept_positions_short": "52711",
+   "nonrept_positions_long_all": "257768",
+   "nonrept_positions_short_all": "144643",
+   "change_in_lev_money_long": "9130",
+   "change_in_lev_money_short": "-16259",
+   "change_in_asset_mgr_long": "15518",
+   "change_in_asset_mgr_short": "-93",
+   "change_in_dealer_long_all": "17117",
+   "change_in_dealer_short_all": "41446"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-07-21T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "1939493",
+   "dealer_positions_long_all": "148984",
+   "dealer_positions_short_all": "881849",
+   "asset_mgr_positions_long": "1143723",
+   "asset_mgr_positions_short": "214564",
+   "lev_money_positions_long": "146834",
+   "lev_money_positions_short": "469699",
+   "other_rept_positions_long": "52274",
+   "other_rept_positions_short": "49406",
+   "nonrept_positions_long_all": "263450",
+   "nonrept_positions_short_all": "139747",
+   "change_in_lev_money_long": "11380",
+   "change_in_lev_money_short": "-30757",
+   "change_in_asset_mgr_long": "-571",
+   "change_in_asset_mgr_short": "10742",
+   "change_in_dealer_long_all": "6070",
+   "change_in_dealer_short_all": "32158"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-07-14T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "1941500",
+   "dealer_positions_long_all": "142914",
+   "dealer_positions_short_all": "849691",
+   "asset_mgr_positions_long": "1144294",
+   "asset_mgr_positions_short": "203822",
+   "lev_money_positions_long": "135454",
+   "lev_money_positions_short": "500456",
+   "other_rept_positions_long": "55528",
+   "other_rept_positions_short": "55690",
+   "nonrept_positions_long_all": "263179",
+   "nonrept_positions_short_all": "131710",
+   "change_in_lev_money_long": "522",
+   "change_in_lev_money_short": "3649",
+   "change_in_asset_mgr_long": "-15553",
+   "change_in_asset_mgr_short": "14567",
+   "change_in_dealer_long_all": "6881",
+   "change_in_dealer_short_all": "-17427"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-07-07T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "1969636",
+   "dealer_positions_long_all": "136033",
+   "dealer_positions_short_all": "867118",
+   "asset_mgr_positions_long": "1159847",
+   "asset_mgr_positions_short": "189255",
+   "lev_money_positions_long": "134932",
+   "lev_money_positions_short": "496807",
+   "other_rept_positions_long": "66452",
+   "other_rept_positions_short": "53438",
+   "nonrept_positions_long_all": "254889",
+   "nonrept_positions_short_all": "145535",
+   "change_in_lev_money_long": "-15624",
+   "change_in_lev_money_short": "-14218",
+   "change_in_asset_mgr_long": "11118",
+   "change_in_asset_mgr_short": "16715",
+   "change_in_dealer_long_all": "8448",
+   "change_in_dealer_short_all": "-11858"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-06-30T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "1967167",
+   "dealer_positions_long_all": "127585",
+   "dealer_positions_short_all": "878976",
+   "asset_mgr_positions_long": "1148729",
+   "asset_mgr_positions_short": "172540",
+   "lev_money_positions_long": "150556",
+   "lev_money_positions_short": "511025",
+   "other_rept_positions_long": "65245",
+   "other_rept_positions_short": "54900",
+   "nonrept_positions_long_all": "264592",
+   "nonrept_positions_short_all": "139266",
+   "change_in_lev_money_long": "-34502",
+   "change_in_lev_money_short": "-47501",
+   "change_in_asset_mgr_long": "-22692",
+   "change_in_asset_mgr_short": "-6152",
+   "change_in_dealer_long_all": "15007",
+   "change_in_dealer_short_all": "10498"
+  },
+  {
+   "report_date_as_yyyy_mm_dd": "2026-06-23T00:00:00.000",
+   "market_and_exchange_names": "E-MINI S&P 500 - CHICAGO MERCANTILE EXCHANGE",
+   "open_interest_all": "1980254",
+   "dealer_positions_long_all": "112578",
+   "dealer_positions_short_all": "868478",
+   "asset_mgr_positions_long": "1171421",
+   "asset_mgr_positions_short": "178692",
+   "lev_money_positions_long": "185058",
+   "lev_money_positions_short": "558526",
+   "other_rept_positions_long": "62151",
+   "other_rept_positions_short": "48090",
+   "nonrept_positions_long_all": "260145",
+   "nonrept_positions_short_all": "137567",
+   "change_in_lev_money_long": "27855",
+   "change_in_lev_money_short": "-114197",
+   "change_in_asset_mgr_long": "-28434",
+   "change_in_asset_mgr_short": "-37154",
+   "change_in_dealer_long_all": "-68993",
+   "change_in_dealer_short_all": "61738"
+  }
+ ],
+ "es": [
+  [
+   "2026-05-15",
+   7432.25
+  ],
+  [
+   "2026-05-18",
+   7425.75
+  ],
+  [
+   "2026-05-19",
+   7378.0
+  ],
+  [
+   "2026-05-20",
+   7451.75
+  ],
+  [
+   "2026-05-21",
+   7466.0
+  ],
+  [
+   "2026-05-22",
+   7491.0
+  ],
+  [
+   "2026-05-26",
+   7537.0
+  ],
+  [
+   "2026-05-27",
+   7540.0
+  ],
+  [
+   "2026-05-28",
+   7581.75
+  ],
+  [
+   "2026-05-29",
+   7595.75
+  ],
+  [
+   "2026-06-01",
+   7613.25
+  ],
+  [
+   "2026-06-02",
+   7623.75
+  ],
+  [
+   "2026-06-03",
+   7571.75
+  ],
+  [
+   "2026-06-04",
+   7601.0
+  ],
+  [
+   "2026-06-05",
+   7400.5
+  ],
+  [
+   "2026-06-08",
+   7416.0
+  ],
+  [
+   "2026-06-09",
+   7392.75
+  ],
+  [
+   "2026-06-10",
+   7278.5
+  ],
+  [
+   "2026-06-11",
+   7396.0
+  ],
+  [
+   "2026-06-12",
+   7435.0
+  ],
+  [
+   "2026-06-15",
+   7561.25
+  ],
+  [
+   "2026-06-16",
+   7518.5
+  ],
+  [
+   "2026-06-17",
+   7424.5
+  ],
+  [
+   "2026-06-18",
+   7508.43017578125
+  ],
+  [
+   "2026-06-22",
+   7541.25
+  ],
+  [
+   "2026-06-23",
+   7437.5
+  ],
+  [
+   "2026-06-24",
+   7428.25
+  ],
+  [
+   "2026-06-25",
+   7423.25
+  ],
+  [
+   "2026-06-26",
+   7401.75
+  ],
+  [
+   "2026-06-29",
+   7500.25
+  ],
+  [
+   "2026-06-30",
+   7548.25
+  ],
+  [
+   "2026-07-01",
+   7543.5
+  ],
+  [
+   "2026-07-02",
+   7528.25
+  ],
+  [
+   "2026-07-06",
+   7591.5
+  ],
+  [
+   "2026-07-07",
+   7551.25
+  ],
+  [
+   "2026-07-08",
+   7528.75
+  ],
+  [
+   "2026-07-09",
+   7588.75
+  ],
+  [
+   "2026-07-10",
+   7620.25
+  ],
+  [
+   "2026-07-13",
+   7563.0
+  ],
+  [
+   "2026-07-14",
+   7591.25
+  ],
+  [
+   "2026-07-15",
+   7614.75
+  ],
+  [
+   "2026-07-16",
+   7577.75
+  ],
+  [
+   "2026-07-17",
+   7497.75
+  ],
+  [
+   "2026-07-20",
+   7484.25
+  ],
+  [
+   "2026-07-21",
+   7545.75
+  ],
+  [
+   "2026-07-22",
+   7540.25
+  ],
+  [
+   "2026-07-23",
+   7445.0
+  ],
+  [
+   "2026-07-24",
+   7447.5
+  ],
+  [
+   "2026-07-27",
+   7448.25
+  ],
+  [
+   "2026-07-28",
+   7465.25
+  ],
+  [
+   "2026-07-29",
+   7351.25
+  ],
+  [
+   "2026-07-30",
+   7472.5
+  ],
+  [
+   "2026-07-31",
+   7519.25
+  ],
+  [
+   "2026-08-03",
+   7628.25
+  ],
+  [
+   "2026-08-04",
+   7765.5
+  ],
+  [
+   "2026-08-05",
+   7749.5
+  ],
+  [
+   "2026-08-06",
+   7734.75
+  ],
+  [
+   "2026-08-07",
+   7779.75
+  ],
+  [
+   "2026-08-10",
+   7776.75
+  ],
+  [
+   "2026-08-11",
+   7747.5
+  ],
+  [
+   "2026-08-12",
+   7770.5
+  ],
+  [
+   "2026-08-13",
+   7822.5
+  ],
+  [
+   "2026-08-14",
+   7805.0
+  ],
+  [
+   "2026-08-17",
+   7768.75
+  ],
+  [
+   "2026-08-18",
+   7714.0
+  ],
+  [
+   "2026-08-19",
+   7729.0
+  ],
+  [
+   "2026-08-20",
+   7662.5
+  ],
+  [
+   "2026-08-21",
+   7691.25
+  ],
+  [
+   "2026-08-24",
+   7669.75
+  ],
+  [
+   "2026-08-25",
+   7692.0
+  ],
+  [
+   "2026-08-26",
+   7690.0
+  ],
+  [
+   "2026-08-27",
+   7742.5
+  ],
+  [
+   "2026-08-28",
+   7722.0
+  ],
+  [
+   "2026-08-31",
+   7699.0
+  ],
+  [
+   "2026-09-01",
+   7642.75
+  ],
+  [
+   "2026-09-02",
+   7676.5
+  ],
+  [
+   "2026-09-03",
+   7754.75
+  ],
+  [
+   "2026-09-04",
+   7722.0
+  ],
+  [
+   "2026-09-08",
+   7680.5
+  ],
+  [
+   "2026-09-09",
+   7643.75
+  ],
+  [
+   "2026-09-10",
+   7598.5
+  ],
+  [
+   "2026-09-11",
+   7659.5
+  ],
+  [
+   "2026-09-14",
+   7625.0
+  ],
+  [
+   "2026-09-15",
+   7589.25
+  ],
+  [
+   "2026-09-16",
+   7556.5
+  ],
+  [
+   "2026-09-17",
+   7640.0
+  ],
+  [
+   "2026-09-18",
+   7657.35009765625
+  ],
+  [
+   "2026-09-21",
+   7833.5
+  ],
+  [
+   "2026-09-22",
+   7831.75
+  ],
+  [
+   "2026-09-23",
+   7772.5
+  ],
+  [
+   "2026-09-24",
+   7767.0
+  ],
+  [
+   "2026-09-25",
+   7803.75
+  ],
+  [
+   "2026-09-28",
+   7746.75
+  ],
+  [
+   "2026-09-29",
+   7732.0
+  ],
+  [
+   "2026-09-30",
+   7715.5
+  ],
+  [
+   "2026-10-01",
+   7724.0
+  ],
+  [
+   "2026-10-02",
+   7777.25
+  ],
+  [
+   "2026-10-05",
+   7826.25
+  ],
+  [
+   "2026-10-06",
+   7874.0
+  ],
+  [
+   "2026-10-07",
+   7852.75
+  ],
+  [
+   "2026-10-08",
+   7816.25
+  ],
+  [
+   "2026-10-09",
+   7859.75
+  ],
+  [
+   "2026-10-12",
+   7858.0
+  ],
+  [
+   "2026-10-13",
+   7855.75
+  ],
+  [
+   "2026-10-14",
+   7770.25
+  ],
+  [
+   "2026-10-15",
+   7791.0
+  ],
+  [
+   "2026-10-16",
+   7704.25
+  ],
+  [
+   "2026-10-19",
+   7734.5
+  ],
+  [
+   "2026-10-20",
+   7755.25
+  ],
+  [
+   "2026-10-21",
+   7800.25
+  ],
+  [
+   "2026-10-22",
+   7704.5
+  ],
+  [
+   "2026-10-23",
+   7659.75
+  ],
+  [
+   "2026-10-26",
+   7714.5
+  ],
+  [
+   "2026-10-27",
+   7758.25
+  ],
+  [
+   "2026-10-28",
+   7783.25
+  ],
+  [
+   "2026-10-29",
+   7754.25
+  ],
+  [
+   "2026-10-30",
+   7614.0
+  ],
+  [
+   "2026-11-02",
+   7574.5
+  ],
+  [
+   "2026-11-03",
+   7596.75
+  ],
+  [
+   "2026-11-04",
+   7720.5
+  ],
+  [
+   "2026-11-05",
+   7383.0
+  ],
+  [
+   "2026-11-06",
+   7402.0
+  ],
+  [
+   "2026-11-09",
+   7574.25
+  ],
+  [
+   "2026-11-10",
+   7544.25
+  ],
+  [
+   "2026-11-11",
+   7640.5
+  ],
+  [
+   "2026-11-12",
+   7615.25
+  ],
+  [
+   "2026-11-13",
+   7583.0
+  ],
+  [
+   "2026-11-16",
+   7561.75
+  ]
+ ],
+ "finra": [
+  [
+   "Oct-26",
+   "1448360",
+   "210290",
+   "212890"
+  ],
+  [
+   "Sep-26",
+   "1480054",
+   "215328",
+   "218581"
+  ],
+  [
+   "Aug-26",
+   "1453832",
+   "207641",
+   "217499"
+  ],
+  [
+   "Jul-26",
+   "1417225",
+   "205132",
+   "217305"
+  ],
+  [
+   "Jun-26",
+   "1502072",
+   "217441",
+   "223412"
+  ],
+  [
+   "May-26",
+   "1415557",
+   "206600",
+   "217256"
+  ],
+  [
+   "Apr-26",
+   "1304281",
+   "217836",
+   "215445"
+  ],
+  [
+   "Mar-26",
+   "1220922",
+   "221860",
+   "205600"
+  ],
+  [
+   "Feb-26",
+   "1253192",
+   "205060",
+   "200047"
+  ],
+  [
+   "Jan-26",
+   "1279042",
+   "203700",
+   "196911"
+  ],
+  [
+   "Dec-25",
+   "1225597",
+   "211720",
+   "199762"
+  ],
+  [
+   "Nov-25",
+   "1214321",
+   "202131",
+   "194418"
+  ],
+  [
+   "Oct-25",
+   "1183654",
+   "197923",
+   "195376"
+  ]
+ ],
+ "finra_cols": [
+  "Month/Year",
+  "Debit Balances in Customers' Securities Margin Accounts",
+  "Free Credit Balances in Customers' Cash Accounts",
+  "Free Credit Balances in Customers' Securities Margin Accounts"
+ ]
+}
