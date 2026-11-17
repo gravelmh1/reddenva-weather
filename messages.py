@@ -169,12 +169,24 @@ def build(f: dict, region: str, city: str, now: dt.datetime) -> dict:
         rows = rows + [third]
 
     # ---- 포즈
-    if f["grp"] in ("thunder", "snow") or f["rain_day"] >= 50: pose = "a10"
-    elif f["lo_c"] <= 3: pose = "a18"
-    elif f["hi_c"] >= 24: pose = "a16"
-    elif f["swing_c"] >= 8: pose = "a05"
-    elif big_wind: pose = "a09"
-    else: pose = "a00"
+    # 날씨 레드덴바 20종 (assets/poses/w00~w19, 형이 준 시트에서 잘라냄)
+    #  w00 맑음 w01 구름조금 w02 구름 w03 구름많음 w04 흐림(담요)
+    #  w05 비옷(약한 비) w06 우산(비) w07 파란 우비(폭우) w08 천둥번개 w09 이슬비
+    #  w10 눈(빨간 모자) w11 눈(파란 모자) w12 폭설 w13 한파(온도계) w14 서리·입김
+    #  w15 덥고 맑음(선글라스) w16 폭염(얼음주머니) w17 강풍 w18 안개 w19 미세먼지(마스크)
+    code = t.get("code", 0)
+    if f["grp"] == "thunder" or code >= 95: pose = "w08"
+    elif f["grp"] == "snow" or code in (71, 73, 75, 77, 85, 86):
+        pose = "w12" if code in (75, 86) else ("w10", "w11")[seed % 2]
+    elif f["rain_day"] >= 60: pose = "w07" if code in (65, 67, 82) else "w06"
+    elif f["rain_day"] >= 40: pose = "w09" if 51 <= code <= 57 else "w05"
+    elif code in (45, 48): pose = "w18"
+    elif f["hi_c"] >= 33: pose = "w16"
+    elif f["lo_c"] <= -5: pose = "w13"
+    elif f["lo_c"] <= 2: pose = "w14"
+    elif big_wind: pose = "w17"
+    elif f["hi_c"] >= 28 and code <= 1: pose = "w15"
+    else: pose = {0: "w00", 1: "w01", 2: "w02", 3: "w04"}.get(code, "w03")
 
     # ---- 캡션 (Instagram과 Threads 공통)
     if lang == "ko":
