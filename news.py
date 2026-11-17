@@ -224,6 +224,7 @@ def main():
     items = [it for it in gather(region, since) if re.sub(r"\W+", "", it["title"].lower())[:40] not in done]
     print(f"후보 {len(items)}건")
     if len(items) < 8: raise RuntimeError("후보 기사가 너무 적음 → 이번 주는 올리지 않음")
+    allc = items
     sl = shortlist(items, region); items = [items[i] for i in sl]; print("1차 후보", len(items))
     t0 = time.time(); items.sort(key=lambda it: "news.google.com" in it["link"])  # 원문 주소가 바로 있는 기사부터
     for it in items:   # Make가 3분 20초 뒤에 결과를 읽으므로 본문 수집은 70초 안에서만
@@ -234,6 +235,16 @@ def main():
             "us": r"\b(dog|dogs|cat|cats|puppy|pup|kitten|pet|pets|animal|animals|horse|wildlife|actor|actress|singer|rapper|celebrity|celebrities|celeb|star|stars|hollywood|nfl|nba|mlb|nhl|quarterback|athlete|billionaire|influencer|youtuber|tiktoker|pop star|band|grammy|oscar)\b"}[region]
     items = [it for it in items if len(it["text"]) > 150 and not re.search(DROP, it["title"] + " " + it["text"][:600], re.I)
              and not re.search(r"entertain|/star/|/ent/|sports", it["link"], re.I)]; print("본문 확보", len(items))
+    if len(items) < 3:
+        # 구글뉴스가 429로 막히는 날: 원문 주소가 바로 있는 언론사 RSS 후보로 보충
+        print("본문 부족 → 언론사 RSS 후보로 보충")
+        have = {it["link"] for it in items}
+        for it in [x for x in allc if "news.google.com" not in x["link"] and x["link"] not in have]:
+            if time.time() - t0 > 110 or len(items) >= 10: break
+            if len(it["text"]) < 400: enrich(it)
+            if len(it["text"]) > 150 and not re.search(DROP, it["title"] + " " + it["text"][:600], re.I) and not re.search(r"entertain|/star/|/ent/|sports", it["link"], re.I):
+                items.append(it)
+        print("보충 후", len(items))
     if len(items) < 3: raise RuntimeError("본문 확보 기사 부족")
     j = pick(region, items, lang)
     print(json.dumps(j, ensure_ascii=False, indent=1))
