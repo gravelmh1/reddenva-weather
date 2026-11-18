@@ -1,0 +1,26 @@
+{
+ "used": [
+  "wm:File:Koala and joey.jpg"
+ ],
+ "pick": {
+  "week": "2026-W47",
+  "id": "wm:File:Koala and joey.jpg",
+  "artist": "Benjamint444",
+  "license": "CC BY-SA 3.0",
+  "src": "Wikimedia Commons",
+  "focus_x": 0.31,
+  "focus_y": 0.38,
+  "name_ko": "아기 코알라",
+  "name_en": "Koala joey",
+  "lines_ko": [
+   "엄마 등에 딱 달라붙는 중.",
+   "내려올 생각은 전혀 없음."
+  ],
+  "lines_en": [
+   "Clinging tightly to mom.",
+   "Zero plans to let go."
+  ],
+  "aside_ko": "부럽다",
+  "aside_en": "Jealous"
+ }
+}
