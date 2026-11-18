@@ -1,0 +1,816 @@
+{
+ "kr|덕수궁 돌담길": {
+  "files": [
+   {
+    "id": "wm:File:Deoksugung-02.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Deoksugung-02.jpg/1920px-Deoksugung-02.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "travel oriented",
+    "license": "CC BY-SA 2.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_덕수궁 돌담길_0.jpg"
+   },
+   {
+    "id": "wm:File:Deoksugung-02 (4x3).jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/Deoksugung-02_%284x3%29.jpg/1920px-Deoksugung-02_%284x3%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "travel oriented",
+    "license": "CC BY-SA 2.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_덕수궁 돌담길_1.jpg"
+   }
+  ],
+  "weather": {
+   "time": [
+    "2026-11-18",
+    "2026-11-19",
+    "2026-11-20",
+    "2026-11-21",
+    "2026-11-22",
+    "2026-11-23",
+    "2026-11-24"
+   ],
+   "temperature_2m_max": [
+    9.1,
+    4.9,
+    1.8,
+    1.7,
+    3.9,
+    11.3,
+    4.8
+   ],
+   "temperature_2m_min": [
+    1.4,
+    -1.9,
+    -4.5,
+    -3.7,
+    -3.9,
+    0.9,
+    -3.1
+   ],
+   "precipitation_probability_max": [
+    88,
+    0,
+    0,
+    0,
+    0,
+    89,
+    18
+   ],
+   "weather_code": [
+    51,
+    2,
+    1,
+    0,
+    3,
+    80,
+    3
+   ]
+  }
+ },
+ "kr|서울숲": {
+  "files": [
+   {
+    "id": "wm:File:Sika Deer - Seoul Forest (3).jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fd/Sika_Deer_-_Seoul_Forest_%283%29.jpg/1920px-Sika_Deer_-_Seoul_Forest_%283%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Drcbrothephotographer",
+    "license": "퍼블릭 도메인",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_서울숲_0.jpg"
+   },
+   {
+    "id": "wm:File:Q24058 Seoul-forest A01.JPG",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/Q24058_Seoul-forest_A01.JPG/1920px-Q24058_Seoul-forest_A01.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "분당선M",
+    "license": "CC BY-SA 3.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_서울숲_1.jpg"
+   },
+   {
+    "id": "wm:File:Sika Deer - Seoul Forest (1).jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Sika_Deer_-_Seoul_Forest_%281%29.jpg/1920px-Sika_Deer_-_Seoul_Forest_%281%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Drcbrothephotographer",
+    "license": "CC BY 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_서울숲_2.jpg"
+   },
+   {
+    "id": "wm:File:Sika Deer - Seoul Forest (2).jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Sika_Deer_-_Seoul_Forest_%282%29.jpg/1920px-Sika_Deer_-_Seoul_Forest_%282%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Drcbrothephotographer",
+    "license": "퍼블릭 도메인",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_서울숲_3.jpg"
+   }
+  ],
+  "weather": {
+   "time": [
+    "2026-11-18",
+    "2026-11-19",
+    "2026-11-20",
+    "2026-11-21",
+    "2026-11-22",
+    "2026-11-23",
+    "2026-11-24"
+   ],
+   "temperature_2m_max": [
+    9.2,
+    5.1,
+    1.9,
+    1.8,
+    4.1,
+    11.4,
+    5.2
+   ],
+   "temperature_2m_min": [
+    1.7,
+    -1.5,
+    -4.2,
+    -3.4,
+    -3.7,
+    0.8,
+    -2.7
+   ],
+   "precipitation_probability_max": [
+    88,
+    0,
+    0,
+    0,
+    0,
+    89,
+    18
+   ],
+   "weather_code": [
+    51,
+    1,
+    1,
+    0,
+    3,
+    80,
+    3
+   ]
+  }
+ },
+ "kr|북촌 한옥마을": {
+  "files": [
+   {
+    "id": "wm:File:Bukchon-ro 11-gil street with hanok houses at blue hour in Bukchon Hanok Village Seoul.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Bukchon-ro_11-gil_street_with_hanok_houses_at_blue_hour_in_Bukchon_Hanok_Village_Seoul.jpg/1920px-Bukchon-ro_11-gil_street_with_hanok_houses_at_blue_hour_in_Bukchon_Hanok_Village_Seoul.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Basile Morin",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_북촌 한옥마을_0.jpg"
+   },
+   {
+    "id": "wm:File:Traditional hanok house with wooden doors along a steeply sloping street in Bukchon Hanok Village Seoul.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/Traditional_hanok_house_with_wooden_doors_along_a_steeply_sloping_street_in_Bukchon_Hanok_Village_Seoul.jpg/1920px-Traditional_hanok_house_with_wooden_doors_along_a_steeply_sloping_street_in_Bukchon_Hanok_Village_Seoul.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Basile Morin",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_북촌 한옥마을_1.jpg"
+   },
+   {
+    "id": "wm:File:Gyedong-gil street with climbing plants at golden hour in Seoul South Korea.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Gyedong-gil_street_with_climbing_plants_at_golden_hour_in_Seoul_South_Korea.jpg/1920px-Gyedong-gil_street_with_climbing_plants_at_golden_hour_in_Seoul_South_Korea.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Basile Morin",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_북촌 한옥마을_2.jpg"
+   },
+   {
+    "id": "wm:File:Bukchon-ro 11-gil street with hanok houses in Bukchon Hanok Village Seoul.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b6/Bukchon-ro_11-gil_street_with_hanok_houses_in_Bukchon_Hanok_Village_Seoul.jpg/1920px-Bukchon-ro_11-gil_street_with_hanok_houses_in_Bukchon_Hanok_Village_Seoul.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Basile Morin",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_북촌 한옥마을_3.jpg"
+   }
+  ],
+  "weather": {
+   "time": [
+    "2026-11-18",
+    "2026-11-19",
+    "2026-11-20",
+    "2026-11-21",
+    "2026-11-22",
+    "2026-11-23",
+    "2026-11-24"
+   ],
+   "temperature_2m_max": [
+    8.7,
+    4.5,
+    1.3,
+    1.7,
+    3.9,
+    11.3,
+    4.8
+   ],
+   "temperature_2m_min": [
+    0.7,
+    -2.6,
+    -5.3,
+    -3.9,
+    -3.9,
+    0.9,
+    -3.1
+   ],
+   "precipitation_probability_max": [
+    88,
+    0,
+    0,
+    0,
+    0,
+    89,
+    18
+   ],
+   "weather_code": [
+    51,
+    1,
+    1,
+    0,
+    3,
+    80,
+    3
+   ]
+  }
+ },
+ "kr|창경궁": {
+  "files": [
+   {
+    "id": "wm:File:Myeongjeongjeon seen through the wooden Gate Hyehwamun at Changgyeonggung Palace in Seoul.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/62/Myeongjeongjeon_seen_through_the_wooden_Gate_Hyehwamun_at_Changgyeonggung_Palace_in_Seoul.jpg/1920px-Myeongjeongjeon_seen_through_the_wooden_Gate_Hyehwamun_at_Changgyeonggung_Palace_in_Seoul.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Basile Morin",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_창경궁_0.jpg"
+   },
+   {
+    "id": "wm:File:Changgyeonggung 2023-11-02.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Changgyeonggung_2023-11-02.jpg/1920px-Changgyeonggung_2023-11-02.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Huntsmanleader",
+    "license": "CC BY 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_창경궁_1.jpg"
+   },
+   {
+    "id": "wm:File:Dancheong at Changgyeonggung 2023-11-02.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/01/Dancheong_at_Changgyeonggung_2023-11-02.jpg/1920px-Dancheong_at_Changgyeonggung_2023-11-02.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Huntsmanleader",
+    "license": "CC BY 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_창경궁_2.jpg"
+   },
+   {
+    "id": "wm:File:Hyehwa fall 2014 138 (Changgyeonggung).JPG",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/Hyehwa_fall_2014_138_%28Changgyeonggung%29.JPG/1920px-Hyehwa_fall_2014_138_%28Changgyeonggung%29.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "User:Piotrus",
+    "license": "CC BY-SA 3.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_창경궁_3.jpg"
+   }
+  ],
+  "weather": {
+   "time": [
+    "2026-11-18",
+    "2026-11-19",
+    "2026-11-20",
+    "2026-11-21",
+    "2026-11-22",
+    "2026-11-23",
+    "2026-11-24"
+   ],
+   "temperature_2m_max": [
+    8.8,
+    4.6,
+    1.4,
+    1.7,
+    3.9,
+    11.3,
+    4.8
+   ],
+   "temperature_2m_min": [
+    0.8,
+    -2.5,
+    -5.2,
+    -3.9,
+    -3.9,
+    0.9,
+    -3.1
+   ],
+   "precipitation_probability_max": [
+    88,
+    0,
+    0,
+    0,
+    0,
+    89,
+    18
+   ],
+   "weather_code": [
+    51,
+    1,
+    1,
+    0,
+    3,
+    80,
+    3
+   ]
+  }
+ },
+ "kr|낙산공원": {
+  "files": [
+   {
+    "id": "wm:File:02025 Park Naksan, Seoul.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/59/02025_Park_Naksan%2C_Seoul.jpg/1920px-02025_Park_Naksan%2C_Seoul.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Marsilar",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_낙산공원_0.jpg"
+   },
+   {
+    "id": "wm:File:Naksan Park 2.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Naksan_Park_2.jpg/1920px-Naksan_Park_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Choism97",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_낙산공원_1.jpg"
+   },
+   {
+    "id": "wm:File:Naksan Park, Seoul, South Korea 12.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4e/Naksan_Park%2C_Seoul%2C_South_Korea_12.jpg/1920px-Naksan_Park%2C_Seoul%2C_South_Korea_12.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "한국의 멋",
+    "license": "퍼블릭 도메인",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_낙산공원_2.jpg"
+   },
+   {
+    "id": "wm:File:Naksan Park, Seoul, South Korea 15.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Naksan_Park%2C_Seoul%2C_South_Korea_15.jpg/1920px-Naksan_Park%2C_Seoul%2C_South_Korea_15.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "한국의 멋",
+    "license": "퍼블릭 도메인",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_낙산공원_3.jpg"
+   }
+  ],
+  "weather": {
+   "time": [
+    "2026-11-18",
+    "2026-11-19",
+    "2026-11-20",
+    "2026-11-21",
+    "2026-11-22",
+    "2026-11-23",
+    "2026-11-24"
+   ],
+   "temperature_2m_max": [
+    8.5,
+    4.3,
+    1.1,
+    1.7,
+    3.9,
+    11.3,
+    4.8
+   ],
+   "temperature_2m_min": [
+    0.5,
+    -2.8,
+    -5.5,
+    -4.1,
+    -3.9,
+    0.9,
+    -3.1
+   ],
+   "precipitation_probability_max": [
+    88,
+    0,
+    0,
+    0,
+    0,
+    89,
+    18
+   ],
+   "weather_code": [
+    51,
+    1,
+    1,
+    0,
+    3,
+    80,
+    3
+   ]
+  }
+ },
+ "kr|석촌호수": {
+  "files": [
+   {
+    "id": "wm:File:Seokchon Lake Park - Oct 10 2005.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/Seokchon_Lake_Park_-_Oct_10_2005.jpg/1920px-Seokchon_Lake_Park_-_Oct_10_2005.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Nesnad",
+    "license": "CC BY-SA 3.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_석촌호수_0.jpg"
+   },
+   {
+    "id": "wm:File:Seokchon Lake in Seoul.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/72/Seokchon_Lake_in_Seoul.jpg/1920px-Seokchon_Lake_in_Seoul.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Christian Bolz",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_석촌호수_1.jpg"
+   },
+   {
+    "id": "wm:File:View of Seokchon Lake.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/89/View_of_Seokchon_Lake.jpg/1920px-View_of_Seokchon_Lake.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Simon Williams-Im",
+    "license": "CC BY 2.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_석촌호수_2.jpg"
+   },
+   {
+    "id": "wm:File:Seokchon Lake 2.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Seokchon_Lake_2.jpg/1920px-Seokchon_Lake_2.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "kallerna",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/kr_석촌호수_3.jpg"
+   }
+  ],
+  "weather": {
+   "time": [
+    "2026-11-18",
+    "2026-11-19",
+    "2026-11-20",
+    "2026-11-21",
+    "2026-11-22",
+    "2026-11-23",
+    "2026-11-24"
+   ],
+   "temperature_2m_max": [
+    9.1,
+    5.0,
+    1.9,
+    2.0,
+    4.1,
+    11.5,
+    5.6
+   ],
+   "temperature_2m_min": [
+    1.5,
+    -1.8,
+    -4.9,
+    -3.5,
+    -3.8,
+    0.0,
+    -2.7
+   ],
+   "precipitation_probability_max": [
+    88,
+    0,
+    0,
+    0,
+    0,
+    89,
+    18
+   ],
+   "weather_code": [
+    51,
+    2,
+    1,
+    0,
+    3,
+    81,
+    3
+   ]
+  }
+ },
+ "us|Descanso Gardens": {
+  "files": [
+   {
+    "id": "wm:File:Descanso Landscape.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/Descanso_Landscape.jpg/1920px-Descanso_Landscape.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "GO1313",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Descanso Gardens_0.jpg"
+   },
+   {
+    "id": "wm:File:Descanso Train Tracks.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f5/Descanso_Train_Tracks.jpg/1920px-Descanso_Train_Tracks.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "GO1313",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Descanso Gardens_1.jpg"
+   },
+   {
+    "id": "wm:File:Descanso Gardens (194726709).jpeg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Descanso_Gardens_%28194726709%29.jpeg/1920px-Descanso_Gardens_%28194726709%29.jpeg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Pinguino Kolb",
+    "license": "CC BY-SA 3.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Descanso Gardens_2.jpg"
+   },
+   {
+    "id": "wm:File:Descanso Gardens (194726707).jpeg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Descanso_Gardens_%28194726707%29.jpeg/1920px-Descanso_Gardens_%28194726707%29.jpeg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Pinguino Kolb",
+    "license": "CC BY-SA 3.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Descanso Gardens_3.jpg"
+   }
+  ],
+  "weather": {
+   "time": [
+    "2026-11-17",
+    "2026-11-18",
+    "2026-11-19",
+    "2026-11-20",
+    "2026-11-21",
+    "2026-11-22",
+    "2026-11-23"
+   ],
+   "temperature_2m_max": [
+    65.2,
+    64.1,
+    58.3,
+    62.6,
+    62.0,
+    61.4,
+    59.8
+   ],
+   "temperature_2m_min": [
+    51.4,
+    49.2,
+    51.7,
+    49.9,
+    51.0,
+    51.8,
+    50.6
+   ],
+   "precipitation_probability_max": [
+    9,
+    6,
+    100,
+    0,
+    0,
+    15,
+    14
+   ],
+   "weather_code": [
+    3,
+    3,
+    65,
+    0,
+    3,
+    53,
+    53
+   ]
+  }
+ },
+ "us|Joshua Tree": {
+  "files": [
+   {
+    "id": "wm:File:Joshua Tree Park approaching thunderstorm 02 2013.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/Joshua_Tree_Park_approaching_thunderstorm_02_2013.jpg/1920px-Joshua_Tree_Park_approaching_thunderstorm_02_2013.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Tuxyso",
+    "license": "CC BY-SA 3.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Joshua Tree_0.jpg"
+   },
+   {
+    "id": "wm:File:Joshua Tree National Park 2013.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Joshua_Tree_National_Park_2013.jpg/1920px-Joshua_Tree_National_Park_2013.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Tuxyso",
+    "license": "CC BY-SA 3.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Joshua Tree_1.jpg"
+   },
+   {
+    "id": "wm:File:Giant Marbles in Joshua Tree National Park.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Giant_Marbles_in_Joshua_Tree_National_Park.jpg/1920px-Giant_Marbles_in_Joshua_Tree_National_Park.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Brocken Inaglory",
+    "license": "CC BY-SA 3.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Joshua Tree_2.jpg"
+   },
+   {
+    "id": "wm:File:1963 Airstream trailer in Joshua Tree dllu.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/1963_Airstream_trailer_in_Joshua_Tree_dllu.jpg/1920px-1963_Airstream_trailer_in_Joshua_Tree_dllu.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Dllu",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Joshua Tree_3.jpg"
+   }
+  ],
+  "weather": {
+   "time": [
+    "2026-11-17",
+    "2026-11-18",
+    "2026-11-19",
+    "2026-11-20",
+    "2026-11-21",
+    "2026-11-22",
+    "2026-11-23"
+   ],
+   "temperature_2m_max": [
+    63.2,
+    63.6,
+    64.4,
+    58.4,
+    58.0,
+    59.3,
+    59.1
+   ],
+   "temperature_2m_min": [
+    48.2,
+    44.8,
+    49.6,
+    45.9,
+    44.3,
+    43.8,
+    45.4
+   ],
+   "precipitation_probability_max": [
+    16,
+    1,
+    18,
+    0,
+    0,
+    3,
+    3
+   ],
+   "weather_code": [
+    1,
+    3,
+    3,
+    0,
+    3,
+    2,
+    3
+   ]
+  }
+ },
+ "us|Ojai": {
+  "files": [
+   {
+    "id": "wm:File:Ojai, California (21583025735).jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7f/Ojai%2C_California_%2821583025735%29.jpg/1920px-Ojai%2C_California_%2821583025735%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Ken Lund",
+    "license": "CC BY-SA 2.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Ojai_0.jpg"
+   },
+   {
+    "id": "wm:File:Aerial view of Ojai, California in July 2021.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Aerial_view_of_Ojai%2C_California_in_July_2021.jpg/1920px-Aerial_view_of_Ojai%2C_California_in_July_2021.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Alfred Twu",
+    "license": "퍼블릭 도메인",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Ojai_1.jpg"
+   },
+   {
+    "id": "wm:File:Ojai, California and California Coast (21398791260).jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Ojai%2C_California_and_California_Coast_%2821398791260%29.jpg/1920px-Ojai%2C_California_and_California_Coast_%2821398791260%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Ken Lund",
+    "license": "CC BY-SA 2.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Ojai_2.jpg"
+   },
+   {
+    "id": "wm:File:Ojai, California (20960249094) (cropped).jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Ojai%2C_California_%2820960249094%29_%28cropped%29.jpg/1920px-Ojai%2C_California_%2820960249094%29_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Ken Lund",
+    "license": "CC BY-SA 2.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Ojai_3.jpg"
+   }
+  ],
+  "weather": {
+   "time": [
+    "2026-11-17",
+    "2026-11-18",
+    "2026-11-19",
+    "2026-11-20",
+    "2026-11-21",
+    "2026-11-22",
+    "2026-11-23"
+   ],
+   "temperature_2m_max": [
+    67.5,
+    63.8,
+    59.9,
+    62.7,
+    61.3,
+    60.2,
+    59.1
+   ],
+   "temperature_2m_min": [
+    47.9,
+    49.2,
+    48.4,
+    45.9,
+    46.9,
+    47.2,
+    45.7
+   ],
+   "precipitation_probability_max": [
+    0,
+    58,
+    100,
+    1,
+    1,
+    24,
+    10
+   ],
+   "weather_code": [
+    0,
+    63,
+    63,
+    0,
+    3,
+    61,
+    3
+   ]
+  }
+ },
+ "us|Huntington Library": {
+  "files": [
+   {
+    "id": "wm:File:Cactus in Huntington Library Botanical Garden, California.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/Cactus_in_Huntington_Library_Botanical_Garden%2C_California.jpg/1920px-Cactus_in_Huntington_Library_Botanical_Garden%2C_California.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Netherzone",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Huntington Library_0.jpg"
+   },
+   {
+    "id": "wm:File:Huntington Gardens 18 - Echinocactus grusonii.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Huntington_Gardens_18_-_Echinocactus_grusonii.jpg/1920px-Huntington_Gardens_18_-_Echinocactus_grusonii.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Photograph by Mike Peel (www.mik",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Huntington Library_1.jpg"
+   },
+   {
+    "id": "wm:File:Huntington Gardens 12 - Mammillaria humboldtii.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/Huntington_Gardens_12_-_Mammillaria_humboldtii.jpg/1920px-Huntington_Gardens_12_-_Mammillaria_humboldtii.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Photograph by Mike Peel (www.mik",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Huntington Library_2.jpg"
+   },
+   {
+    "id": "wm:File:Huntington Gardens 19 - Echinocactus grusonii.jpg",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Huntington_Gardens_19_-_Echinocactus_grusonii.jpg/1920px-Huntington_Gardens_19_-_Echinocactus_grusonii.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+    "artist": "Photograph by Mike Peel (www.mik",
+    "license": "CC BY-SA 4.0",
+    "src": "Wikimedia Commons",
+    "file": "samples/trip/us_Huntington Library_3.jpg"
+   }
+  ],
+  "weather": {
+   "time": [
+    "2026-11-17",
+    "2026-11-18",
+    "2026-11-19",
+    "2026-11-20",
+    "2026-11-21",
+    "2026-11-22",
+    "2026-11-23"
+   ],
+   "temperature_2m_max": [
+    67.8,
+    66.8,
+    60.3,
+    64.9,
+    64.4,
+    63.5,
+    61.8
+   ],
+   "temperature_2m_min": [
+    52.4,
+    50.0,
+    53.3,
+    52.4,
+    54.0,
+    54.5,
+    53.1
+   ],
+   "precipitation_probability_max": [
+    11,
+    5,
+    97,
+    0,
+    0,
+    15,
+    15
+   ],
+   "weather_code": [
+    3,
+    3,
+    65,
+    0,
+    3,
+    53,
+    53
+   ]
+  }
+ }
+}
