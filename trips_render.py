@@ -94,11 +94,12 @@ def carousel(region, today, spot, w, ph, j, outs):
     rows = [(("가는 법" if ko else "Getting there"), spot["how"])]
     if spot.get("hours"): rows.append((("시간" if ko else "Hours"), spot["hours"]))
     if spot.get("fee"): rows.append((("요금" if ko else "Entry"), spot["fee"]))
+    rows.append((("팁" if ko else "Tip"), j["tip"]))
     _info(im, d, rows, 900)
     im.save(outs[1], "JPEG", quality=92)
     # 3장: 코스·팁·레드덴바 한마디·사진 출처
     im, d = _photo_slide(ph[2], head, handle, 3)
-    y = _info(im, d, [(("코스" if ko else "Route"), spot["course"]), (("팁" if ko else "Tip"), j["tip"])], 900)
+    y = _info(im, d, [(("코스" if ko else "Route"), spot["course"])], 900)
     d.rounded_rectangle([M, y + 6, W - M - 200, y + 120], radius=28, fill="white", outline=LINE, width=2)
     d.text((M + 30, y + 20), "레드덴바 한마디" if ko else "Red Denva says", font=font("Bold", 28), fill=ORANGE)
     d.text((M + 30, y + 58), j["aside"], font=fit(d, j["aside"], "Bold", 38, W - 2 * M - 260, 24), fill=INK)

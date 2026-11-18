@@ -31,10 +31,10 @@ def sky(code, ko):
 def weekend_weather(spots, region, sat):
     """여러 장소를 한 번에 요청. 실패하면 None들."""
     unit = "celsius" if region == "kr" else "fahrenheit"
-    for wait in (0, 5, 10):
+    for wait in (0, 4, 8, 12):
         time.sleep(wait)
         try:
-            r = requests.get("https://api.open-meteo.com/v1/forecast", timeout=25, params={
+            r = requests.get("https://api.open-meteo.com/v1/forecast", timeout=(10, 40), params={
                 "latitude": ",".join(str(s["lat"]) for s in spots), "longitude": ",".join(str(s["lon"]) for s in spots),
                 "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code", "timezone": TZ[region],
                 "start_date": sat.isoformat(), "end_date": (sat + dt.timedelta(days=1)).isoformat(), "temperature_unit": unit})
@@ -83,6 +83,21 @@ def photos_for(spot):
     return out
 
 
+def season_note(region, d):
+    m, part = d.month, ("early" if d.day <= 10 else "mid" if d.day <= 20 else "late")
+    if region == "kr":
+        notes = {11: {"early": "autumn foliage near its peak in Seoul", "mid": "late autumn in Seoul; foliage past peak, many leaves falling", "late": "late autumn turning to early winter in Seoul; most leaves have fallen, cold"},
+                 12: "early winter in Seoul, bare trees, cold", 1: "midwinter in Seoul, cold, bare trees, possible snow", 2: "late winter in Seoul, cold",
+                 3: "early spring in Seoul; blossoms start late March", 4: "spring in Seoul; cherry blossoms early April", 5: "late spring in Seoul, fresh green",
+                 6: "early summer in Seoul", 7: "summer monsoon season in Seoul", 8: "hot summer in Seoul", 9: "early autumn in Seoul, still green", 10: "autumn in Seoul; foliage starts late October"}
+    else:
+        notes = {11: "late fall in Southern California; mild days, cool nights, desert season is ideal", 12: "winter in Southern California; mild coast, snow in mountains",
+                 1: "winter in Southern California; snow in mountains, green hills after rain", 2: "late winter in Southern California", 3: "spring in Southern California; wildflowers in deserts",
+                 4: "spring in Southern California; wildflowers", 5: "late spring in Southern California; May Gray on the coast", 6: "early summer; June Gloom on the coast, deserts get hot",
+                 7: "summer; deserts very hot, beaches busy", 8: "hot summer; deserts dangerously hot", 9: "early fall; still hot inland", 10: "fall in Southern California; warm days"}
+    n = notes[m]; return n[part] if isinstance(n, dict) else n
+
+
 def judge(spot, cands, w, region, today):
     key = os.environ["GEMINI_API_KEY"].strip(); ko = region == "kr"; parts = []
     for i, c in enumerate(cands):
@@ -95,14 +110,15 @@ def judge(spot, cands, w, region, today):
     lim = dict(why=22, cap=14, tip=26, aside=20) if ko else dict(why=46, cap=28, tip=50, aside=34)
     prompt = f"""You are the photo editor and writer of a weekly Instagram carousel "WEEKEND PICK" recommending ONE place to visit this weekend.
 Place facts (the ONLY facts you may use): {json.dumps(facts, ensure_ascii=False)}
-Today: {today.isoformat()} (season: {SEASON[today.month]}). Weekend weather there: {wtxt}.
+Today: {today.isoformat()}. Season reality check: {season_note(region, today)}. Weekend weather there: {wtxt}.
 1) From the photos choose exactly 3 that best SELL a visit: real photos of THIS place, beautiful, sharp, well lit, different views (no near-duplicates).
-   Prefer photos matching the current season (or season-neutral). Reject: maps, signs/station boards, interiors of shops, close-up faces of people, watermarks/big text, ugly construction, animals in cages, blurry or dark photos.
+   The photos must look like what a visitor would see THIS weekend: reject photos that clearly show a different season (e.g. lush summer green or spring blossoms in late autumn/winter, snow in summer). Season-neutral views (buildings, sea, rocks, sky, night) are fine.
+   Reject: maps, signs/station boards, shop interiors, close-up faces, watermarks/big text, construction, animals in cages, blurry or dark photos. Avoid photos where random people are the main subject.
    Order them: first = the most striking cover photo. If fewer than 3 photos qualify, return {{"photos": []}}.
 2) Write in {lang}:
-   - "why": one-line reason to go THIS weekend (season/weather angle). max {lim['why']} chars.
-   - for each chosen photo "cap": what the photo shows, max {lim['cap']} chars (no facts beyond the photo).
-   - "tip": one practical tip using only the weather or the facts above (e.g. best time of day, what to wear). No new prices, hours, names. max {lim['tip']} chars.
+   - "why": one-line reason to go THIS weekend, true to the season reality and the weather (never claim peak foliage/blossoms unless the season note says so). max {lim['why']} chars.
+   - for each chosen photo "cap": an inviting label of what the view is (e.g. "{'호수 위 노을' if ko else 'Golden hour on the bluffs'}"), not a dry description; never mention "person/people". max {lim['cap']} chars.
+   - "tip": one practical tip about timing, clothing or what to bring, based on the weekend weather. Do NOT repeat the directions, hours or fees above, and add no new facts. max {lim['tip']} chars.
    - "aside": deadpan dry one-liner by the bored red panda mascot "Red Denva", related to the place or weather. max {lim['aside']} chars. No emoji, no exclamation marks.
 Return ONLY JSON: {{"photos": [{{"i": index, "cap": "...", "fx": 0..1, "fy": 0..1}}, ...3], "why": "...", "tip": "...", "aside": "..."}}
 (fx, fy = where the main subject is, as a fraction of width/height, for cropping)."""
