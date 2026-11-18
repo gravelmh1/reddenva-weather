@@ -1,0 +1,22 @@
+name: trip-sample
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python tools/trip_sample.py
+      - name: samples 브랜치에 저장
+        run: |
+          mkdir /tmp/s && cp -r samples/trip /tmp/s/
+          git config user.name "github-actions"; git config user.email "actions@users.noreply.github.com"
+          git fetch origin samples || true
+          git checkout -B samples origin/samples 2>/dev/null || git checkout --orphan samples
+          git rm -rq --cached . 2>/dev/null || true
+          rm -rf trip && cp -r /tmp/s/trip trip && git add trip && git commit -qm "trip samples" && git push -q origin samples
