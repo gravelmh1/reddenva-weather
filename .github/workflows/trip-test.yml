@@ -1,0 +1,33 @@
+name: trip-test
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        type: choice
+        options: [kr, us]
+        default: kr
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 폰트 설치
+        run: sudo apt-get update -y && sudo apt-get install -y fonts-noto-cjk
+      - run: pip install -r requirements.txt
+      - name: 주말 여행 카드 (테스트, 게시 안 함)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python trips.py --region ${{ inputs.region }} --dry-run --force
+      - name: samples 브랜치에 저장
+        if: always()
+        run: |
+          mkdir -p /tmp/s && cp out/trip-*.jpg /tmp/s/ 2>/dev/null || true
+          git config user.name "github-actions"; git config user.email "actions@users.noreply.github.com"
+          git fetch origin samples && git checkout -B samples origin/samples
+          mkdir -p tripout && rm -f tripout/${{ inputs.region }}-* && for f in /tmp/s/*.jpg; do cp "$f" "tripout/${{ inputs.region }}-$(basename $f)"; done
+          git add tripout && git commit -qm "trip test ${{ inputs.region }}" && git push -q origin samples || true

@@ -1,5 +1,5 @@
 name: post-kr
-# Make가 깨우는 단 하나의 워크플로. 아침에는 날씨, 낮 12~13시대에는 주간 카드(월: 책, 화: 좋은 뉴스, 수: 강아지)를 만들고
+# Make가 깨우는 단 하나의 워크플로. 아침에는 날씨, 낮 12~13시대에는 주간 카드(월 책, 화 좋은 뉴스, 수 아기 동물, 목 파생 브리핑, 금 주말 여행)를 만들고
 # out/kr-post.json 에 "지금 올릴 카드"를 적어 둔다. Make는 3분 20초 뒤 그 파일만 읽어 Instagram에 올린다.
 on:
   workflow_dispatch:
@@ -64,6 +64,12 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: python animals.py --region kr ${{ inputs.dry_run && '--dry-run --force' || '' }}
+      - name: (주간) 주말 여행 카드 만들기 (금요일에만 실제 실행)
+        if: ${{ steps.slot.outputs.slot == 'weekly' }}
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: python trips.py --region kr ${{ inputs.dry_run && '--dry-run --force' || '' }}
       - name: Make가 읽을 파일(post.json) 쓰기
         if: ${{ always() && !inputs.dry_run && steps.slot.outputs.slot != '' }}
         run: |
@@ -76,7 +82,7 @@ jobs:
         env:
           THREADS_TOKEN_KR: ${{ secrets.THREADS_TOKEN_KR }}
         run: |
-          if [ "${{ steps.slot.outputs.slot }}" = "weather" ]; then python threads_post.py --region kr; else python threads_post.py --region kr --kind books-; python threads_post.py --region kr --kind news-; python threads_post.py --region kr --kind puppy-; python threads_post.py --region kr --kind deriv-; fi
+          if [ "${{ steps.slot.outputs.slot }}" = "weather" ]; then python threads_post.py --region kr; else python threads_post.py --region kr --kind books-; python threads_post.py --region kr --kind news-; python threads_post.py --region kr --kind puppy-; python threads_post.py --region kr --kind deriv-; python threads_post.py --region kr --kind trip-; fi
           git add state
           git diff --cached --quiet || (git commit -q -m "kr threads posted" && git pull --rebase -q && git push -q)
       - name: 테스트 카드 보관 (dry-run일 때)

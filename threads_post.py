@@ -32,7 +32,7 @@ def main():
     me = r.json()
     os.environ[f"THREADS_USER_ID_{a.region.upper()}"] = me["id"]
     if meta.get("image_url2"):
-        pid = publish.threads_carousel(a.region, [meta["image_url"], meta["image_url2"]], meta["caption"])
+        pid = publish.threads_carousel(a.region, [u for u in (meta["image_url"], meta["image_url2"], meta.get("image_url3")) if u], meta["caption"])
     else:
         pid = publish.threads(a.region, meta["image_url"], meta["caption"])
     print(f"Threads 게시 완료: @{me.get('username')} {pid}")
