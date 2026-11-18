@@ -3,8 +3,8 @@ import json, os, re, requests, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from animals import commons, UA
 SPOTS = {
-    "kr": [("덕수궁 돌담길", "Deoksugung Doldam-gil", 37.5658, 126.9752), ("서울숲", "Seoul Forest autumn", 37.5444, 127.0374),
-           ("하늘공원", "Haneul Park Seoul silver grass", 37.5684, 126.8851), ("창경궁", "Changgyeonggung autumn", 37.5794, 126.9948)],
+    "kr": [("덕수궁 돌담길", "Deoksugung Doldam-gil", 37.5658, 126.9752), ("서울숲", "Seoul Forest", 37.5444, 127.0374),
+           ("북촌 한옥마을", "Bukchon Hanok Village", 37.5826, 126.9830), ("창경궁", "Changgyeonggung", 37.5794, 126.9948), ("낙산공원", "Naksan Park Seoul", 37.5806, 127.0076), ("석촌호수", "Seokchon Lake", 37.5096, 127.1036)],
     "us": [("Descanso Gardens", "Descanso Gardens", 34.2015, -118.2104), ("Joshua Tree", "Joshua Tree National Park", 33.8734, -115.9010),
            ("Ojai", "Ojai Valley", 34.4480, -119.2429), ("Huntington Library", "Huntington Library gardens", 34.1290, -118.1145)],
 }
@@ -19,7 +19,8 @@ for reg, spots in SPOTS.items():
             if r.ok:
                 fn = f"samples/trip/{reg}_{re.sub(r'\\W+', '_', name)}_{i}.jpg"; open(fn, "wb").write(r.content); files.append(dict(c, file=fn))
         unit = "celsius" if reg == "kr" else "fahrenheit"
-        w = requests.get("https://api.open-meteo.com/v1/forecast", timeout=30, params={"latitude": lat, "longitude": lon, "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code", "timezone": "auto", "forecast_days": 7, "temperature_unit": unit}).json().get("daily")
+        try: w = requests.get("https://api.open-meteo.com/v1/forecast", timeout=30, params={"latitude": lat, "longitude": lon, "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code", "timezone": "auto", "forecast_days": 7, "temperature_unit": unit}).json().get("daily")
+        except Exception as e: print("날씨 실패", e); w = None
         meta[f"{reg}|{name}"] = dict(files=files, weather=w)
         print(reg, name, len(files))
 json.dump(meta, open("samples/trip/meta.json", "w"), ensure_ascii=False, indent=1)
