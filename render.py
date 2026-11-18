@@ -58,7 +58,7 @@ def palette(grp, hi_c, lo_c):
     return (255, 233, 199), (255, 214, 168)
 
 
-def card(out, region, now, p, f, cp, city):
+def card_old(out, region, now, p, f, cp, city):
     """폰 화면(인스타 피드)에서 읽히도록 글자를 크게 잡은 레이아웃."""
     lang = cp["lang"]; unit = f["unit"]; u = "°C" if unit == "C" else "°F"
     days = p["days"]; t = f["today"]
@@ -143,4 +143,104 @@ def card(out, region, now, p, f, cp, city):
             d.rounded_rectangle([xx - w2 / 2 - 10, ly + 50, xx + w2 / 2 + 10, ly + 88], radius=19, fill=BLUE + (255,))
             d.text((xx - w2 / 2, ly + 51), tt, font=fw, fill="white")
     d.rectangle([0, H - 22, W, H], fill=ORANGE + (255,))
+    im.save(out, "JPEG", quality=92)
+
+
+# ---------------- 시안 B (2026-11-17 형 확정): 남색 띠 + 달력 날짜, 출근길 어제→오늘 비교, 어제부터 시작하는 주간 ----------------
+INK = (18, 30, 52); SUB = (92, 102, 122); UP = (214, 66, 26); DN = (24, 96, 200); OK = (36, 128, 84)
+BAND = (20, 40, 78); BG = (244, 246, 250); SAT = (24, 96, 200); SUN = (214, 40, 40)
+WD_EN = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+
+def _ctext(d, cx, y, t, fn, fill):
+    d.text((cx - d.textlength(t, font=fn) / 2, y), t, font=fn, fill=fill)
+
+
+def _week(d, x0, x1, y, h, cols, ko):
+    """cols: [(day dict, kind)] kind = 'yday' | 'today' | 'next'"""
+    n = len(cols); cw = (x1 - x0) / n
+    hi = [z["hi"] for z, _ in cols]; lo = [z["lo"] for z, _ in cols]
+    vmin, vmax = min(lo), max(hi)
+    has_rain = any(z["rain"] >= 50 for z, k in cols if k == "next")
+    top, bot = y + 112, y + h - (84 if has_rain else 56)
+    sc = lambda v: bot - (v - vmin) / max(1, vmax - vmin) * (bot - top)
+    for i, (z, kind) in enumerate(cols):
+        cx = x0 + cw * (i + .5); wdi = dt.date.fromisoformat(z["date"]).weekday()
+        if kind == "today":
+            d.rounded_rectangle([cx - cw / 2 + 6, y, cx + cw / 2 - 6, y + h], radius=20, fill=(255, 236, 224))
+            lab, lc = ("오늘" if ko else "Today"), UP
+        elif kind == "yday":
+            lab, lc = ("어제" if ko else "Yest."), SUB
+        else:
+            lab = "월화수목금토일"[wdi] if ko else WD_EN[wdi]
+            lc = SAT if wdi == 5 else SUN if wdi == 6 else INK
+        _ctext(d, cx, y + 12, lab, font("Bold", 34 if n <= 7 else 30), lc)
+        faded = kind == "yday"
+        bar = (205, 210, 220) if faded else (255, 170, 120)
+        d.rounded_rectangle([cx - 9, sc(z["hi"]), cx + 9, sc(z["lo"])], radius=9, fill=bar)
+        _ctext(d, cx, sc(z["hi"]) - 44, f"{z['hi']}°", font("Bold", 32), SUB if faded else UP)
+        _ctext(d, cx, sc(z["lo"]) + 6, f"{z['lo']}°", font("Bold", 32), SUB if faded else DN)
+        if kind == "next" and z["rain"] >= 50:
+            _ctext(d, cx, y + h - 44, ("비 " if ko else "") + f"{z['rain']}%", font("Bold", 28), DN)
+
+
+def card(out, region, now, p, f, cp, city):
+    ko = cp["lang"] == "ko"; t = f["today"]
+    im = Image.new("RGB", (W, H), BG); d = ImageDraw.Draw(im)
+    # 머리: 남색 띠 + 달력 타일 + 요일
+    d.rectangle([0, 0, W, 300], fill=BAND)
+    d.rounded_rectangle([64, 52, 264, 252], radius=28, fill="white")
+    d.rounded_rectangle([64, 52, 264, 102], radius=28, fill=UP); d.rectangle([64, 80, 264, 102], fill=UP)
+    _ctext(d, 164, 56, f"{now.month}월" if ko else now.strftime("%b").upper(), font("Bold", 34), "white")
+    _ctext(d, 164, 96, str(now.day), font("Black", 120), INK)
+    wd = ("월화수목금토일"[now.weekday()] + "요일") if ko else now.strftime("%A")
+    d.text((300, 70), wd, font=fit(d, wd, "Black", 92, W - 300 - 330, 50), fill="white")
+    cname = "서울" if ko else ("Los Angeles" if city == "Los Angeles" else city)
+    d.text((304, 186), f"{cname} · {'오늘의 날씨' if ko else 'Today'}", font=font("Bold", 38), fill=(190, 205, 230))
+    pose = Image.open(os.path.join(HERE, "assets", "poses", cp["pose"] + ".png")).convert("RGBA")
+    s = min(300 / pose.width, 270 / pose.height)
+    pose = pose.resize((int(pose.width * s), int(pose.height * s)), Image.LANCZOS).filter(ImageFilter.UnsharpMask(2, 60, 3))
+    im.paste(pose, (W - 40 - pose.width, 330 - pose.height), pose); d = ImageDraw.Draw(im)
+
+    # 출근길(아침 7~9시) 어제 → 오늘
+    cy = 336; dm = f["d_morn"]
+    d.rounded_rectangle([40, cy, W - 40, cy + 330], radius=32, fill="white")
+    d.text((80, cy + 28), "출근길 아침 7~9시" if ko else "Morning commute 7–9am", font=font("Bold", 36), fill=SUB)
+    col = UP if (dm or 0) > 0 else DN if (dm or 0) < 0 else OK
+    if dm is not None:
+        d.text((80, cy + 86), "어제 아침" if ko else "Yesterday", font=font("Bold", 34), fill=SUB)
+        d.text((76, cy + 130), f"{f['morning'] - dm}°", font=font("Black", 112), fill=SUB)
+        _ctext(d, 330, cy + 160, "→", font("Bold", 72), SUB)
+        d.text((400, cy + 86), "오늘" if ko else "Today", font=font("Bold", 34), fill=SUB)
+        d.text((396, cy + 112), f"{f['morning']}°", font=font("Black", 140), fill=col)
+        bx0, bx1 = 690, W - 80
+        d.rounded_rectangle([bx0, cy + 96, bx1, cy + 290], radius=28, fill=col)
+        if dm == 0:
+            _ctext(d, (bx0 + bx1) / 2, cy + 120, "＝", font("Black", 84), "white")
+            sub = "어제랑 같아요" if ko else "same"
+        else:
+            _ctext(d, (bx0 + bx1) / 2, cy + 112, f"{'▲' if dm > 0 else '▼'} {abs(dm)}°", font("Black", 84), "white")
+            sub = ("어제보다 " + ("따뜻해요" if dm > 0 else "추워요")) if ko else ("warmer" if dm > 0 else "colder")
+        _ctext(d, (bx0 + bx1) / 2, cy + 226, sub, fit(d, sub, "Bold", 34, bx1 - bx0 - 30, 26), "white")
+    else:
+        d.text((76, cy + 96), f"{f['morning']}°", font=font("Black", 160), fill=INK)
+
+    # 낮 최고 / 밤 최저 + 우산·옷차림
+    y = cy + 360
+    d.text((64, y), f"{'낮 최고' if ko else 'High'} {t['hi']}°", font=font("Bold", 48), fill=UP)
+    d.text((440, y), f"{'밤 최저' if ko else 'Low'} {t['lo']}°", font=font("Bold", 48), fill=DN)
+    y += 84
+    rows = [r for r in (cp["card_rows"] if cp.get("compare") else cp["rows"]) if not r[0].startswith(("어제", "vs"))][:2]
+    lab_w = 170
+    for lab, txt in rows:
+        d.rounded_rectangle([64, y, 64 + lab_w, y + 58], radius=14, fill=(226, 232, 242))
+        _ctext(d, 64 + lab_w / 2, y + 7, lab, fit(d, lab, "Bold", 32, lab_w - 16, 24), INK)
+        d.text((64 + lab_w + 24, y + 4), txt, font=fit(d, txt, "Bold", 40, W - 128 - lab_w - 24, 30), fill=INK)
+        y += 76
+
+    # 주간: 어제 → 오늘(강조) → 다음 5일, 토 파랑·일 빨강
+    cols = ([(p["yday"], "yday")] if p.get("yday") else []) + [(p["days"][0], "today")] + [(z, "next") for z in p["days"][1:]]
+    cols = cols[:7]
+    d.rounded_rectangle([40, y + 4, W - 40, H - 40], radius=32, fill="white")
+    _week(d, 64, W - 64, y + 20, H - 56 - (y + 20), cols, ko)
     im.save(out, "JPEG", quality=92)
