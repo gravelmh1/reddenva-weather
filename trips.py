@@ -114,13 +114,13 @@ Today: {today.isoformat()}. Season reality check: {season_note(region, today)}. 
 1) From the photos choose exactly 3 that best SELL a visit: real photos of THIS place, beautiful, sharp, well lit, different views (no near-duplicates).
    The photos must look like what a visitor would see THIS weekend: reject photos that clearly show a different season (e.g. lush summer green or spring blossoms in late autumn/winter, snow in summer). Season-neutral views (buildings, sea, rocks, sky, night) are fine.
    Reject: maps, signs/station boards, shop interiors, close-up faces, watermarks/big text, construction, animals in cages, blurry or dark photos. Avoid photos where random people are the main subject.
-   Order them: first = the most striking cover photo. If fewer than 3 photos qualify, return {{"photos": []}}.
+   Order them: first = the most striking cover photo. Rate honestly how much the 3 photos together make people want to go, 1-10, as "score" (10 = travel magazine quality; dull alleys, gray skies, clutter, wires = low). If fewer than 3 photos qualify or the score is below 7, return {{"photos": [], "score": n}}.
 2) Write in {lang}:
    - "why": one-line reason to go THIS weekend, true to the season reality and the weather (never claim peak foliage/blossoms unless the season note says so). max {lim['why']} chars.
    - for each chosen photo "cap": an inviting label of what the view is (e.g. "{'호수 위 노을' if ko else 'Golden hour on the bluffs'}"), not a dry description; never mention "person/people". max {lim['cap']} chars.
    - "tip": one practical tip about timing, clothing or what to bring, based on the weekend weather. Do NOT repeat the directions, hours or fees above, and add no new facts. max {lim['tip']} chars.
    - "aside": deadpan dry one-liner by the bored red panda mascot "Red Denva", related to the place or weather. max {lim['aside']} chars. No emoji, no exclamation marks.
-Return ONLY JSON: {{"photos": [{{"i": index, "cap": "...", "fx": 0..1, "fy": 0..1}}, ...3], "why": "...", "tip": "...", "aside": "..."}}
+Return ONLY JSON: {{"score": 1..10, "photos": [{{"i": index, "cap": "...", "fx": 0..1, "fy": 0..1}}, ...3], "why": "...", "tip": "...", "aside": "..."}}
 (fx, fy = where the main subject is, as a fraction of width/height, for cropping)."""
     last = None
     for m in models(key)[:4] * 2:
@@ -130,7 +130,7 @@ Return ONLY JSON: {{"photos": [{{"i": index, "cap": "...", "fx": 0..1, "fy": 0..
         try:
             j = json.loads(re.sub(r"^```json|```$", "", r.json()["candidates"][0]["content"]["parts"][0]["text"].strip()).strip())
             ph = j.get("photos") or []
-            if not ph: print("  사진 부족 판정:", m); return None
+            if not ph or int(j.get("score", 10)) < 7: print("  사진 부족/매력 부족 판정:", m, j.get("score")); return None
             ids = [int(p["i"]) for p in ph[:3]]
             assert len(set(ids)) == 3 and all(0 <= i < len(cands) for i in ids)
             for k in ("why", "tip", "aside"):

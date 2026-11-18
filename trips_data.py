@@ -48,7 +48,7 @@ KR = [
     dict(name="뚝섬한강공원", area="서울 광진구", lat=37.5296, lon=127.0687, seasons="spring summer fall", indoor=False,
          how="7호선 자양역 2·3번 출구", hours="", fee="무료", course="자벌레 전망대 → 강변 피크닉",
          q=["Ttukseom Hangang Park", "Hangang Park Seoul"]),
-    dict(name="익선동 한옥거리", area="서울 종로구", lat=37.5743, lon=126.9897, seasons="spring summer fall winter", indoor=True,
+    dict(name="익선동 한옥거리", area="서울 종로구", lat=37.5743, lon=126.9897, seasons="spring summer fall winter", indoor=False,
          how="1·3·5호선 종로3가역 4번 출구", hours="", fee="무료", course="익선동 골목 → 종로 카페 → 낙원상가",
          q=["Ikseon-dong", "Ikseon-dong hanok"]),
     dict(name="국립현대미술관 서울", area="서울 종로구", lat=37.5786, lon=126.9800, seasons="spring summer fall winter", indoor=True,
