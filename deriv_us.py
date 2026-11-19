@@ -4,6 +4,7 @@
 결과: out/deriv-us-YYYY-MM-DD-1.jpg, -2.jpg, out/deriv-us-latest.json (image_url, image_url2)
 """
 import argparse, datetime as dt, io, json, os, subprocess, time
+from datetile import stamp_png
 from zoneinfo import ZoneInfo
 import requests
 import matplotlib
@@ -76,9 +77,9 @@ def render(D, out1, out2):
         return fig, fy, T
 
     def head(fig, fy, T, n):
-        T(0.055, 46, f"DERIVATIVES WEEKLY   ·   @reddenva.us   ·   {n}/2", 15, "bold", GOLD)
-        T(0.055, 78, "Thursday Derivatives Briefing", 31, "black")
-        T(0.055, 132, f"As of {lab(BASE)} US close  ·  E-mini S&P 500, front month", 14.5, c=GR)
+        T(0.19, 46, f"DERIVATIVES WEEKLY   ·   @reddenva.us   ·   {n}/2", 15, "bold", GOLD)
+        T(0.19, 78, "Thursday Derivatives Briefing", 28, "black")
+        T(0.19, 132, f"As of {lab(BASE)} US close  ·  E-mini S&P 500, front month", 14.5, c=GR)
         fig.add_artist(plt.Line2D([0.055, 0.945], [fy(170), fy(170)], color=GOLD, lw=2))
         im = Image.open(f"assets/poses/{'a06' if n == 1 else 'a15'}.png").convert("RGBA"); im = im.crop(im.getbbox())
         h = 150; w = im.width * h / im.height
@@ -122,7 +123,7 @@ def render(D, out1, out2):
     axb.axhline(0, color=GR, lw=0.8); style(axb); axb.set_xlim(-0.6, len(post) + 3); axb.set_xticks(ticks); axb.set_xticklabels(tl, color=GR)
     axb.annotate(f"{last['basis']:+.1f}", (x[-1], last["basis"]), xytext=(4, 4), textcoords="offset points", color=UP if last["basis"] > 0 else DN, fontsize=12, fontweight="bold")
     T(0.055, Hp - 34, "Sources: FRED (S&P 500, VIX, 10Y), Yahoo Finance (ES)", 11.5, c=GR)
-    fig.savefig("/tmp/_d1.png", facecolor=BG); plt.close(fig)
+    fig.savefig("/tmp/_d1.png", facecolor=BG); plt.close(fig); stamp_png("/tmp/_d1.png", "us")
 
     cot = sorted(D["cot"], key=lambda c: c["report_date_as_yyyy_mm_dd"]); cd = [P(c["report_date_as_yyyy_mm_dd"]) for c in cot]
     net = {k: [int(c[f"{p}_long{s}"]) - int(c[f"{p}_short{s}"]) for c in cot] for k, p, s in (("lev", "lev_money_positions", ""), ("am", "asset_mgr_positions", ""), ("dl", "dealer_positions", "_all"))}
@@ -155,7 +156,7 @@ def render(D, out1, out2):
     for i, v in enumerate(debit): ax3.text(i, v + 0.01, f"{v:.2f}", ha="center", va="bottom", fontsize=10.5, color=WH if i == len(debit) - 1 else GR, fontweight="bold" if i == len(debit) - 1 else "regular")
     style(ax3); ax3.set_ylim(min(debit) * 0.9, max(debit) * 1.06); ax3.set_xticks(bx); ax3.set_xticklabels([f"{d:%b}\n{d:%y}" if d.month == 1 or i == 0 else f"{d:%b}" for i, d in enumerate(fmo)], color=GR, fontsize=11); ax3.set_yticks([])
     T(0.055, Hp - 34, "Sources: CFTC Traders in Financial Futures, FINRA margin statistics", 11.5, c=GR)
-    fig.savefig("/tmp/_d2.png", facecolor=BG); plt.close(fig)
+    fig.savefig("/tmp/_d2.png", facecolor=BG); plt.close(fig); stamp_png("/tmp/_d2.png", "us")
     for src, dst in (("/tmp/_d1.png", out1), ("/tmp/_d2.png", out2)): Image.open(src).convert("RGB").save(dst, quality=92)
     cap = (f"📊 Thursday Derivatives Briefing · S&P 500 futures, basis, VIX, CFTC positioning, margin debt · as of {lab(BASE)}\n\n"
            "#SP500 #ESfutures #futures #derivatives #VIX #COT #margindebt #reddenva")

@@ -1,15 +1,14 @@
 """수요일 아기 동물 카드(1080x1350). 사진 한 장 크게 + 이름 + 시큰둥한 한 줄."""
 import os
 from PIL import Image, ImageDraw
+from datetile import cream_header
 from render import font, fit
 from news_render import W, H, M, CREAM, NAVY, OR, GR, POSES
 
 
 def card(c: dict, out: str):
     im = Image.new("RGB", (W, H), CREAM); d = ImageDraw.Draw(im)
-    d.text((M, 70), c["top"], font=font("Bold", 26), fill=NAVY)
-    hf = font("Bold", 26); d.text((W - M - d.textlength(c["handle"], font=hf), 70), c["handle"], font=hf, fill=OR)
-    d.line([(M, 120), (W - M, 120)], fill=NAVY, width=3)
+    cream_header(im, d, c, W, M, NAVY, OR)
     # 사진: 가운데(또는 지정 위치) 기준으로 꽉 채워 자르기, 둥근 모서리
     pw, ph = W - 2 * M, 790
     p = Image.open(c["photo"]).convert("RGB"); sc = max(pw / p.width, ph / p.height)

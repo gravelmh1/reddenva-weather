@@ -24,10 +24,17 @@ def _grad(im, y0, y1, a1=215):
     return Image.alpha_composite(im.convert("RGBA"), ov)
 
 
+_DAY = {"day": None, "ko": True}
+
+
 def _top(d, head, handle, n):
-    M = 48
+    M = 48; x = M
+    from datetile import tile
+    if _DAY["day"]:
+        tile(d, M, 32, 104, _DAY["day"], _DAY["ko"]); x += 122
+        head = head.split(" · ")[0]
     tw = d.textlength(head, font=font("Bold", 30))
-    d.rounded_rectangle([M, 40, M + tw + 40, 96], radius=28, fill=(18, 30, 52, 210)); d.text((M + 20, 47), head, font=font("Bold", 30), fill="white")
+    d.rounded_rectangle([x, 40, x + tw + 40, 96], radius=28, fill=(18, 30, 52, 210)); d.text((x + 20, 47), head, font=font("Bold", 30), fill="white")
     h = f"{handle}  {n}/3"; hw = d.textlength(h, font=font("Bold", 30))
     d.rounded_rectangle([W - M - hw - 40, 40, W - M, 96], radius=28, fill=(255, 255, 255, 225)); d.text((W - M - hw - 20, 47), h, font=font("Bold", 30), fill=ORANGE)
 
@@ -67,6 +74,7 @@ def _photo_slide(ph, head, handle, n):
 
 def carousel(region, today, spot, w, ph, j, outs):
     ko = region == "kr"
+    _DAY.update(day=today, ko=ko)
     head = f"WEEKEND PICK · {today.month}.{today.day} ({'월화수목금토일'[today.weekday()]})" if ko else f"WEEKEND PICK · {today.strftime('%a').upper()}, {today.strftime('%b').upper()} {today.day}"
     handle = "@reddenva.kr" if ko else "@reddenva.us"; M = 56
     # 1장: 표지

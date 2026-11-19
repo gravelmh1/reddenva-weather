@@ -1,6 +1,7 @@
 """좋은 소식 카드(1080x1350). 한국판/미국판 공용."""
 import os
 from PIL import Image, ImageDraw
+from datetile import cream_header
 from render import font, wrap, fit
 
 W, H, M = 1080, 1350, 84
@@ -16,9 +17,7 @@ def _pose(im, name, box, x, y_bottom=None, y=None, scale=1.0):
 
 def card(c: dict, out: str):
     im = Image.new("RGB", (W, H), CREAM); d = ImageDraw.Draw(im)
-    d.text((M, 70), c["top"], font=font("Bold", 26), fill=NAVY)
-    hf = font("Bold", 26); d.text((W - M - d.textlength(c["handle"], font=hf), 70), c["handle"], font=hf, fill=OR)
-    d.line([(M, 120), (W - M, 120)], fill=NAVY, width=3)
+    cream_header(im, d, c, W, M, NAVY, OR)
     bf = font("Bold", 30); bw = int(d.textlength(c["badge"], font=bf)) + 64
     d.rounded_rectangle([M, 156, M + bw, 214], radius=29, fill=OR); d.text((M + bw / 2, 185), c["badge"], font=bf, fill="white", anchor="mm")
     # 히어로 숫자
@@ -53,9 +52,7 @@ def card(c: dict, out: str):
 def card3(c: dict, out: str):
     """주간 좋은 뉴스 TOP 3 카드."""
     im = Image.new("RGB", (W, H), CREAM); d = ImageDraw.Draw(im)
-    d.text((M, 70), c["top"], font=font("Bold", 26), fill=NAVY)
-    hf = font("Bold", 26); d.text((W - M - d.textlength(c["handle"], font=hf), 70), c["handle"], font=hf, fill=OR)
-    d.line([(M, 120), (W - M, 120)], fill=NAVY, width=3)
+    cream_header(im, d, c, W, M, NAVY, OR)
     bf = font("Bold", 30); bw = int(d.textlength(c["badge"], font=bf)) + 64
     d.rounded_rectangle([M, 156, M + bw, 214], radius=29, fill=OR); d.text((M + bw / 2, 185), c["badge"], font=bf, fill="white", anchor="mm")
     d.text((M, 236), c["title"], font=fit(d, c["title"], "Black", 62, W - 2 * M - 200, 36), fill=NAVY)
