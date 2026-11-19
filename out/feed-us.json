@@ -1,0 +1,61 @@
+{
+ "region": "us",
+ "updated": "2026-11-19T16:54:22Z",
+ "categories": [
+  {
+   "series": "books",
+   "label": "Book of the week"
+  },
+  {
+   "series": "news",
+   "label": "Good news"
+  },
+  {
+   "series": "animal",
+   "label": "Baby animal"
+  },
+  {
+   "series": "deriv",
+   "label": "Derivatives brief"
+  },
+  {
+   "series": "trip",
+   "label": "Weekend trip"
+  }
+ ],
+ "items": [
+  {
+   "series": "animal",
+   "label": "Baby animal",
+   "date": "2026-11-18",
+   "date_label": "Wed, Nov 18, 2026",
+   "title": "Baby animal of the week: Koala joey",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/puppy-us-2026-11-18.jpg"
+   ]
+  },
+  {
+   "series": "news",
+   "label": "Good news",
+   "date": "2026-11-17",
+   "date_label": "Tue, Nov 17, 2026",
+   "title": "This week's good news: Top 3 · Nov 17, 2026",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/news-us-2026-11-17.jpg"
+   ]
+  },
+  {
+   "series": "books",
+   "label": "Book of the week",
+   "date": "2026-11-16",
+   "date_label": "Mon, Nov 16, 2026",
+   "title": "Last week's #3 on the NYT Hardcover Fiction list: The Calamity Club by Kathryn Stockett",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/books-us-2026-11-16.jpg"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,73 @@
+{
+ "region": "kr",
+ "updated": "2026-11-19T16:54:22Z",
+ "categories": [
+  {
+   "series": "books",
+   "label": "이번 주 책"
+  },
+  {
+   "series": "news",
+   "label": "좋은 뉴스"
+  },
+  {
+   "series": "animal",
+   "label": "아기 동물"
+  },
+  {
+   "series": "deriv",
+   "label": "파생 브리핑"
+  },
+  {
+   "series": "trip",
+   "label": "주말 여행"
+  }
+ ],
+ "items": [
+  {
+   "series": "deriv",
+   "label": "파생 브리핑",
+   "date": "2026-11-19",
+   "date_label": "2026.11.19 (목)",
+   "title": "목요일 파생 브리핑 · 11/18(수) 마감 기준 · 투자 권유 아님",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/deriv-kr-2026-11-19-1.jpg",
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/deriv-kr-2026-11-19-2.jpg"
+   ]
+  },
+  {
+   "series": "animal",
+   "label": "아기 동물",
+   "date": "2026-11-18",
+   "date_label": "2026.11.18 (수)",
+   "title": "이번 주 아기 동물: 아기 코알라",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/puppy-kr-2026-11-18.jpg"
+   ]
+  },
+  {
+   "series": "news",
+   "label": "좋은 뉴스",
+   "date": "2026-11-17",
+   "date_label": "2026.11.17 (화)",
+   "title": "이번 주 좋은 뉴스 TOP 3 · 2026.11.17",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/news-kr-2026-11-17.jpg"
+   ]
+  },
+  {
+   "series": "books",
+   "label": "이번 주 책",
+   "date": "2026-11-16",
+   "date_label": "2026.11.16 (월)",
+   "title": "《무정》 이광수",
+   "text": "근대 지식인 교사 이형식은 정혼자인 기녀 박영채와 제자 김선형 사이에서 갈등한다. 영채는 비극을 겪고 자살하려다 신여성 김병욱의 설득으로 유학을 결심한다. 세 사람은 우연히 기차에서 만나 수재민을 돕고 민족을 위한 길을 토론한다. 💬 이렇게 말하면 읽은 척 가능 “구시대의 잔재를 씻고 새로운 길을 가는 이야기죠”",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/books-kr-2026-11-16.jpg"
+   ]
+  }
+ ]
+}

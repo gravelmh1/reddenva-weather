@@ -75,6 +75,7 @@ jobs:
         run: |
           git pull --rebase -q || true
           python post_slot.py kr --write ${{ steps.slot.outputs.slot }}
+          python feed.py kr || true
           git add out
           git diff --cached --quiet || (git commit -q -m "kr post.json" && git pull --rebase -q && git push -q)
       - name: Threads 게시

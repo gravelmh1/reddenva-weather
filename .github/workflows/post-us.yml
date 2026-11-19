@@ -80,6 +80,7 @@ jobs:
         run: |
           git pull --rebase -q || true
           python post_slot.py us --write ${{ steps.slot.outputs.slot }}
+          python feed.py us || true
           git add out
           git diff --cached --quiet || (git commit -q -m "us post.json" && git pull --rebase -q && git push -q)
       - name: Threads 게시
