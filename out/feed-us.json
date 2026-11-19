@@ -1,6 +1,6 @@
 {
  "region": "us",
- "updated": "2026-11-19T16:54:22Z",
+ "updated": "2026-11-19T21:01:49Z",
  "categories": [
   {
    "series": "books",
@@ -24,6 +24,18 @@
   }
  ],
  "items": [
+  {
+   "series": "deriv",
+   "label": "Derivatives brief",
+   "date": "2026-11-19",
+   "date_label": "Thu, Nov 19, 2026",
+   "title": "Thursday Derivatives Briefing · S&P 500 futures, basis, VIX, CFTC positioning, margin debt · as of Nov 18 (Wed)",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/deriv-us-2026-11-19-1.jpg",
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/deriv-us-2026-11-19-2.jpg"
+   ]
+  },
   {
    "series": "animal",
    "label": "Baby animal",
