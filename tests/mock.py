@@ -8,6 +8,10 @@ SCENARIOS = {
     "us_warm": dict(unit="F", hi=[78, 67, 71, 73, 68, 68, 67], lo=[60, 57, 57, 58, 57, 52, 53], rain=[5, 75, 10, 10, 30, 15, 15], code=0),
     "rain": dict(unit="C", hi=[14, 12, 15, 16, 17, 15, 14], lo=[9, 8, 9, 10, 11, 9, 8], rain=[80, 60, 20, 10, 10, 30, 20], code=61),
     "cold": dict(unit="C", hi=[3, 2, 5, 7, 6, 4, 3], lo=[-5, -6, -3, -2, -1, -4, -5], rain=[0] * 7, code=0),
+    "storm": dict(unit="F", hi=[58, 62, 66, 70, 71, 68, 66], lo=[52, 50, 52, 54, 55, 53, 52], rain=[100, 70, 10, 0, 20, 60, 30],
+                  code=[65, 63, 2, 0, 3, 61, 45], mm=[38, 9, 0, 0, 0.5, 4, 0], yhi=64, ylo=55, ycode=3),
+    "kstorm": dict(unit="C", hi=[14, 12, 9, 7, 8, 5, 3], lo=[10, 8, 3, 1, 2, -1, -3], rain=[100, 80, 10, 0, 30, 70, 20],
+                   code=[95, 63, 1, 0, 3, 73, 2], mm=[42, 12, 0, 0, 1, 6, 0], yhi=13, ylo=7, ycode=61),
     "hot": dict(unit="F", hi=[96, 94, 91, 88, 85, 84, 86], lo=[70, 69, 68, 66, 64, 63, 65], rain=[0] * 7, code=0),
 }
 
@@ -19,8 +23,11 @@ def make(name: str, start: dt.date) -> dict:
     s["lo"] = [s.get("ylo", s["lo"][0] - 3)] + s["lo"]
     s["rain"] = [0] + s["rain"]
     N = 8
+    codes = s["code"] if isinstance(s["code"], list) else [s["code"]] * 7
+    codes = [s.get("ycode", codes[0])] + codes
+    mms = [0] + s.get("mm", [0] * 7)
     daily = dict(time=[], temperature_2m_max=s["hi"], temperature_2m_min=s["lo"], precipitation_probability_max=s["rain"],
-                 weather_code=[s["code"]] * N, wind_speed_10m_max=[12] * N)
+                 weather_code=codes, precipitation_sum=mms, wind_speed_10m_max=[12] * N)
     hourly = dict(time=[], temperature_2m=[], apparent_temperature=[], precipitation_probability=[], weather_code=[], wind_speed_10m=[])
     for i in range(N):
         day = start + dt.timedelta(days=i - 1)
@@ -29,5 +36,5 @@ def make(name: str, start: dt.date) -> dict:
             t = s["lo"][i] + (s["hi"][i] - s["lo"][i]) * (0.5 - 0.5 * math.cos(2 * math.pi * (h - 3) / 24))
             hourly["time"].append(f"{day.isoformat()}T{h:02d}:00")
             hourly["temperature_2m"].append(t); hourly["apparent_temperature"].append(t)
-            hourly["precipitation_probability"].append(s["rain"][i]); hourly["weather_code"].append(s["code"]); hourly["wind_speed_10m"].append(12)
+            hourly["precipitation_probability"].append(s["rain"][i]); hourly["weather_code"].append(codes[i]); hourly["wind_speed_10m"].append(12)
     return dict(daily=daily, hourly=hourly)

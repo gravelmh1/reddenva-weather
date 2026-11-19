@@ -17,7 +17,7 @@ def fetch(region: str) -> dict:
         "latitude": r["lat"], "longitude": r["lon"], "timezone": r["tz"], "forecast_days": 7, "past_days": 1,
         "temperature_unit": "celsius" if r["unit"] == "C" else "fahrenheit",
         "wind_speed_unit": "kmh" if r["unit"] == "C" else "mph",
-        "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code,wind_speed_10m_max",
+        "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,weather_code,wind_speed_10m_max",
         "hourly": "temperature_2m,apparent_temperature,precipitation_probability,weather_code,wind_speed_10m",
     }
     if key:
@@ -41,11 +41,12 @@ def to_c(v: float, unit: str) -> float:
 def parse(data: dict, today: str = None) -> dict:
     """today(YYYY-MM-DD)를 주면 그 이전 날(어제)은 비교용으로 따로 빼요."""
     d = data["daily"]
+    mm = d.get("precipitation_sum") or [0] * len(d["time"])
     days = []
     for i, date in enumerate(d["time"]):
         days.append(dict(date=date, hi=round(d["temperature_2m_max"][i]), lo=round(d["temperature_2m_min"][i]),
                          rain=int(d["precipitation_probability_max"][i] or 0), code=int(d["weather_code"][i] or 0),
-                         wind=round(d["wind_speed_10m_max"][i])))
+                         wind=round(d["wind_speed_10m_max"][i]), mm=round(float(mm[i] or 0), 1)))
     h = data["hourly"]
     hourly = {}
     for i, t in enumerate(h["time"]):

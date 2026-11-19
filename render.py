@@ -156,13 +156,87 @@ def _ctext(d, cx, y, t, fn, fill):
     d.text((cx - d.textlength(t, font=fn) / 2, y), t, font=fn, fill=fill)
 
 
+def _icon(d, cx, cy, s, code):
+    """날씨 코드 → 작은 그림 (해·구름·비·눈·번개·안개). 이모지 폰트 없이 도형으로 그린다."""
+    import math
+    SUNC, CL, CLD = (255, 176, 32), (176, 186, 202), (128, 140, 160)
+    RAIN, BOLT = (36, 112, 220), (255, 196, 0)
+
+    def sun(x, y, r):
+        for k in range(8):
+            a = k * math.pi / 4
+            d.line([x + math.cos(a) * r * 1.35, y + math.sin(a) * r * 1.35, x + math.cos(a) * r * 1.85, y + math.sin(a) * r * 1.85], fill=SUNC, width=max(3, int(s * .07)))
+        d.ellipse([x - r, y - r, x + r, y + r], fill=SUNC)
+
+    def cloud(x, y, w, col):
+        h = w * .42
+        d.ellipse([x - w * .5, y - h * .1, x - w * .05, y + h * .75], fill=col)
+        d.ellipse([x - w * .28, y - h * .75, x + w * .22, y + h * .55], fill=col)
+        d.ellipse([x + w * .02, y - h * .35, x + w * .5, y + h * .75], fill=col)
+        d.rounded_rectangle([x - w * .5, y + h * .2, x + w * .5, y + h * .75], radius=int(h * .3), fill=col)
+
+    heavy = code in (65, 67, 82, 75, 86) or code >= 95
+    if code == 0:
+        sun(cx, cy, s * .28)
+    elif code in (1, 2):
+        sun(cx + s * .16, cy - s * .14, s * .2); cloud(cx - s * .06, cy + s * .06, s * .78, CL)
+    elif code == 3:
+        cloud(cx, cy, s * .9, CLD)
+    elif code in (45, 48):
+        for k in range(4):
+            yy = cy - s * .3 + k * s * .2
+            d.rounded_rectangle([cx - s * .42 + (k % 2) * s * .08, yy, cx + s * .42 - (k % 2) * s * .08, yy + s * .09], radius=int(s * .05), fill=CL)
+    else:
+        cloud(cx, cy - s * .16, s * .9, CLD if heavy else CL)
+        base = cy + s * .2
+        if 71 <= code <= 77 or code in (85, 86):
+            for k, dx in enumerate((-.26, 0, .26)):
+                x, y, r = cx + s * dx, base + (k % 2) * s * .12, s * .07
+                d.line([x - r, y, x + r, y], fill=(90, 150, 230), width=3); d.line([x, y - r, x, y + r], fill=(90, 150, 230), width=3)
+                d.line([x - r * .7, y - r * .7, x + r * .7, y + r * .7], fill=(90, 150, 230), width=3)
+                d.line([x - r * .7, y + r * .7, x + r * .7, y - r * .7], fill=(90, 150, 230), width=3)
+        else:
+            drops = (-.3, -.1, .1, .3) if heavy else (-.22, 0, .22)
+            for k, dx in enumerate(drops):
+                x, y = cx + s * dx, base + (k % 2) * s * .1
+                d.line([x + s * .05, y, x - s * .03, y + s * .2], fill=RAIN, width=max(4, int(s * .08)))
+        if code >= 95:
+            x, y = cx + s * .02, cy - s * .02
+            d.polygon([(x, y), (x - s * .16, y + s * .26), (x - s * .02, y + s * .26), (x - s * .1, y + s * .5),
+                       (x + s * .16, y + s * .18), (x + s * .02, y + s * .18), (x + s * .08, y)], fill=BOLT)
+
+
+def alert(p, f, ko):
+    """오늘 크게 경고할 날씨가 있으면 (제목, 부제, 색) 아니면 None."""
+    t = f["today"]; hrs = p["hourly"].get(t["date"], {})
+    codes = [hrs[h]["code"] for h in range(6, 23) if h in hrs] + [t.get("code", 0)]
+    mm = t.get("mm", 0) or 0
+    amt = (f"{mm:.0f}mm" if ko else f"{mm / 25.4:.1f} in") if mm >= 1 else ""
+    wind_big = t.get("wind", 0) >= (50 if f["unit"] == "C" else 31)
+    if any(c >= 95 for c in codes):
+        return ("천둥·번개 조심" if ko else "Thunderstorms today", (((f"비 {amt} · ") if ko else f"Rain {amt} · ") if amt else "") + ("외출 땐 우산 꼭 챙기세요" if ko else "stay safe out there"), (110, 60, 170))
+    if any(c in (65, 67, 82) for c in codes) or mm >= 25:
+        return ("폭우 조심" if ko else "Heavy rain — take care", (((f"하루 {amt} · ") if ko else f"Up to {amt} · ") if amt else "") + ("길 미끄러워요, 천천히" if ko else "slick roads, slow down"), (20, 90, 200))
+    if any(c in (75, 86) for c in codes):
+        return ("폭설 조심" if ko else "Heavy snow — take care", "빙판길 미끄럼 주의" if ko else "icy roads, slow down", (60, 110, 190))
+    if any(c in (63, 81) for c in codes) or mm >= 8:
+        return ("비 많이 와요" if ko else "Steady rain today", (((f"하루 {amt} · ") if ko else f"Up to {amt} · ") if amt else "") + ("우산 필수" if ko else "bring an umbrella"), (40, 110, 210))
+    if f["hi_c"] >= 33:
+        return ("폭염 조심" if ko else "Heat warning", "물 자주 마시고 그늘로" if ko else "drink water, stay in the shade", (214, 66, 26))
+    if f["lo_c"] <= -10:
+        return ("한파 조심" if ko else "Hard freeze", "따뜻하게 꽁꽁 싸매세요" if ko else "bundle up", (24, 96, 200))
+    if wind_big:
+        return ("강풍 조심" if ko else "Strong winds", "간판·나뭇가지 조심" if ko else "watch for falling branches", (90, 100, 120))
+    return None
+
+
 def _week(d, x0, x1, y, h, cols, ko):
     """cols: [(day dict, kind)] kind = 'yday' | 'today' | 'next'"""
     n = len(cols); cw = (x1 - x0) / n
     hi = [z["hi"] for z, _ in cols]; lo = [z["lo"] for z, _ in cols]
     vmin, vmax = min(lo), max(hi)
     has_rain = any(z["rain"] >= 50 for z, k in cols if k == "next")
-    top, bot = y + 112, y + h - (84 if has_rain else 56)
+    top, bot = y + 166, y + h - (84 if has_rain else 56)
     sc = lambda v: bot - (v - vmin) / max(1, vmax - vmin) * (bot - top)
     for i, (z, kind) in enumerate(cols):
         cx = x0 + cw * (i + .5); wdi = dt.date.fromisoformat(z["date"]).weekday()
@@ -175,6 +249,7 @@ def _week(d, x0, x1, y, h, cols, ko):
             lab = "월화수목금토일"[wdi] if ko else WD_EN[wdi]
             lc = SAT if wdi == 5 else SUN if wdi == 6 else INK
         _ctext(d, cx, y + 12, lab, font("Bold", 34 if n <= 7 else 30), lc)
+        _icon(d, cx, y + 88, 54, z.get("code", 0))
         faded = kind == "yday"
         bar = (205, 210, 220) if faded else (255, 170, 120)
         d.rounded_rectangle([cx - 9, sc(z["hi"]), cx + 9, sc(z["lo"])], radius=9, fill=bar)
@@ -225,12 +300,25 @@ def card(out, region, now, p, f, cp, city):
     else:
         d.text((76, cy + 96), f"{f['morning']}°", font=font("Black", 160), fill=INK)
 
+    # 경고 배너 (폭우·뇌우·폭설·폭염·한파·강풍)
+    y = cy + 352
+    al = alert(p, f, ko)
+    if al:
+        title, sub, colr = al
+        d.rounded_rectangle([40, y, W - 40, y + 140], radius=30, fill=colr)
+        d.polygon([(84, y + 104), (122, y + 34), (160, y + 104)], fill="white")
+        _ctext(d, 122, y + 52, "!", font("Black", 44), colr)
+        d.text((190, y + 6), title, font=fit(d, title, "Black", 62, W - 40 - 190 - 30, 40), fill="white")
+        d.text((192, y + 92), sub, font=fit(d, sub, "Bold", 30, W - 40 - 192 - 30, 22), fill=(230, 238, 250))
+        y += 158
+    else:
+        y += 8
+
     # 낮 최고 / 밤 최저 + 우산·옷차림
-    y = cy + 360
     d.text((64, y), f"{'낮 최고' if ko else 'High'} {t['hi']}°", font=font("Bold", 48), fill=UP)
     d.text((440, y), f"{'밤 최저' if ko else 'Low'} {t['lo']}°", font=font("Bold", 48), fill=DN)
     y += 84
-    rows = [r for r in (cp["card_rows"] if cp.get("compare") else cp["rows"]) if not r[0].startswith(("어제", "vs"))][:2]
+    rows = [r for r in (cp["card_rows"] if cp.get("compare") else cp["rows"]) if not r[0].startswith(("어제", "vs"))][:0 if al else 2]
     lab_w = 170
     for lab, txt in rows:
         d.rounded_rectangle([64, y, 64 + lab_w, y + 58], radius=14, fill=(226, 232, 242))
