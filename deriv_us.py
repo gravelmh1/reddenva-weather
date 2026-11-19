@@ -121,7 +121,7 @@ def render(D, out1, out2):
     bv = [r["basis"] for r in post]; axb.bar(x, bv, color=[UP if v > 0 else DN for v in bv], width=0.7)
     axb.axhline(0, color=GR, lw=0.8); style(axb); axb.set_xlim(-0.6, len(post) + 3); axb.set_xticks(ticks); axb.set_xticklabels(tl, color=GR)
     axb.annotate(f"{last['basis']:+.1f}", (x[-1], last["basis"]), xytext=(4, 4), textcoords="offset points", color=UP if last["basis"] > 0 else DN, fontsize=12, fontweight="bold")
-    T(0.055, Hp - 34, "Sources: FRED (S&P 500, VIX, 10Y), Yahoo Finance (ES)  ·  Not investment advice", 11.5, c=GR)
+    T(0.055, Hp - 34, "Sources: FRED (S&P 500, VIX, 10Y), Yahoo Finance (ES)", 11.5, c=GR)
     fig.savefig("/tmp/_d1.png", facecolor=BG); plt.close(fig)
 
     cot = sorted(D["cot"], key=lambda c: c["report_date_as_yyyy_mm_dd"]); cd = [P(c["report_date_as_yyyy_mm_dd"]) for c in cot]
@@ -154,7 +154,7 @@ def render(D, out1, out2):
     ax3.bar(bx, debit, color=[GOLD if i == len(debit) - 1 else "#c9d2e3" for i in bx], width=0.65)
     for i, v in enumerate(debit): ax3.text(i, v + 0.01, f"{v:.2f}", ha="center", va="bottom", fontsize=10.5, color=WH if i == len(debit) - 1 else GR, fontweight="bold" if i == len(debit) - 1 else "regular")
     style(ax3); ax3.set_ylim(min(debit) * 0.9, max(debit) * 1.06); ax3.set_xticks(bx); ax3.set_xticklabels([f"{d:%b}\n{d:%y}" if d.month == 1 or i == 0 else f"{d:%b}" for i, d in enumerate(fmo)], color=GR, fontsize=11); ax3.set_yticks([])
-    T(0.055, Hp - 34, "Sources: CFTC Traders in Financial Futures, FINRA margin statistics  ·  Not investment advice", 11.5, c=GR)
+    T(0.055, Hp - 34, "Sources: CFTC Traders in Financial Futures, FINRA margin statistics", 11.5, c=GR)
     fig.savefig("/tmp/_d2.png", facecolor=BG); plt.close(fig)
     for src, dst in (("/tmp/_d1.png", out1), ("/tmp/_d2.png", out2)): Image.open(src).convert("RGB").save(dst, quality=92)
     cap = (f"📊 Thursday Derivatives Briefing · S&P 500 futures, basis, VIX, CFTC positioning, margin debt · as of {lab(BASE)}\n\n"
