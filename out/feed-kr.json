@@ -1,6 +1,6 @@
 {
  "region": "kr",
- "updated": "2026-11-19T21:05:31Z",
+ "updated": "2026-11-20T04:01:35Z",
  "categories": [
   {
    "series": "books",
@@ -24,6 +24,19 @@
   }
  ],
  "items": [
+  {
+   "series": "trip",
+   "label": "주말 여행",
+   "date": "2026-11-20",
+   "date_label": "2026.11.20 (금)",
+   "title": "이번 주말 서울 나들이: 서울식물원 (서울 강서구)",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/trip-kr-2026-11-20-1.jpg",
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/trip-kr-2026-11-20-2.jpg",
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/trip-kr-2026-11-20-3.jpg"
+   ]
+  },
   {
    "series": "deriv",
    "label": "파생 브리핑",
