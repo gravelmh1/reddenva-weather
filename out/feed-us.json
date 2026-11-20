@@ -1,6 +1,6 @@
 {
  "region": "us",
- "updated": "2026-11-20T16:49:25Z",
+ "updated": "2026-11-20T21:02:30Z",
  "categories": [
   {
    "series": "books",
@@ -24,6 +24,19 @@
   }
  ],
  "items": [
+  {
+   "series": "trip",
+   "label": "Weekend trip",
+   "date": "2026-11-20",
+   "date_label": "Fri, Nov 20, 2026",
+   "title": "Weekend pick from LA: Point Dume (Malibu, CA)",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/trip-us-2026-11-20-1.jpg",
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/trip-us-2026-11-20-2.jpg",
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/trip-us-2026-11-20-3.jpg"
+   ]
+  },
   {
    "series": "deriv",
    "label": "Derivatives brief",
