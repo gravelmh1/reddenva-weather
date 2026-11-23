@@ -1,6 +1,6 @@
 {
  "region": "kr",
- "updated": "2026-11-22T21:05:27Z",
+ "updated": "2026-11-23T04:01:02Z",
  "categories": [
   {
    "series": "books",
@@ -24,6 +24,17 @@
   }
  ],
  "items": [
+  {
+   "series": "books",
+   "label": "이번 주 책",
+   "date": "2026-11-23",
+   "date_label": "2026.11.23 (월)",
+   "title": "이번 주 아는 척 고전 《메밀꽃 필 무렵》 이효석",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/books-kr-2026-11-23.jpg"
+   ]
+  },
   {
    "series": "trip",
    "label": "주말 여행",
