@@ -1,6 +1,6 @@
 {
  "region": "us",
- "updated": "2026-11-23T21:03:25Z",
+ "updated": "2026-11-23T21:06:08Z",
  "categories": [
   {
    "series": "books",
@@ -24,6 +24,17 @@
   }
  ],
  "items": [
+  {
+   "series": "books",
+   "label": "Book of the week",
+   "date": "2026-11-23",
+   "date_label": "Mon, Nov 23, 2026",
+   "title": "This week's classic: The Great Gatsby by F. Scott Fitzgerald",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/books-us-2026-11-23.jpg"
+   ]
+  },
   {
    "series": "trip",
    "label": "Weekend trip",
