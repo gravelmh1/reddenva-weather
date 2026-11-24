@@ -1,6 +1,6 @@
 {
  "region": "us",
- "updated": "2026-11-24T14:05:31Z",
+ "updated": "2026-11-24T21:01:53Z",
  "categories": [
   {
    "series": "books",
@@ -24,6 +24,17 @@
   }
  ],
  "items": [
+  {
+   "series": "news",
+   "label": "Good news",
+   "date": "2026-11-24",
+   "date_label": "Tue, Nov 24, 2026",
+   "title": "This week's good news: Top 3 · Nov 24, 2026",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/news-us-2026-11-24.jpg"
+   ]
+  },
   {
    "series": "books",
    "label": "Book of the week",
