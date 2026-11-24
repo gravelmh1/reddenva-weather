@@ -1,6 +1,6 @@
 {
  "region": "kr",
- "updated": "2026-11-23T21:07:15Z",
+ "updated": "2026-11-24T04:02:10Z",
  "categories": [
   {
    "series": "books",
@@ -24,6 +24,17 @@
   }
  ],
  "items": [
+  {
+   "series": "news",
+   "label": "좋은 뉴스",
+   "date": "2026-11-24",
+   "date_label": "2026.11.24 (화)",
+   "title": "이번 주 좋은 뉴스 TOP 3 · 2026.11.24",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/news-kr-2026-11-24.jpg"
+   ]
+  },
   {
    "series": "books",
    "label": "이번 주 책",
