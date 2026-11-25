@@ -1,14 +1,16 @@
 # Red Denva 자동 게시
 
-> **현재 구조 (2026-11 기준). 아래 "준비" 이하는 처음 만들 때의 기록이라 일부는 지금과 달라요.**
+> **현재 구조 (2026-11-25 기준). 아래 "준비" 이하는 처음 만들 때의 기록이라 일부는 지금과 달라요.**
 >
-> - **게시 방아쇠는 Make.com**이에요. Make가 정해진 시각에 이 저장소의 워크플로를 깨우고(workflow_dispatch), 3분 20초 뒤 `out/*-latest.json`을 읽어 Instagram에 올려요. Threads는 깨워진 워크플로가 직접 올려요.
-> - GitHub 예약 실행(cron)은 2~5시간씩 늦게 와서 게시에는 쓰지 않아요. 날씨 워크플로의 cron은 새벽에 **예비 카드**만 만들어 둬요(06:05에 날씨 서버가 죽어 있을 때 대신 쓰임).
-> - Make가 깨우는 워크플로는 **`post-kr.yml` / `post-us.yml` 하나씩**이고, Make가 읽는 파일도 `out/kr-post.json` / `out/us-post.json` 하나씩이에요. Make 안에는 시간 수식이 없어요(주소 두 개 모두 고정). 아침이면 날씨, 현지 낮 12~13시대면 주간 카드(월: 책, 화: 좋은 뉴스)를 `post_slot.py`가 정해요.
-> - `weather-*.yml`은 새벽 예비 카드용, `weekly-*.yml`·`news-*.yml`은 손으로 시험할 때만 써요.
-> - 워크플로는 **3분 안에 끝나야** Make가 결과를 읽을 수 있어요. 느려지는 수정은 피하세요.
-> - **Instagram 직접 게시(크레딧 절약):** Make가 본문에 `"ig":"true"`를 넣어 깨우면 워크플로가 `ig_post.py`로 Instagram까지 직접 올려요. 이때 Make는 깨우기 1단계만 남겨 실행당 1크레딧만 써요. 필요한 비밀값: `IG_TOKEN_KR`, `IG_TOKEN_US`(Instagram 로그인 방식 장기 토큰, `refresh-threads.yml`이 매주 자동 연장).
-> - 서머타임: Make 일정이 뉴욕 시각 기준이라, 미국 서머타임 기간(3~11월)에는 한국판이 한 시간 일찍(날씨 05:05, 책·뉴스 12:00) 나가요. 맞추려면 Make의 한국 시나리오 시각을 한 시간 늦추면 돼요.
+> - **Make는 알람만 해요.** Make 시나리오 2개(무료 플랜 최대 2개)가 정해진 시각에 `post-kr.yml` / `post-us.yml`을 `{"dry_run":"false","ig":"true"}`로 깨워요. 실행당 1크레딧, 월 ~120크레딧.
+> - **게시는 전부 GitHub 워크플로가 직접** 해요: Instagram은 `ig_post.py`, Threads는 `threads_post.py`. 같은 날 같은 시각 카드는 `state/`에 기록해서 두 번 안 올려요.
+> - Make 시각(뉴욕 시각 기준): 미국 09:05·16:00 (=LA 06:05·13:00), 한국 16:05·23:00 (=KST 06:05·13:00), **매일**.
+> - 아침이면 날씨, 현지 낮 12~13시대면 요일 카드를 `post_slot.py`가 골라요: 월 책 · 화 좋은 뉴스 · 수 아기 동물 · 목 파생 브리핑 · 금 주말 여행 · 토 동물 상식 · 일 넷플릭스 Top 10.
+> - **새 시리즈를 추가할 때는 Make를 건드릴 필요 없어요.** 스크립트를 만들고 `post-*.yml`·`post_slot.py`·`feed.py`·Threads 줄에 추가하면 돼요. Make 시각을 바꾸기 전엔 이 저장소 최근 커밋부터 확인하세요.
+> - 토큰(GitHub Secrets): `IG_TOKEN_KR`·`IG_TOKEN_US` = Meta 시스템 사용자 토큰(EAA…, **만료 없음**, 앱 "Red Denva Weather"·비즈니스 포트폴리오 마켓브리프). `THREADS_TOKEN_*` = 60일 토큰, `refresh-threads.yml`이 매주 월요일 자동 연장.
+> - GitHub 예약 실행(cron)은 몇 시간씩 늦어서 게시에 쓰지 않아요. `weather-*.yml` cron은 새벽 예비 카드만 만들어요.
+> - 서머타임: Make 일정이 뉴욕 시각 기준이라 미국 서머타임 기간(3~11월)엔 한국판이 한 시간 일찍(05:05, 12:00) 나가요. `post_slot.py`가 12시도 주간 시각으로 처리해서 카드는 정상으로 나가요.
+> - 블로그 red-denva-market-brief(Vercel)가 `out/feed-*.json`을 읽어 시리즈 카드를 보여줘요.
 
 매일 아침 06:00에 캐릭터 날씨 카드를 만들어 Instagram과 Threads에 올려요. 사람도 Claude도 필요 없고, GitHub가 알아서 실행해요.
 
