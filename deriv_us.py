@@ -4,6 +4,7 @@
 결과: out/deriv-us-YYYY-MM-DD-1.jpg, -2.jpg, out/deriv-us-latest.json (image_url, image_url2)
 """
 import argparse, datetime as dt, io, json, os, subprocess, time
+import tags
 from datetile import stamp_png
 from zoneinfo import ZoneInfo
 import requests
@@ -159,7 +160,7 @@ def render(D, out1, out2):
     fig.savefig("/tmp/_d2.png", facecolor=BG); plt.close(fig); stamp_png("/tmp/_d2.png", "us")
     for src, dst in (("/tmp/_d1.png", out1), ("/tmp/_d2.png", out2)): Image.open(src).convert("RGB").save(dst, quality=92)
     cap = (f"📊 Thursday Derivatives Briefing · S&P 500 futures, basis, VIX, CFTC positioning, margin debt · as of {lab(BASE)}\n\n"
-           "#SP500 #ESfutures #futures #derivatives #VIX #COT #margindebt #reddenva")
+           + tags.line("us", "stockmarket", "SP500", "futures", "VIX"))
     return cap
 
 

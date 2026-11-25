@@ -7,6 +7,7 @@
 결과: out/trip-{region}-{day}-{1,2,3}.jpg, out/trip-{region}-latest.json (image_url, image_url2, image_url3)
 """
 import argparse, base64, datetime as dt, io, json, os, random, re, subprocess, time
+import tags
 from zoneinfo import ZoneInfo
 import requests
 from PIL import Image
@@ -171,8 +172,8 @@ def main():
     trips_render.carousel(region, today, spot, w, ph, j, rel)
     name = spot["name"]
     tag = re.sub(r"[^0-9A-Za-z가-힣]", "", name)
-    cap = (f"📍 이번 주말 서울 나들이: {name} ({spot['area']})\n\n#{tag} #서울나들이 #주말나들이 #서울가볼만한곳 #주말여행 #레드덴바" if ko else
-           f"📍 Weekend pick from LA: {name} ({spot['area']})\n\n#{tag} #weekendtrip #californiatravel #LAweekend #daytrip #reddenva")
+    cap = (f"📍 이번 주말 서울 나들이: {name} ({spot['area']})\n\n" + tags.line("kr", "서울가볼만한곳", tag, "서울나들이", "주말나들이") if ko else
+           f"📍 Weekend pick from LA: {name} ({spot['area']})\n\n" + tags.line("us", "thingstodoinLA", tag, "LAweekend", "californiatravel"))
     print(json.dumps(j, ensure_ascii=False)); print(cap)
     if a.dry_run: print("(dry-run) 카드 저장:", rel); return
     with open(sf, "a", encoding="utf-8") as fh: fh.write(f"{day}|{name}\n")

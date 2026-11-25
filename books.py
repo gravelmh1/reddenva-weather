@@ -2,6 +2,7 @@
 순위: 한국=알라딘 한국소설 주간 / 미국=NYT 하드커버 소설. 줄거리: 웹에서 모은 글만 근거로 Gemini가 요약(검색 기능은 안 씀).
 사용: python books.py --region kr|us [--dry-run] [--force]"""
 import argparse, datetime as dt, json, os, re, subprocess, sys, time, urllib.parse
+import tags
 from zoneinfo import ZoneInfo
 import requests
 from bs4 import BeautifulSoup
@@ -160,6 +161,7 @@ def build(region, book, j, urls, period):
         c["top"] = "WEEKLY BOOK · 고전" if ko else "WEEKLY BOOK · CLASSIC"
         c["foot1"] = c["foot1"].replace("순위: 알라딘 한국소설 주간", "고전 코너").replace("Rank: NYT Hardcover Fiction", "Classics corner")
         cap = re.sub(r"지난주 한국소설 베스트 1위", "이번 주 아는 척 고전", cap); cap = re.sub(r"Last week's #1 on the NYT Hardcover Fiction list", "This week's classic", cap)
+        cap = cap.replace("#베스트셀러", "#고전소설").replace("#bestseller", "#classicbooks")
         return c, cap
     if ko:
         c = dict(top=f"WEEKLY BOOK · {period}차", handle="@reddenva.kr", badge="지난주 한국소설 베스트 1위" if book["rank"] == 1 else f"지난주 한국소설 베스트 {book['rank']}위",
@@ -168,7 +170,7 @@ def build(region, book, j, urls, period):
                  quote=[f"“{j['quote'][0].strip('“”\"')}", f"{j['quote'][1].strip('“”\"')}”"],
                  foot1="순위: 알라딘 한국소설 주간 / 줄거리: 웹 자료 기반 AI 요약(결말 제외, 오류 가능)", foot2="마음에 들면 책도 읽어보세요")
         cap = (f"📚 지난주 한국소설 베스트 {book['rank']}위 《{book['title']}》 {book['author']}\n\n"
-               f"#{re.sub(r'[^0-9A-Za-z가-힣]', '', book['title'])} #{re.sub(r'[^0-9A-Za-z가-힣]', '', book['author'])} #베스트셀러 #책추천 #소설추천 #아는척가이드 #레드덴바")
+               + tags.line("kr", "책추천", tags.word(book["title"]), "베스트셀러", "소설추천"))
     else:
         d = dt.date.fromisoformat(book["period"]) if re.match(r"\d{4}-\d\d-\d\d", book.get("period", "")) else dt.date.today()
         c = dict(top=f"WEEKLY BOOK · NYT {d.strftime('%b %d (%a)').upper()}", handle="@reddenva.us", badge=f"Last week's #{book['rank']} fiction",
@@ -177,7 +179,7 @@ def build(region, book, j, urls, period):
                  quote=[f"“{j['quote'][0].strip('“”\"')}", f"{j['quote'][1].strip('“”\"')}”"],
                  foot1="Rank: NYT Hardcover Fiction / Summary: AI from public sources, no ending, may contain errors", foot2="If you like it, read the book")
         cap = (f"📚 Last week's #{book['rank']} on the NYT Hardcover Fiction list: {book['title']} by {book['author']}\n\n"
-               f"#{re.sub(r'[^0-9A-Za-z]', '', book['title'])} #{re.sub(r'[^0-9A-Za-z]', '', book['author'])} #bookstagram #bestseller #booktok #reddenva")
+               + tags.line("us", "booktok", tags.word(book["title"], ko=False), "bookstagram", "bestseller"))
     return c, cap
 
 
