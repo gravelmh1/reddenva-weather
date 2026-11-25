@@ -31,24 +31,34 @@ def load(region):
 def norm(s): return re.sub(r"[^0-9a-z가-힣]", "", (s or "").lower())
 
 
-def wiki(title, kind):
-    """영어 위키백과에서 작품 문서를 찾아 (영어 제목, 한국어 제목, 영어 요약, 한국어 요약)을 돌려준다. 못 찾으면 None."""
-    api = "https://en.wikipedia.org/w/api.php"
+def _page(lang, title):
+    j = requests.get(f"https://{lang}.wikipedia.org/w/api.php", headers=UA, timeout=20, params={"action": "query", "format": "json", "prop": "extracts|langlinks",
+                     "titles": title, "exintro": 1, "explaintext": 1, "lllang": "ko", "redirects": 1}).json()
+    page = next(iter(j["query"]["pages"].values()))
+    return None if "missing" in page else page
+
+
+def wiki(title, kind, year):
+    """영어 위키백과에서 넷플릭스 작품 문서를 찾아 (영어 제목, 한국어 제목, 영어 요약, 한국어 요약)을 돌려준다.
+    요약에 'Netflix'가 들어 있는 문서만 인정해서 동명 작품을 잘못 고르지 않게 한다. 못 찾으면 None."""
+    tv = [f"{title} ({y} TV series)" for y in (year, year - 1)] + [f"{title} (TV series)", f"{title} (American TV series)", f"{title} (British TV series)",
+                                                                   f"{title} (South Korean TV series)", f"{title} (miniseries)"]
+    film = [f"{title} ({y} film)" for y in (year, year - 1)] + [f"{title} (film)"]
     try:
-        s = requests.get(api, headers=UA, timeout=20, params={"action": "query", "format": "json", "list": "search", "srlimit": 5,
-                                                             "srsearch": f'"{title}" {"television series" if kind == "tv" else "film"} Netflix'}).json()
-        for hit in s.get("query", {}).get("search", []):
-            t = hit["title"]; base = re.sub(r"\s*\(.*?\)$", "", t)
-            if norm(base) != norm(title) and not norm(base).startswith(norm(title)): continue
-            p = requests.get(api, headers=UA, timeout=20, params={"action": "query", "format": "json", "prop": "extracts|langlinks", "titles": t,
-                                                                 "exintro": 1, "explaintext": 1, "lllang": "ko", "redirects": 1}).json()
-            page = next(iter(p["query"]["pages"].values())); ext = (page.get("extract") or "").strip()
-            if not re.search(r"(series|film|show|drama|documentary|movie|anime|special)", ext[:400], re.I): continue
+        cands = (tv if kind == "tv" else film) + [title]
+        s = requests.get("https://en.wikipedia.org/w/api.php", headers=UA, timeout=20, params={"action": "query", "format": "json", "list": "search", "srlimit": 5,
+                         "srsearch": f'"{title}" Netflix {"series" if kind == "tv" else "film"}'}).json()
+        cands += [h["title"] for h in s.get("query", {}).get("search", [])]
+        seen = set()
+        for t in cands:
+            if t in seen: continue
+            seen.add(t); page = _page("en", t)
+            if not page: continue
+            base = re.sub(r"\s*\(.*?\)$", "", page["title"]); ext = (page.get("extract") or "").strip()
+            if norm(base) != norm(title) or "netflix" not in ext.lower(): continue
             ko_title = (page.get("langlinks") or [{}])[0].get("*", ""); ko_ext = ""
             if ko_title:
-                k = requests.get("https://ko.wikipedia.org/w/api.php", headers=UA, timeout=20, params={"action": "query", "format": "json", "prop": "extracts",
-                                                                                                     "titles": ko_title, "exintro": 1, "explaintext": 1, "redirects": 1}).json()
-                ko_ext = (next(iter(k["query"]["pages"].values())).get("extract") or "").strip()
+                kp = _page("ko", ko_title); ko_ext = ((kp or {}).get("extract") or "").strip()
             return {"en_title": base, "ko_title": re.sub(r"\s*\(.*?\)$", "", ko_title), "en": ext[:1500], "ko": ko_ext[:1500]}
     except Exception as e:
         print("  위키백과 조회 실패:", title, str(e)[:80])
@@ -56,11 +66,11 @@ def wiki(title, kind):
 
 
 def season(row):
-    m = re.search(r"(Season|Part|Volume|Limited Series)\s*(\d+)?", row.get("season_title") or "", re.I)
-    if not m or row.get("season_title") in ("", "N/A"): return ("", "")
-    word, n = m.group(1).title(), m.group(2) or ""
-    ko = {"Season": "시즌", "Part": "파트", "Volume": "볼륨", "Limited Series": "리미티드 시리즈"}[word]
-    return (f"{ko} {n}".strip(), f"{word} {n}".strip())
+    """시즌·파트 번호가 2 이상일 때만 표시 (시즌 1·리미티드 시리즈는 굳이 안 씀)."""
+    m = re.search(r"\b(Season|Part|Volume)\s+(\d+)", row.get("season_title") or "", re.I)
+    if not m or int(m.group(2)) < 2: return ("", "")
+    word, n = m.group(1).title(), m.group(2)
+    return (f"{ {'Season': '시즌', 'Part': '파트', 'Volume': '볼륨'}[word] } {n}", f"{word} {n}")
 
 
 def pitch(info, title):
@@ -98,19 +108,19 @@ def label(row, region, info):
 
 def build(region, week, tv, film, day):
     ko = region == "kr"; end = dt.date.fromisoformat(week); start = end - dt.timedelta(days=6)
-    top = tv[0]; info = wiki(top["show_title"], "tv"); p = pitch(info, top["show_title"])
+    yr = end.year; top = tv[0]; info = wiki(top["show_title"], "tv", yr); p = pitch(info, top["show_title"])
     title, seas = label(top, region, info)
     rest = []
     for row in tv[1:5]:
-        t, s = label(row, region, wiki(row["show_title"], "tv") if ko else None); rest.append((int(row["weekly_rank"]), t, s))
+        t, s = label(row, region, wiki(row["show_title"], "tv", yr) if ko else None); rest.append((int(row["weekly_rank"]), t, s))
     f = film[0] if film else None
-    ft = label(f, region, wiki(f["show_title"], "film") if ko else None)[0] if f else ""
+    ft = label(f, region, wiki(f["show_title"], "film", yr) if ko else None)[0] if f else ""
     weeks = int(top.get("cumulative_weeks_in_top_10") or 1)
     rng = f"{start.month}/{start.day}–{end.month}/{end.day}"
     c = dict(top="SUNDAY NETFLIX", date=day, handle=f"@reddenva.{region}",
              kicker=(f"지난주 한국 넷플릭스 시리즈 1위 · {rng}" if ko else f"Last week's #1 series on Netflix US · {rng}"),
              title=title, season=seas, genre=(p or {}).get("genre_ko" if ko else "genre_en", ""),
-             line=(p or {}).get("line_ko" if ko else "line_en", ""), who=(p or {}).get("who_ko" if ko else "who_en", ""), who_label="추천: " if ko else "For: ",
+             line=(p or {}).get("line_ko" if ko else "line_en", "") or ("지난주 한국에서 가장 많이 본 넷플릭스 시리즈." if ko else "The most-watched Netflix series in the US last week."), who=(p or {}).get("who_ko" if ko else "who_en", ""), who_label="추천: " if ko else "For: ",
              weeks=(f"{weeks}주째 Top 10" if ko else f"{weeks} week{'s' if weeks > 1 else ''} in Top 10"),
              list_title="시리즈 2~5위" if ko else "Series #2–5", rest=rest,
              film_label="영화 1위" if ko else "#1 film", film=ft,
