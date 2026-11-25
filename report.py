@@ -31,29 +31,23 @@ SERIES = [
     ("trip", "📍 주말 여행", "금"),
     ("facts", "🦦 동물 상식", "토"),
     ("netflix", "🍿 넷플릭스", "일"),
-    ("etc", "🐼 레드덴바 기타", "-"),
     ("marketbrief", "📈 마켓브리프(참고)", "-"),
 ]
 NAME = {k: n for k, n, _ in SERIES}
-RD_TAG = re.compile(r"#(레드덴바|reddenva)\b", re.I)
 
 
 def classify(caption, ts_local):
-    c = caption or ""
-    if not RD_TAG.search(c):
-        # 태그가 없어도 아침 6시대 날씨 카드 모양이면 날씨 (초기 게시물 대비)
-        if ts_local.hour == 6 and re.search(r"(최고.*최저|high.*low)", c, re.I):
-            return "weather"
-        return "marketbrief"
+    """레드덴바 시리즈 캡션 모양에 맞으면 그 시리즈, 아니면 마켓브리프(ChatGPT 시황. 레드덴바 태그를 달기도 해서 태그로는 못 가름)"""
+    c = (caption or "").strip()
     rules = [
         ("books", r"^📚"), ("news", r"^📰"), ("animal", r"^🐾"), ("trip", r"^📍"), ("facts", r"^🦦"), ("netflix", r"^🍿"),
-        ("deriv", r"파생 브리핑|Derivatives Briefing"),
-        ("weather", r"최고.*최저|high .*low|#서울날씨|#LAWeather"),
+        ("deriv", r"^(📊 )?(목요일 파생 브리핑|Thursday Derivatives Briefing)"),
+        ("weather", r"^(서울 \d+/\d+.*최고.*최저|Los Angeles .*high .*low)"),
     ]
     for key, pat in rules:
-        if re.search(pat, c.strip(), re.I):
+        if re.search(pat, c, re.I):
             return key
-    return "etc"
+    return "marketbrief"
 
 
 # ---------------------------------------------------------------- 수집
@@ -100,7 +94,7 @@ def fetch_ig(region, token, notes):
             except Exception as e:
                 last_err = str(e)
         if ok_set is None:
-            notes.append(f"Instagram 도달·저장 수는 못 읽음(토큰에 인사이트 권한 없음?): {last_err[:120]}")
+            notes.append("Instagram 도달·저장 수는 못 읽음: 시스템 사용자 토큰에 instagram_manage_insights 권한이 없어요. 권한을 추가해 토큰을 다시 만들면 다음 리포트부터 자동으로 들어가요.")
             break
     return acct, media
 
@@ -192,32 +186,34 @@ def table(rows, week, prev, reach_label):
     return "\n".join(out)
 
 
-def best_worst(rows, week):
+def best_worst(rows, week, reach_label="도달"):
     w = [r for r in rows if week[0] <= r["date"] <= week[1] and r["eng"] is not None and r["series"] != "marketbrief"]
     if not w:
         return ""
     w.sort(key=lambda r: r["eng"], reverse=True)
-    line = lambda r: f"- {NAME[r['series']]} · {r['local']} · 반응 {f(r['eng'])}" + (f" / 도달 {f(r['reach'])}" if r["reach"] is not None else "") + f" · [{r['text']}]({r['link']})"
+    line = lambda r: f"- {NAME[r['series']]} · {r['local']} · 반응 {f(r['eng'])}" + (f" / {reach_label} {f(r['reach'])}" if r["reach"] is not None else "") + f" · [{r['text']}]({r['link']})"
     out = ["**이번 주 베스트 3**"] + [line(r) for r in w[:3]]
     if len(w) > 3:
         out += ["", "**이번 주 아쉬운 글**", line(w[-1])]
     return "\n".join(out)
 
 
-def verdict(rows, week):
-    """증권사 리포트처럼 한 줄 의견: 레드덴바 시리즈 중 평균 반응 1등·꼴찌"""
-    w = [r for r in rows if week[0] <= r["date"] <= week[1] and r["eng"] is not None and r["series"] not in ("marketbrief", "etc")]
+def verdict(rows, week, reach_label):
+    """증권사 리포트처럼 한 줄 의견. 도달/조회 값이 있으면 그걸로(초기엔 좋아요가 0~1개라 변별력이 없음), 없으면 반응으로 순위."""
+    w = [r for r in rows if week[0] <= r["date"] <= week[1] and r["series"] != "marketbrief"]
+    use = "reach" if any(r["reach"] is not None for r in w) else "eng"
+    lab = f"평균 {reach_label}" if use == "reach" else "평균 반응"
     by = {}
     for r in w:
-        by.setdefault(r["series"], []).append(r["eng"])
+        if r[use] is not None:
+            by.setdefault(r["series"], []).append(r[use])
     if len(by) < 2:
         return ""
     sc = sorted(((statistics.mean(v), k) for k, v in by.items()), reverse=True)
-    rd_avg = statistics.mean([r["eng"] for r in w])
-    mb = [r["eng"] for r in rows if week[0] <= r["date"] <= week[1] and r["series"] == "marketbrief" and r["eng"] is not None]
-    s = f"> **투자의견** · 비중 확대: {NAME[sc[0][1]]} (평균 {f(sc[0][0])}) · 비중 축소 검토: {NAME[sc[-1][1]]} (평균 {f(sc[-1][0])})"
-    if mb:
-        s += f"\n> 레드덴바 시리즈 평균 {f(rd_avg)} vs 마켓브리프 평균 {f(statistics.mean(mb))}"
+    rd = statistics.mean([x for v in by.values() for x in v])
+    mb = [r[use] for r in rows if week[0] <= r["date"] <= week[1] and r["series"] == "marketbrief" and r[use] is not None]
+    s = f"> **투자의견** ({lab} 기준) · 비중 확대: {NAME[sc[0][1]]} ({f(sc[0][0])}) · 비중 축소 검토: {NAME[sc[-1][1]]} ({f(sc[-1][0])})"
+    s += f"\n> 레드덴바 시리즈 글당 {f(rd)}" + (f" vs 마켓브리프 글당 {f(statistics.mean(mb))}" if mb else "")
     return s
 
 
@@ -231,7 +227,7 @@ def section(region, chan, acct, rows, week, prev, notes, hist_prev):
     if not rows:
         md.append("게시물이 없어요.")
     else:
-        md += [verdict(rows, week), "", table(rows, week, prev, reach_label), "", best_worst(rows, week)]
+        md += [verdict(rows, week, reach_label), "", table(rows, week, prev, reach_label), "", best_worst(rows, week, reach_label)]
     for n in dict.fromkeys(notes):
         md.append(f"\n_참고: {n}_")
     return "\n".join(x for x in md if x is not None)
@@ -249,7 +245,7 @@ def weeks(region, today=None):
 def mock_data(region):
     import random
     random.seed(region)
-    caps = {"weather": "서울 날씨 최고 6° · 최저 -4°\n\n#서울날씨 #레드덴바", "books": "📚 책\n\n#레드덴바", "news": "📰 뉴스\n\n#레드덴바",
+    caps = {"weather": "서울 11/25(수) 최고 6° · 최저 -4°\n\n#서울날씨 #레드덴바", "books": "📚 책\n\n#레드덴바", "news": "📰 뉴스\n\n#레드덴바",
             "animal": "🐾 아기\n\n#레드덴바", "deriv": "목요일 파생 브리핑\n\n#레드덴바", "trip": "📍 나들이\n\n#레드덴바", "marketbrief": "코스피 마감 시황"}
     tz = ZoneInfo(TZ[region]); items = []
     for i in range(20):
