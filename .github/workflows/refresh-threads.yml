@@ -36,6 +36,7 @@ jobs:
           for R in KR US; do
             eval "old=\$IG_$R"
             if [ -z "$old" ]; then echo "IG $R: 토큰 없음, 건너뜀"; continue; fi
+            case "$old" in EAA*) echo "IG $R: 만료 없는 시스템 사용자 토큰, 갱신 불필요"; continue;; esac
             resp=$(curl -sS -G "https://graph.instagram.com/refresh_access_token" \
               --data-urlencode "grant_type=ig_refresh_token" \
               --data-urlencode "access_token=$old") || { echo "IG $R: 요청 실패"; fail=1; continue; }

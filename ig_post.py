@@ -2,7 +2,7 @@
 예전에는 Make가 이 파일을 읽어 올렸지만(실행마다 5크레딧), 이제 Make는 워크플로만 깨우고(1크레딧) 게시는 여기서 한다.
 
 - 워크플로 입력 ig=true 일 때만 호출된다 (Make 본문에서 켜고 끔 → 전환 전에는 중복 게시 없음).
-- IG_TOKEN_{KR,US}: Instagram 로그인 방식의 장기 토큰. 사용자 ID는 토큰으로 직접 조회한다.
+- IG_TOKEN_{KR,US}: 시스템 사용자 토큰(EAA…, 만료 없음) 또는 Instagram 로그인 방식 장기 토큰(IGAA…).
 - state/{region}_ig_{slot}.txt 에 오늘 날짜가 있으면 다시 올리지 않는다.
 
   python ig_post.py --region us --slot weather
@@ -11,6 +11,9 @@ import argparse, datetime as dt, json, os
 from zoneinfo import ZoneInfo
 import requests
 import publish, weather
+
+# Instagram 비즈니스 계정 번호 (공개 정보, Meta 개발자 화면·Make에 보이는 값)
+IG_IDS = {"kr": "17841415970047103", "us": "17841468623391374"}
 
 
 def main():
@@ -29,10 +32,14 @@ def main():
     sf = f"state/{a.region}_ig_{a.slot}.txt"
     if os.path.exists(sf) and open(sf).read().strip() == day:
         print("Instagram: 오늘 이 시각 카드는 이미 게시함. 건너뜀"); return
-    r = requests.get(f"{publish.IG}/me", params={"fields": "user_id,username"},
-                     headers={"Authorization": f"Bearer {token}"}, timeout=30)
-    r.raise_for_status()
-    me = r.json()
+    if token.startswith("EAA"):  # 시스템 사용자 토큰: 계정 번호를 직접 지정
+        me = requests.get(f"{publish.FB}/{IG_IDS[a.region]}", params={"fields": "username"},
+                          headers={"Authorization": f"Bearer {token}"}, timeout=30)
+        me.raise_for_status(); me = me.json(); me["user_id"] = IG_IDS[a.region]
+    else:
+        r = requests.get(f"{publish.IG}/me", params={"fields": "user_id,username"},
+                         headers={"Authorization": f"Bearer {token}"}, timeout=30)
+        r.raise_for_status(); me = r.json()
     os.environ[f"IG_USER_ID_{R}"] = str(me.get("user_id") or me["id"])
     urls = [u for u in (meta["image_url"], meta.get("image_url2"), meta.get("image_url3")) if u]
     if len(urls) > 1:

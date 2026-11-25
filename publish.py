@@ -4,6 +4,11 @@ import time
 import requests
 
 IG = "https://graph.instagram.com/v21.0"
+FB = "https://graph.facebook.com/v21.0"  # EAA… 토큰(시스템 사용자, 만료 없음)은 이쪽 주소를 쓴다
+
+
+def ig_base(token: str) -> str:
+    return FB if token.startswith("EAA") else IG
 TH = "https://graph.threads.net/v1.0"
 
 
@@ -20,18 +25,15 @@ def _post(url, data, token, retries=3):
 
 def instagram(region: str, image_url: str, caption: str) -> str:
     uid, token = os.environ[f"IG_USER_ID_{region.upper()}"], os.environ[f"IG_TOKEN_{region.upper()}"]
-    c = _post(f"{IG}/{uid}/media", {"image_url": image_url, "caption": caption}, token)["id"]
-    for _ in range(12):  # 컨테이너가 FINISHED 될 때까지 최대 ~60초
-        s = requests.get(f"{IG}/{c}", params={"fields": "status_code"}, headers={"Authorization": f"Bearer {token}"}, timeout=30).json()
-        if s.get("status_code") == "FINISHED": break
-        if s.get("status_code") == "ERROR": raise RuntimeError(f"Instagram 컨테이너 오류: {s}")
-        time.sleep(5)
-    return _post(f"{IG}/{uid}/media_publish", {"creation_id": c}, token)["id"]
+    B = ig_base(token)
+    c = _post(f"{B}/{uid}/media", {"image_url": image_url, "caption": caption}, token)["id"]
+    _ig_wait(c, token)
+    return _post(f"{B}/{uid}/media_publish", {"creation_id": c}, token)["id"]
 
 
 def _ig_wait(c: str, token: str):
     for _ in range(12):  # 컨테이너가 FINISHED 될 때까지 최대 ~60초
-        s = requests.get(f"{IG}/{c}", params={"fields": "status_code"}, headers={"Authorization": f"Bearer {token}"}, timeout=30).json()
+        s = requests.get(f"{ig_base(token)}/{c}", params={"fields": "status_code"}, headers={"Authorization": f"Bearer {token}"}, timeout=30).json()
         if s.get("status_code") == "FINISHED": return
         if s.get("status_code") == "ERROR": raise RuntimeError(f"Instagram 컨테이너 오류: {s}")
         time.sleep(5)
@@ -40,13 +42,14 @@ def _ig_wait(c: str, token: str):
 def instagram_carousel(region: str, image_urls: list, caption: str) -> str:
     """2~3장 카드를 Instagram 캐러셀로. (Make의 2장/3장 경로와 같은 역할)"""
     uid, token = os.environ[f"IG_USER_ID_{region.upper()}"], os.environ[f"IG_TOKEN_{region.upper()}"]
+    B = ig_base(token)
     kids = []
     for u in image_urls:
-        k = _post(f"{IG}/{uid}/media", {"image_url": u, "is_carousel_item": "true"}, token)["id"]
+        k = _post(f"{B}/{uid}/media", {"image_url": u, "is_carousel_item": "true"}, token)["id"]
         _ig_wait(k, token); kids.append(k)
-    c = _post(f"{IG}/{uid}/media", {"media_type": "CAROUSEL", "children": ",".join(kids), "caption": caption}, token)["id"]
+    c = _post(f"{B}/{uid}/media", {"media_type": "CAROUSEL", "children": ",".join(kids), "caption": caption}, token)["id"]
     _ig_wait(c, token)
-    return _post(f"{IG}/{uid}/media_publish", {"creation_id": c}, token)["id"]
+    return _post(f"{B}/{uid}/media_publish", {"creation_id": c}, token)["id"]
 
 
 def fit_threads(text: str, limit: int = 500) -> str:
