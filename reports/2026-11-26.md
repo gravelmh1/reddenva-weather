@@ -3,9 +3,10 @@
 _만든 날: 2026-11-26 (한국 날짜). '반응' = 좋아요+댓글+저장+공유(Threads는 좋아요+답글+리포스트+인용+공유). '지난주 대비'는 평균 반응 변화. 최근 1~2일 글은 아직 반응이 쌓이는 중이라 낮게 보일 수 있어요. '누적'은 11/01 이후 전체._
 
 ### Instagram · 🇰🇷 @reddenva.kr
-팔로워 2
+팔로워 2 (+0 vs 지난 리포트)
 
-> **투자의견** · 비중 확대: 📍 주말 여행 (평균 2) · 비중 축소 검토: 📊 파생 브리핑 (평균 0)
+> **투자의견** (평균 반응 기준) · 비중 확대: 📍 주말 여행 (2) · 비중 축소 검토: 📊 파생 브리핑 (0)
+> 레드덴바 시리즈 글당 0.4 vs 마켓브리프 글당 0.4
 
 | 시리즈 | 이번 주 글 | 평균 반응 | 평균 좋아요 | 평균 댓글 | 지난주 대비 | 누적 글 | 누적 평균 반응 |
 |---|---|---|---|---|---|---|---|
@@ -15,53 +16,51 @@ _만든 날: 2026-11-26 (한국 날짜). '반응' = 좋아요+댓글+저장+공�
 | 🐾 아기 동물 | 1 | 1 | 1 | 0 | – | 2 | 1.5 |
 | 📊 파생 브리핑 | 1 | 0 | 0 | 0 | – | 1 | 0 |
 | 📍 주말 여행 | 1 | 2 | 2 | 0 | – | 1 | 2 |
-| 🐼 레드덴바 기타 | 19 | 0.4 | 0.4 | 0 | -63% | 31 | 0.4 |
-| 📈 마켓브리프(참고) | 0 | – | – | – | – | 19 | 0.9 |
+| 📈 마켓브리프(참고) | 19 | 0.4 | 0.4 | 0 | -63% | 50 | 0.6 |
 
 **이번 주 베스트 3**
 - 📍 주말 여행 · 11/20(금) 13:04 · 반응 2 · [📍 이번 주말 서울 나들이: 서울식물원 (서울 강서구)](https://www.instagram.com/p/Df8wQJLl-Si/)
-- 🐼 레드덴바 기타 · 11/22(일) 06:39 · 반응 1 · [11월 22일 한국 주간](https://www.instagram.com/p/DgBN0tdDa8b/)
-- 🐼 레드덴바 기타 · 11/22(일) 05:41 · 반응 1 · [11월 21일 한국 주간](https://www.instagram.com/p/DgBHOo5DG4l/)
+- 🐾 아기 동물 · 11/18(수) 13:03 · 반응 1 · [🐾 이번 주 아기 동물: 아기 코알라](https://www.instagram.com/p/Df3mpk2F__V/)
+- 📚 이번 주 책 · 11/16(월) 13:03 · 반응 1 · [📚 이번 주 아는 척 고전](https://www.instagram.com/p/DfydDUzF0k7/)
 
 **이번 주 아쉬운 글**
 - ☀️ 오늘의 날씨 · 11/17(화) 06:08 · 반응 0 · [서울 11/17(화) 최고 12° · 최저 9°](https://www.instagram.com/p/Df0ST1XjLII/)
 
-_참고: Instagram 도달·저장 수는 못 읽음(토큰에 인사이트 권한 없음?): 400 {"error":{"message":"(#10) Application does not have permission for this action","code":10,"type":"OAuthException","_
+_참고: Instagram 도달·저장 수는 못 읽음: 시스템 사용자 토큰에 instagram_manage_insights 권한이 없어요. 권한을 추가해 토큰을 다시 만들면 다음 리포트부터 자동으로 들어가요._
 
 ---
 
 ### Threads · 🇰🇷 @reddenva.kr
-팔로워 13
+팔로워 13 (+0 vs 지난 리포트)
 
-> **투자의견** · 비중 확대: 📍 주말 여행 (평균 2) · 비중 축소 검토: 🐾 아기 동물 (평균 0)
-> 레드덴바 시리즈 평균 0.5 vs 마켓브리프 평균 0.9
+> **투자의견** (평균 조회 기준) · 비중 확대: 📊 파생 브리핑 (119) · 비중 축소 검토: 📰 좋은 뉴스 (7)
+> 레드덴바 시리즈 글당 34.6 vs 마켓브리프 글당 94.8
 
 | 시리즈 | 이번 주 글 | 평균 반응 | 평균 좋아요 | 평균 댓글 | 평균 조회 | 반응률 | 지난주 대비 | 누적 글 | 누적 평균 반응 |
 |---|---|---|---|---|---|---|---|---|---|
 | ☀️ 오늘의 날씨 | 7 | 0.4 | 0.4 | 0 | 25.7 | 1.7% | -57% | 12 | 0.4 |
-| 📚 이번 주 책 | 0 | – | – | – | – | – | – | 1 | 1 |
+| 📚 이번 주 책 | 1 | 1 | 1 | 0 | 28 | 3.6% | – | 2 | 1 |
 | 📰 좋은 뉴스 | 1 | 1 | 1 | 0 | 7 | 14.3% | – | 2 | 1 |
 | 🐾 아기 동물 | 1 | 0 | 0 | 0 | 8 | 0.0% | – | 2 | 1.5 |
 | 📊 파생 브리핑 | 1 | 0 | 0 | 0 | 119 | 0.0% | – | 1 | 0 |
 | 📍 주말 여행 | 1 | 2 | 2 | 0 | 73 | 2.7% | – | 1 | 2 |
-| 🐼 레드덴바 기타 | 0 | – | – | – | – | – | – | 1 | 1 |
-| 📈 마켓브리프(참고) | 20 | 0.9 | 0.8 | 0 | 91.3 | 1.5% | -5% | 54 | 1.2 |
+| 📈 마켓브리프(참고) | 19 | 0.9 | 0.8 | 0 | 94.8 | 1.4% | -6% | 54 | 1.2 |
 
 **이번 주 베스트 3**
-- 📍 주말 여행 · 11/20(금) 13:02 · 반응 2 / 도달 73 · [📍 이번 주말 서울 나들이: 서울식물원 (서울 강서구)](https://www.threads.com/@reddenva.kr/post/Df8wBadGxaC)
-- ☀️ 오늘의 날씨 · 11/21(토) 06:05 · 반응 1 / 도달 19 · [서울 11/21(토) 최고 1° · 최저 -4°](https://www.threads.com/@reddenva.kr/post/Df-lLPcI_ku)
-- ☀️ 오늘의 날씨 · 11/20(금) 06:05 · 반응 1 / 도달 22 · [서울 11/20(금) 최고 1° · 최저 -4°](https://www.threads.com/@reddenva.kr/post/Df8AXm5lJBZ)
+- 📍 주말 여행 · 11/20(금) 13:02 · 반응 2 / 조회 73 · [📍 이번 주말 서울 나들이: 서울식물원 (서울 강서구)](https://www.threads.com/@reddenva.kr/post/Df8wBadGxaC)
+- ☀️ 오늘의 날씨 · 11/21(토) 06:05 · 반응 1 / 조회 19 · [서울 11/21(토) 최고 1° · 최저 -4°](https://www.threads.com/@reddenva.kr/post/Df-lLPcI_ku)
+- ☀️ 오늘의 날씨 · 11/20(금) 06:05 · 반응 1 / 조회 22 · [서울 11/20(금) 최고 1° · 최저 -4°](https://www.threads.com/@reddenva.kr/post/Df8AXm5lJBZ)
 
 **이번 주 아쉬운 글**
-- ☀️ 오늘의 날씨 · 11/17(화) 06:06 · 반응 0 / 도달 21 · [서울 11/17(화) 최고 12° · 최저 9°](https://www.threads.com/@reddenva.kr/post/Df0SGZ0G_To)
+- ☀️ 오늘의 날씨 · 11/17(화) 06:06 · 반응 0 / 조회 21 · [서울 11/17(화) 최고 12° · 최저 9°](https://www.threads.com/@reddenva.kr/post/Df0SGZ0G_To)
 
 ---
 
 ### Instagram · 🇺🇸 @reddenva.us
-팔로워 3
+팔로워 3 (+0 vs 지난 리포트)
 
-> **투자의견** · 비중 확대: 📍 주말 여행 (평균 1) · 비중 축소 검토: 🐾 아기 동물 (평균 0)
-> 레드덴바 시리즈 평균 0.3 vs 마켓브리프 평균 2
+> **투자의견** (평균 반응 기준) · 비중 확대: 📍 주말 여행 (1) · 비중 축소 검토: 🐾 아기 동물 (0)
+> 레드덴바 시리즈 글당 0.3 vs 마켓브리프 글당 0.7
 
 | 시리즈 | 이번 주 글 | 평균 반응 | 평균 좋아요 | 평균 댓글 | 지난주 대비 | 누적 글 | 누적 평균 반응 |
 |---|---|---|---|---|---|---|---|
@@ -71,26 +70,25 @@ _참고: Instagram 도달·저장 수는 못 읽음(토큰에 인사이트 권�
 | 🐾 아기 동물 | 1 | 0 | 0 | 0 | – | 1 | 0 |
 | 📊 파생 브리핑 | 1 | 1 | 1 | 0 | – | 1 | 1 |
 | 📍 주말 여행 | 1 | 1 | 1 | 0 | – | 1 | 1 |
-| 🐼 레드덴바 기타 | 15 | 0.6 | 0.6 | 0 | -52% | 29 | 0.8 |
-| 📈 마켓브리프(참고) | 1 | 2 | 2 | 0 | +100% | 11 | 1.1 |
+| 📈 마켓브리프(참고) | 16 | 0.7 | 0.7 | 0 | -40% | 40 | 0.9 |
 
 **이번 주 베스트 3**
-- 🐼 레드덴바 기타 · 11/22(일) 10:47 · 반응 2 · [November 22 Weekend Brief](https://www.instagram.com/p/DgDe5s2mvVN/)
-- 🐼 레드덴바 기타 · 11/21(토) 12:01 · 반응 2 · [November 21 Weekend Brief](https://www.instagram.com/p/DgBClEel7AI/)
-- 🐼 레드덴바 기타 · 11/21(토) 13:29 · 반응 1 · [US WEEKEND BRIEF · SAT, NOV 21](https://www.instagram.com/p/DgBMqmpDwQA/)
+- ☀️ 오늘의 날씨 · 11/21(토) 06:08 · 반응 1 · [Los Angeles Sat 11/21: high 68° · low 46°](https://www.instagram.com/p/DgAaN-npUCW/)
+- 📍 주말 여행 · 11/20(금) 13:04 · 반응 1 · [📍 Weekend pick from LA: Point Dume (Malibu, CA)](https://www.instagram.com/p/Df-lAhfF2q5/)
+- 📊 파생 브리핑 · 11/19(목) 13:04 · 반응 1 · [📊 Thursday Derivatives Briefing · S&P 500 futures, basis, VI](https://www.instagram.com/p/Df8APJRlwHp/)
 
 **이번 주 아쉬운 글**
-- 🐼 레드덴바 기타 · 11/16(월) 00:49 · 반응 0 · [Week Ahead · November 16–22, 2026](https://www.instagram.com/p/Dfy9tgQjvb0/)
+- ☀️ 오늘의 날씨 · 11/16(월) 07:42 · 반응 0 · [Los Angeles Mon 11/16: high 68° · low 53°](https://www.instagram.com/p/Dfzs_EeF6ID/)
 
-_참고: Instagram 도달·저장 수는 못 읽음(토큰에 인사이트 권한 없음?): 400 {"error":{"message":"(#10) Application does not have permission for this action","code":10,"type":"OAuthException","_
+_참고: Instagram 도달·저장 수는 못 읽음: 시스템 사용자 토큰에 instagram_manage_insights 권한이 없어요. 권한을 추가해 토큰을 다시 만들면 다음 리포트부터 자동으로 들어가요._
 
 ---
 
 ### Threads · 🇺🇸 @reddenva.us
-팔로워 1
+팔로워 1 (+0 vs 지난 리포트)
 
-> **투자의견** · 비중 확대: ☀️ 오늘의 날씨 (평균 0.1) · 비중 축소 검토: 🐾 아기 동물 (평균 0)
-> 레드덴바 시리즈 평균 0.1 vs 마켓브리프 평균 0.1
+> **투자의견** (평균 조회 기준) · 비중 확대: 📊 파생 브리핑 (91) · 비중 축소 검토: 📰 좋은 뉴스 (0)
+> 레드덴바 시리즈 글당 14.7 vs 마켓브리프 글당 25.5
 
 | 시리즈 | 이번 주 글 | 평균 반응 | 평균 좋아요 | 평균 댓글 | 평균 조회 | 반응률 | 지난주 대비 | 누적 글 | 누적 평균 반응 |
 |---|---|---|---|---|---|---|---|---|---|
@@ -103,9 +101,9 @@ _참고: Instagram 도달·저장 수는 못 읽음(토큰에 인사이트 권�
 | 📈 마켓브리프(참고) | 15 | 0.1 | 0.1 | 0 | 25.5 | 0.4% | – | 47 | 0.6 |
 
 **이번 주 베스트 3**
-- ☀️ 오늘의 날씨 · 11/17(화) 06:05 · 반응 1 / 도달 15 · [Los Angeles Tue 11/17: high 70° · low 53°](https://www.threads.com/@reddenva.us/post/Df2GtTXllO1)
-- ☀️ 오늘의 날씨 · 11/22(일) 06:06 · 반응 0 / 도달 4 · [Los Angeles Sun 11/22: high 68° · low 48°](https://www.threads.com/@reddenva.us/post/DgC-uoHEXm_)
-- ☀️ 오늘의 날씨 · 11/21(토) 06:07 · 반응 0 / 도달 2 · [Los Angeles Sat 11/21: high 68° · low 46°](https://www.threads.com/@reddenva.us/post/DgAaEoYlFlV)
+- ☀️ 오늘의 날씨 · 11/17(화) 06:05 · 반응 1 / 조회 15 · [Los Angeles Tue 11/17: high 70° · low 53°](https://www.threads.com/@reddenva.us/post/Df2GtTXllO1)
+- ☀️ 오늘의 날씨 · 11/22(일) 06:06 · 반응 0 / 조회 4 · [Los Angeles Sun 11/22: high 68° · low 48°](https://www.threads.com/@reddenva.us/post/DgC-uoHEXm_)
+- ☀️ 오늘의 날씨 · 11/21(토) 06:07 · 반응 0 / 조회 2 · [Los Angeles Sat 11/21: high 68° · low 46°](https://www.threads.com/@reddenva.us/post/DgAaEoYlFlV)
 
 **이번 주 아쉬운 글**
-- ☀️ 오늘의 날씨 · 11/16(월) 06:51 · 반응 0 / 도달 3 · [Los Angeles Mon 11/16: high 68° · low 53°](https://www.threads.com/@reddenva.us/post/DfznK_8G-iH)
+- ☀️ 오늘의 날씨 · 11/16(월) 06:51 · 반응 0 / 조회 3 · [Los Angeles Mon 11/16: high 68° · low 53°](https://www.threads.com/@reddenva.us/post/DfznK_8G-iH)
