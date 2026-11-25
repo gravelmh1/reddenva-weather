@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; }
+  body { font-family: "Noto Sans CJK KR", sans-serif; color: #fff; letter-spacing: -0.02em;
+         background: radial-gradient(1100px 900px at 50% 15%, #1d2a47 0%, #0f172b 60%, #0a1020 100%); }
+  .abs { position: absolute; left: 0; width: 1080px; text-align: center; will-change: transform, opacity; }
+  #grid { position: absolute; inset: 0; opacity: .5;
+          background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+          background-size: 60px 60px; }
+  .kicker { font-size: 38px; font-weight: 700; color: #f0a04b; letter-spacing: .04em; }
+  .title { font-size: 72px; font-weight: 900; line-height: 1.2; }
+  .hook { font-size: 128px; font-weight: 900; line-height: 1.12; letter-spacing: -0.04em; }
+  .hook span { display: inline-block; }
+  .up { color: #ff4d55; } .dn { color: #4d8dff; }
+  .panel { background: #151f36; border: 1px solid rgba(255,255,255,.08); border-radius: 40px; box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+  #chart { width: 960px; height: 760px; margin: 0 auto; position: relative; }
+  .lab { position: absolute; font-size: 30px; color: #7f8aa6; }
+  .endlab { position: absolute; font-weight: 900; font-size: 54px; white-space: nowrap; }
+  .legend { position: absolute; top: 34px; left: 40px; font-size: 32px; font-weight: 700; color: #b6c0d8; display: flex; gap: 36px; }
+  .legend i { display: inline-block; width: 40px; height: 8px; border-radius: 4px; vertical-align: middle; margin-right: 12px; }
+  .tiles { width: 960px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .tile { height: 330px; padding: 38px 42px; text-align: left; }
+  .tile .l { font-size: 38px; font-weight: 700; color: #9aa6c2; }
+  .tile .n { font-size: 112px; font-weight: 900; letter-spacing: -0.04em; line-height: 1.15; margin-top: 8px; }
+  .tile .c { font-size: 42px; font-weight: 700; }
+  .foot { font-size: 30px; color: #6f7a96; }
+  .handle { font-size: 40px; font-weight: 500; color: #aebbd8; }
+  img.char { display: block; margin: 0 auto; filter: drop-shadow(0 18px 30px rgba(0,0,0,.45)); }
+</style></head>
+<body>
+<div id="grid"></div>
+
+<!-- 장면 1: 훅 -->
+<div class="abs" id="k1" style="top:300px"><div class="kicker" id="kick"></div></div>
+<div class="abs" id="h1" style="top:440px"><div class="hook"><span id="w1">외국인은</span> <span id="w2" class="up">샀고,</span></div></div>
+<div class="abs" id="h2" style="top:600px"><div class="hook"><span id="w3">기관은</span> <span id="w4" class="dn">팔았다</span></div></div>
+<div class="abs" id="c1w" style="top:960px"><img class="char" id="c1" height="360"></div>
+
+<!-- 장면 2: 누적 순매수 차트 -->
+<div class="abs" id="s2head" style="top:230px"><div class="kicker">9월 만기 이후</div><div class="title">선물 누적 순매수</div></div>
+<div class="abs" id="s2panel" style="top:440px"><div class="panel" id="chart">
+  <div class="legend"><span><i style="background:#ff4d55"></i>외국인</span><span><i style="background:#4d8dff"></i>기관</span><span style="color:#7f8aa6">단위 계약</span></div>
+  <svg id="svg" width="960" height="760" style="position:absolute;left:0;top:0"></svg>
+</div></div>
+<div class="abs" id="s2foot" style="top:1230px"><div class="foot" id="src1"></div></div>
+
+<!-- 장면 3: 이번 주 숫자 -->
+<div class="abs" id="s3head" style="top:230px"><div class="kicker">이번 주 숫자</div><div class="title" id="s3title"></div></div>
+<div class="abs" id="s3tiles" style="top:440px"><div class="tiles" id="tiles"></div></div>
+<div class="abs" id="s3foot" style="top:1180px"><div class="foot" id="src2"></div></div>
+
+<!-- 장면 4: 끝 -->
+<div class="abs" id="s4char" style="top:560px"><img class="char" id="c4" height="380"></div>
+<div class="abs" id="s4t" style="top:1010px"><div class="title" id="outro"></div></div>
+<div class="abs" id="s4h" style="top:1150px"><div class="handle" id="handle"></div></div>
+
+<script src="lib.js"></script>
+<script>
+const D = window.DATA;
+const POSE = n => `../../assets/poses/${n}.png`;
+$("#kick").textContent = D.kicker; $("#s3title").textContent = D.tiles_title;
+$("#outro").textContent = D.outro; $("#handle").textContent = D.handle;
+$("#src1").textContent = D.src1; $("#src2").textContent = D.src2;
+$("#c1").src = POSE(D.pose); $("#c4").src = POSE(D.pose2);
+
+// 차트
+const X0 = 60, X1 = 800, Y0 = 130, Y1 = 700, MAX = 36000;
+const xOf = (i, n) => X0 + (X1 - X0) * i / (n - 1), yOf = v => (Y0 + Y1) / 2 - (v / MAX) * (Y1 - Y0) / 2;
+const svg = $("#svg"), NS = "http://www.w3.org/2000/svg";
+const mk = (tag, a) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); svg.appendChild(e); return e; };
+[-30000, -15000, 0, 15000, 30000].forEach(v => {
+  mk("line", { x1: X0, x2: X1, y1: yOf(v), y2: yOf(v), stroke: v ? "rgba(255,255,255,.07)" : "rgba(255,255,255,.35)", "stroke-width": v ? 2 : 3 });
+  const l = document.createElement("div"); l.className = "lab"; l.style.left = "0px"; l.style.width = (X0 - 8) + "px";
+  l.style.textAlign = "right"; l.style.top = (yOf(v) - 20) + "px"; l.textContent = v ? (v / 1000) + "k" : "0"; $("#chart").appendChild(l);
+});
+const LINES = [{ k: "frn", c: "#ff4d55" }, { k: "ins", c: "#4d8dff" }].map(L => {
+  L.v = D.cum[L.k];
+  L.glow = mk("path", { fill: "none", stroke: L.c, "stroke-width": 16, "stroke-opacity": .18, "stroke-linejoin": "round", "stroke-linecap": "round" });
+  L.p = mk("path", { fill: "none", stroke: L.c, "stroke-width": 7, "stroke-linejoin": "round", "stroke-linecap": "round" });
+  L.dot = mk("circle", { r: 13, fill: L.c, stroke: "#151f36", "stroke-width": 5 });
+  L.lab = document.createElement("div"); L.lab.className = "endlab"; L.lab.style.color = L.c; $("#chart").appendChild(L.lab);
+  return L;
+});
+function draw(k) {
+  LINES.forEach(L => {
+    const n = L.v.length, f = k * (n - 1), m = Math.floor(f);
+    let d = "", last;
+    for (let i = 0; i <= Math.min(m, n - 1); i++) { d += (i ? "L" : "M") + xOf(i, n) + " " + yOf(L.v[i]); }
+    if (m < n - 1) { const fr = f - m, v = lerp(L.v[m], L.v[m + 1], fr); last = [lerp(xOf(m, n), xOf(m + 1, n), fr), yOf(v), v]; d += "L" + last[0] + " " + last[1]; }
+    else last = [xOf(n - 1, n), yOf(L.v[n - 1]), L.v[n - 1]];
+    L.p.setAttribute("d", d); L.glow.setAttribute("d", d);
+    L.dot.setAttribute("cx", last[0]); L.dot.setAttribute("cy", last[1]); L.dot.style.opacity = k > 0 ? 1 : 0;
+    L.lab.textContent = fmt(last[2], true);
+    const w = L.lab.offsetWidth; L.lab.style.left = clamp(last[0] - w / 2, 70, 940 - w) + "px";
+    L.lab.style.top = (L.k === "frn" ? last[1] - 92 : last[1] + 22) + "px";
+    L.lab.style.opacity = k > 0 ? 1 : 0;
+  });
+}
+
+// 숫자 칸
+D.tiles.forEach(T => {
+  const e = document.createElement("div"); e.className = "panel tile";
+  e.innerHTML = `<div class="l">${T.l}</div><div class="n">${T.pre || ""}<span class="cnt"></span>${T.suf || ""}</div><div class="c" style="color:${T.cc || "#9aa6c2"}">${T.c}</div>`;
+  e._T = T; $("#tiles").appendChild(e);
+});
+
+window.render = t => {
+  // 장면 1 (0 ~ 2.9초)
+  const o1 = 1 - P(t, 2.6, 3.0, easeInOut), up1 = -80 * P(t, 2.6, 3.0, easeInOut);
+  set("#k1", { o: P(t, 0, .35) * o1, y: up1 });
+  ["#w1", "#w2", "#w3", "#w4"].forEach((w, i) => {
+    const a = .2 + i * .28; set(w, { o: P(t, a, a + .25) * o1, y: 70 * (1 - P(t, a, a + .4, back)) + up1, s: i % 2 ? .85 + .15 * P(t, a, a + .4, back) : 1 });
+  });
+  set("#c1w", { o: P(t, 1.1, 1.4) * o1, y: 240 * (1 - P(t, 1.1, 1.7, back)) + breathe(t) + up1 * .5 });
+  // 장면 2 (2.9 ~ 6.6초)
+  const o2 = 1 - P(t, 6.3, 6.7, easeInOut), up2 = -80 * P(t, 6.3, 6.7, easeInOut);
+  set("#s2head", { o: P(t, 2.9, 3.3) * o2, y: 60 * (1 - P(t, 2.9, 3.3)) + up2 });
+  set("#s2panel", { o: P(t, 3.0, 3.35) * o2, y: 120 * (1 - P(t, 3.0, 3.5)) + up2 });
+  set("#s2foot", { o: P(t, 3.4, 3.8) * o2, y: up2 });
+  draw(P(t, 3.4, 5.6, easeInOut));
+  // 장면 3 (6.6 ~ 9.2초)
+  const o3 = 1 - P(t, 8.9, 9.25, easeInOut), up3 = -80 * P(t, 8.9, 9.25, easeInOut);
+  set("#s3head", { o: P(t, 6.6, 7.0) * o3, y: 60 * (1 - P(t, 6.6, 7.0)) + up3 });
+  set("#s3foot", { o: P(t, 7.2, 7.6) * o3, y: up3 });
+  $$("#tiles .tile").forEach((e, i) => {
+    const a = 6.75 + i * .14, T = e._T;
+    set(e, { o: P(t, a, a + .3) * o3, s: .85 + .15 * P(t, a, a + .45, back), y: up3 });
+    const k = P(t, a + .1, a + 1.0, easeInOut);
+    e.querySelector(".cnt").textContent = (T.n < 0 ? "−" : "") + (Math.abs(T.n) * k).toFixed(T.dp || 0);
+  });
+  // 장면 4 (9.2 ~ 10초)
+  set("#s4char", { o: P(t, 9.25, 9.5), s: .7 + .3 * P(t, 9.25, 9.7, back), y: breathe(t) });
+  set("#s4t", { o: P(t, 9.35, 9.65), y: 40 * (1 - P(t, 9.35, 9.75)) });
+  set("#s4h", { o: P(t, 9.45, 9.75) });
+};
+waitImages();
+</script>
+</body></html>
