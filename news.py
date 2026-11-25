@@ -251,6 +251,7 @@ def main():
     for x in j["items"]: print("  ·", items[x["id"]]["src"], "|", items[x["id"]]["title"], "|", items[x["id"]]["link"][:80])
     c, cap = build(region, j, items, day)
     img_rel = f"out/news-{region}-{day}.jpg"; news_render.card3(c, img_rel)
+    import reel_data; reel_data.save("news", region, {"c": c, "cards": [os.path.abspath(img_rel)]})
     if a.dry_run: print("(dry-run) 카드 저장:", img_rel); print("CARDJSON " + json.dumps(c, ensure_ascii=False)); print(cap); return
     with open(sf, "a", encoding="utf-8") as fh: fh.write(f"{day}|" + "|".join(items[x["id"]]["title"] for x in j["items"]) + "\n")
     git_push(["out", "state"], f"news {region} {day} card")

@@ -149,6 +149,7 @@ def main():
     card, cap = build(region, week, tv, film, day)
     print(json.dumps(card, ensure_ascii=False)); print(cap)
     img_rel = f"out/netflix-{region}-{day}.jpg"; netflix_render.card(card, img_rel)
+    import reel_data; reel_data.save("netflix", region, {"c": card, "cards": [os.path.abspath(img_rel)]})
     if a.dry_run: print("(dry-run) 카드 저장:", img_rel); return
     git_push(["out"], f"netflix {region} {day} card")
     sha = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()

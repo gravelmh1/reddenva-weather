@@ -93,6 +93,17 @@ jobs:
           python feed.py kr || true
           git add out
           git diff --cached --quiet || (git commit -q -m "kr post.json" && git pull --rebase -q && git push -q)
+      - name: (릴스) 영상 만들기 (reels.json에서 켠 지역만. 실패하면 그냥 카드 이미지로 게시)
+        if: ${{ always() && inputs.ig && !inputs.dry_run && steps.slot.outputs.slot != '' }}
+        continue-on-error: true
+        timeout-minutes: 10
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if python reel.py --region kr --enabled; then
+            pip install -q playwright && python -m playwright install --with-deps chromium
+            python reel.py --region kr
+          else echo "릴스 꺼짐 → 카드 이미지로 게시"; fi
       - name: Instagram 게시 (ig=true일 때)
         if: ${{ always() && inputs.ig && !inputs.dry_run && steps.slot.outputs.slot != '' }}
         env:
@@ -110,6 +121,19 @@ jobs:
           if [ "${{ steps.slot.outputs.slot }}" = "weather" ]; then python threads_post.py --region kr; else python threads_post.py --region kr --kind books-; python threads_post.py --region kr --kind news-; python threads_post.py --region kr --kind puppy-; python threads_post.py --region kr --kind deriv-; python threads_post.py --region kr --kind trip-; python threads_post.py --region kr --kind facts-; python threads_post.py --region kr --kind netflix-; fi
           git add state
           git diff --cached --quiet || (git commit -q -m "kr threads posted" && git pull --rebase -q && git push -q)
+      - name: (릴스) 테스트 영상 만들기 (dry-run일 때, 게시 안 함)
+        if: ${{ inputs.dry_run }}
+        continue-on-error: true
+        run: |
+          pip install -q playwright && python -m playwright install --with-deps chromium
+          python reel.py --region kr --preview
+      - name: 테스트 영상 보관 (dry-run일 때)
+        if: ${{ inputs.dry_run }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: reel-preview-kr
+          path: reel_out/*
+          if-no-files-found: ignore
       - name: 테스트 카드 보관 (dry-run일 때)
         if: ${{ inputs.dry_run }}
         uses: actions/upload-artifact@v4

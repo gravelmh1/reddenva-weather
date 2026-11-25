@@ -217,6 +217,7 @@ def main():
     print(json.dumps(j, ensure_ascii=False, indent=1))
     c, cap = build(region, pick, j, urls, pick.get("period", ""))
     img_rel = f"out/books-{region}-{day}.jpg"; books_render.card(c, img_rel)
+    import reel_data; reel_data.save("books", region, {"c": c, "rank": pick.get("rank"), "classic": bool(pick.get("classic")), "cards": [os.path.abspath(img_rel)]})
     if a.dry_run: print("(dry-run) 카드 저장:", img_rel); print(cap); return
     with open(sf, "a", encoding="utf-8") as fh: fh.write(f"{day}|{pick['title']}\n")
     git_push(["out", "state"], f"books {region} {day} card")

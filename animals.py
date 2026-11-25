@@ -147,6 +147,7 @@ def main():
         print("선택:", c["id"], "|", j.get("score"), j.get("why", "")); print(json.dumps(pick, ensure_ascii=False))
     card, cap = build(region, pick, day, photo)
     img_rel = f"out/puppy-{region}-{day}.jpg"; animals_render.card(card, img_rel)
+    import reel_data; reel_data.save("puppy", region, {"c": {k: v for k, v in card.items() if k != "photo"}, "cards": [os.path.abspath(img_rel)]}, photos={"photo": photo})
     json.dump(hist, open(pf, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     if a.dry_run: print("(dry-run) 카드 저장:", img_rel); print(cap); return
     git_push(["out", "state"], f"puppy {region} {day} card")
