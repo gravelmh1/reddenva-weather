@@ -4,9 +4,6 @@ on:
   schedule:
     - cron: "0 17 * * 1"   # 매주 월요일 17:00 UTC (= LA 월 09:00, 한국 화 02:00). 늦게 돌아도 상관없음
   workflow_dispatch:
-  push:
-    branches: [claude/project-thread-xcdqy5]   # PR 확인용 첫 실행. 합치기 전에 지움
-    paths: [report.py, .github/workflows/report.yml]
 permissions:
   contents: write
 concurrency:
