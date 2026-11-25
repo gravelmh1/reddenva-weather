@@ -1,6 +1,6 @@
 {
  "region": "us",
- "updated": "2026-11-25T14:05:30Z",
+ "updated": "2026-11-25T21:01:49Z",
  "categories": [
   {
    "series": "books",
@@ -21,9 +21,28 @@
   {
    "series": "trip",
    "label": "Weekend trip"
+  },
+  {
+   "series": "facts",
+   "label": "Animal facts"
+  },
+  {
+   "series": "netflix",
+   "label": "Netflix"
   }
  ],
  "items": [
+  {
+   "series": "animal",
+   "label": "Baby animal",
+   "date": "2026-11-25",
+   "date_label": "Wed, Nov 25, 2026",
+   "title": "Baby animal of the week: Akita puppy",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/puppy-us-2026-11-25.jpg"
+   ]
+  },
   {
    "series": "news",
    "label": "Good news",
