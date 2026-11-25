@@ -29,6 +29,26 @@ def instagram(region: str, image_url: str, caption: str) -> str:
     return _post(f"{IG}/{uid}/media_publish", {"creation_id": c}, token)["id"]
 
 
+def _ig_wait(c: str, token: str):
+    for _ in range(12):  # 컨테이너가 FINISHED 될 때까지 최대 ~60초
+        s = requests.get(f"{IG}/{c}", params={"fields": "status_code"}, headers={"Authorization": f"Bearer {token}"}, timeout=30).json()
+        if s.get("status_code") == "FINISHED": return
+        if s.get("status_code") == "ERROR": raise RuntimeError(f"Instagram 컨테이너 오류: {s}")
+        time.sleep(5)
+
+
+def instagram_carousel(region: str, image_urls: list, caption: str) -> str:
+    """2~3장 카드를 Instagram 캐러셀로. (Make의 2장/3장 경로와 같은 역할)"""
+    uid, token = os.environ[f"IG_USER_ID_{region.upper()}"], os.environ[f"IG_TOKEN_{region.upper()}"]
+    kids = []
+    for u in image_urls:
+        k = _post(f"{IG}/{uid}/media", {"image_url": u, "is_carousel_item": "true"}, token)["id"]
+        _ig_wait(k, token); kids.append(k)
+    c = _post(f"{IG}/{uid}/media", {"media_type": "CAROUSEL", "children": ",".join(kids), "caption": caption}, token)["id"]
+    _ig_wait(c, token)
+    return _post(f"{IG}/{uid}/media_publish", {"creation_id": c}, token)["id"]
+
+
 def fit_threads(text: str, limit: int = 500) -> str:
     """Threads 글자 수 제한(500자)에 맞춘다. 넘치면 해시태그 줄 → 💬 줄 순서로 빼고, 그래도 넘치면 끝을 …로 자른다."""
     paras = text.split("\n\n")

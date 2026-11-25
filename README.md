@@ -7,6 +7,7 @@
 > - Make가 깨우는 워크플로는 **`post-kr.yml` / `post-us.yml` 하나씩**이고, Make가 읽는 파일도 `out/kr-post.json` / `out/us-post.json` 하나씩이에요. Make 안에는 시간 수식이 없어요(주소 두 개 모두 고정). 아침이면 날씨, 현지 낮 12~13시대면 주간 카드(월: 책, 화: 좋은 뉴스)를 `post_slot.py`가 정해요.
 > - `weather-*.yml`은 새벽 예비 카드용, `weekly-*.yml`·`news-*.yml`은 손으로 시험할 때만 써요.
 > - 워크플로는 **3분 안에 끝나야** Make가 결과를 읽을 수 있어요. 느려지는 수정은 피하세요.
+> - **Instagram 직접 게시(크레딧 절약):** Make가 본문에 `"ig":"true"`를 넣어 깨우면 워크플로가 `ig_post.py`로 Instagram까지 직접 올려요. 이때 Make는 깨우기 1단계만 남겨 실행당 1크레딧만 써요. 필요한 비밀값: `IG_TOKEN_KR`, `IG_TOKEN_US`(Instagram 로그인 방식 장기 토큰, `refresh-threads.yml`이 매주 자동 연장).
 > - 서머타임: Make 일정이 뉴욕 시각 기준이라, 미국 서머타임 기간(3~11월)에는 한국판이 한 시간 일찍(날씨 05:05, 책·뉴스 12:00) 나가요. 맞추려면 Make의 한국 시나리오 시각을 한 시간 늦추면 돼요.
 
 매일 아침 06:00에 캐릭터 날씨 카드를 만들어 Instagram과 Threads에 올려요. 사람도 Claude도 필요 없고, GitHub가 알아서 실행해요.

@@ -1,6 +1,6 @@
 name: post-kr
 # Make가 깨우는 단 하나의 워크플로. 아침에는 날씨, 낮 12~13시대에는 주간 카드(월 책, 화 좋은 뉴스, 수 아기 동물, 목 파생 브리핑, 금 주말 여행)를 만들고
-# out/kr-post.json 에 "지금 올릴 카드"를 적어 둔다. Make는 3분 20초 뒤 그 파일만 읽어 Instagram에 올린다.
+# out/kr-post.json 에 "지금 올릴 카드"를 적어 둔다. ig=true로 깨우면 Instagram도 여기서 직접 올리고(Make 1크레딧), 아니면 예전처럼 Make가 3분 20초 뒤 그 파일을 읽어 올린다.
 on:
   workflow_dispatch:
     inputs:
@@ -12,6 +12,10 @@ on:
         description: "auto(현지 시각으로 자동) / weather / weekly"
         type: string
         default: auto
+      ig:
+        description: "Instagram도 여기서 직접 올리기 (Make가 true로 깨우면 Make는 게시하지 않음)"
+        type: boolean
+        default: false
 permissions:
   contents: write
 concurrency:
@@ -78,6 +82,15 @@ jobs:
           python feed.py kr || true
           git add out
           git diff --cached --quiet || (git commit -q -m "kr post.json" && git pull --rebase -q && git push -q)
+      - name: Instagram 게시 (ig=true일 때)
+        if: ${{ always() && inputs.ig && !inputs.dry_run && steps.slot.outputs.slot != '' }}
+        env:
+          IG_TOKEN_KR: ${{ secrets.IG_TOKEN_KR }}
+        run: |
+          git pull --rebase -q || true
+          python ig_post.py --region kr --slot ${{ steps.slot.outputs.slot }}
+          git add state
+          git diff --cached --quiet || (git commit -q -m "kr instagram posted" && git pull --rebase -q && git push -q)
       - name: Threads 게시
         if: ${{ !inputs.dry_run }}
         env:
