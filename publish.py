@@ -39,6 +39,23 @@ def _ig_wait(c: str, token: str):
         time.sleep(5)
 
 
+def instagram_reel(region: str, video_url: str, cover_url: str, caption: str) -> str:
+    """세로 영상을 릴스로. 영상 처리(FINISHED)까지 최대 ~5분 기다린 뒤 게시. 피드에도 보이게 share_to_feed."""
+    uid, token = os.environ[f"IG_USER_ID_{region.upper()}"], os.environ[f"IG_TOKEN_{region.upper()}"]
+    B = ig_base(token)
+    data = {"media_type": "REELS", "video_url": video_url, "caption": caption, "share_to_feed": "true"}
+    if cover_url: data["cover_url"] = cover_url
+    c = _post(f"{B}/{uid}/media", data, token)["id"]
+    for _ in range(60):
+        s = requests.get(f"{B}/{c}", params={"fields": "status_code,status"}, headers={"Authorization": f"Bearer {token}"}, timeout=30).json()
+        if s.get("status_code") == "FINISHED": break
+        if s.get("status_code") == "ERROR": raise RuntimeError(f"릴스 영상 처리 오류: {s}")
+        time.sleep(5)
+    else:
+        raise RuntimeError("릴스 영상 처리가 5분 안에 안 끝남")
+    return _post(f"{B}/{uid}/media_publish", {"creation_id": c}, token)["id"]
+
+
 def instagram_carousel(region: str, image_urls: list, caption: str) -> str:
     """2~3장 카드를 Instagram 캐러셀로. (Make의 2장/3장 경로와 같은 역할)"""
     uid, token = os.environ[f"IG_USER_ID_{region.upper()}"], os.environ[f"IG_TOKEN_{region.upper()}"]

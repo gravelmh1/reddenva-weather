@@ -158,6 +158,12 @@ def render(D, out1, out2):
     T(0.055, Hp - 34, "Sources: CFTC Traders in Financial Futures, FINRA margin statistics", 11.5, c=GR)
     fig.savefig("/tmp/_d2.png", facecolor=BG); plt.close(fig); stamp_png("/tmp/_d2.png", "us")
     for src, dst in (("/tmp/_d1.png", out1), ("/tmp/_d2.png", out2)): Image.open(src).convert("RGB").save(dst, quality=92)
+    import reel_data  # 릴스용 숫자
+    reel_data.save("deriv", "us", {"asof": lab(BASE), "xm": xm, "nm": nm, "bd": bd,
+                   "tiles": [[t, v, cs, sub, cc] for t, v, (cs, cc), sub in cards],
+                   "net": {k: net[k][i0:] for k in net}, "net_d": {k: net[k][-1] - net[k][i0] for k in net}, "net_last": {k: net[k][-1] for k in net},
+                   "margin": [round(debit[-1], 2), round((debit[-1] - debit[-2]) / debit[-2] * 100, 1), f"{fmo[-1]:%b %Y}"],
+                   "cards": [os.path.abspath(out1), os.path.abspath(out2)]})
     cap = (f"📊 Thursday Derivatives Briefing · S&P 500 futures, basis, VIX, CFTC positioning, margin debt · as of {lab(BASE)}\n\n"
            "#SP500 #ESfutures #futures #derivatives #VIX #COT #margindebt #reddenva")
     return cap

@@ -169,6 +169,10 @@ def main():
     ph = [dict(cands[p["i"]], cap=p["cap"], fx=float(p.get("fx", .5)), fy=float(p.get("fy", .5))) for p in j["photos"]]
     rel = [f"out/trip-{region}-{day}-{n}.jpg" for n in (1, 2, 3)]
     trips_render.carousel(region, today, spot, w, ph, j, rel)
+    import reel_data
+    reel_data.save("trip", region, {"spot": {k: spot.get(k) for k in ("name", "area", "how", "hours", "fee")}, "w": w, "sat": sat.isoformat(),
+                   "j": {k: j.get(k) for k in ("why", "tip", "aside")}, "caps": [p["cap"] for p in ph], "fx": [[p["fx"], p["fy"]] for p in ph],
+                   "cards": [os.path.abspath(r) for r in rel]}, photos={f"p{i}": p["im"] for i, p in enumerate(ph)})
     name = spot["name"]
     tag = re.sub(r"[^0-9A-Za-z가-힣]", "", name)
     cap = (f"📍 이번 주말 서울 나들이: {name} ({spot['area']})\n\n#{tag} #서울나들이 #주말나들이 #서울가볼만한곳 #주말여행 #레드덴바" if ko else

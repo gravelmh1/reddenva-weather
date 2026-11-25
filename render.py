@@ -332,3 +332,12 @@ def card(out, region, now, p, f, cp, city):
     d.rounded_rectangle([40, y + 4, W - 40, H - 40], radius=32, fill="white")
     _week(d, 64, W - 64, y + 20, H - 56 - (y + 20), cols, ko)
     im.save(out, "JPEG", quality=92)
+    import reel_data  # 릴스용으로 같은 숫자를 남겨둠
+    wk = []
+    for z, kind in cols:
+        wdi = dt.date.fromisoformat(z["date"]).weekday()
+        lab = ("오늘" if ko else "Today") if kind == "today" else ("어제" if ko else "Yest.") if kind == "yday" else ("월화수목금토일"[wdi] if ko else WD_EN[wdi])
+        wk.append(dict(d=lab, wd=wdi, code=z.get("code", 0), hi=z["hi"], lo=z["lo"], rain=z.get("rain", 0), today=kind == "today", faded=kind == "yday"))
+    reel_data.save("weather", region, dict(ko=ko, city=cname, wd=wd, month=now.month, day=now.day, mon_en=now.strftime("%b"),
+                   morning=f["morning"], dm=dm, hi=t["hi"], lo=t["lo"], rows=rows, alert=list(al) [:2] if al else None,
+                   headline=cp["headline"], pose=cp["pose"], week=wk, card=os.path.abspath(out)))

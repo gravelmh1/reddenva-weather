@@ -42,7 +42,20 @@ def main():
         r.raise_for_status(); me = r.json()
     os.environ[f"IG_USER_ID_{R}"] = str(me.get("user_id") or me["id"])
     urls = [u for u in (meta["image_url"], meta.get("image_url2"), meta.get("image_url3")) if u]
-    if len(urls) > 1:
+    pid = None
+    vf = f"reel_out/{a.region}-video.json"  # reel.py가 같은 실행에서 만든 영상 (같은 카드일 때만)
+    if os.path.exists(vf):
+        v = json.load(open(vf, encoding="utf-8"))
+        if v.get("date") == day and v.get("image_url") == meta["image_url"]: meta.update(video_url=v["video_url"], cover_url=v.get("cover_url"))
+    if meta.get("video_url"):  # reel.py가 영상을 만들었으면 릴스로. 실패하면 아래 카드 이미지로 대신 올림
+        try:
+            pid = publish.instagram_reel(a.region, meta["video_url"], meta.get("cover_url"), meta["caption"])
+            print("릴스로 게시")
+        except Exception as e:
+            print("릴스 게시 실패 → 카드 이미지로 올림:", e)
+    if pid:
+        pass
+    elif len(urls) > 1:
         pid = publish.instagram_carousel(a.region, urls, meta["caption"])
     else:
         pid = publish.instagram(a.region, urls[0], meta["caption"])
