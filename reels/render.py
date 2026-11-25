@@ -3,11 +3,18 @@
 
   python reels/render.py data.json out.mp4 [cover.jpg]
 """
-import json, os, subprocess, sys
+import json, os, shutil, subprocess, sys
 from playwright.sync_api import sync_playwright
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 W, H, FPS = 1080, 1920, 30
+
+
+def ffmpeg_bin():
+    """GitHub 러너엔 ffmpeg가 없어서 pip 패키지(imageio-ffmpeg)의 정적 실행 파일을 쓴다."""
+    if shutil.which("ffmpeg"): return "ffmpeg"
+    import imageio_ffmpeg
+    return imageio_ffmpeg.get_ffmpeg_exe()
 
 
 def render(data, out, cover=None, cover_at=None, fps=FPS):
@@ -22,7 +29,7 @@ def render(data, out, cover=None, cover_at=None, fps=FPS):
         if cover:
             pg.evaluate(f"render({cover_at if cover_at is not None else 2.0})")
             pg.screenshot(path=cover, type="jpeg", quality=92)
-        ff = subprocess.Popen(["ffmpeg", "-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", str(fps),
+        ff = subprocess.Popen([ffmpeg_bin(), "-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", str(fps),
                                "-c:v", "mjpeg", "-i", "-", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo", "-shortest",
                                "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p", "-r", str(fps),
                                "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", out], stdin=subprocess.PIPE)

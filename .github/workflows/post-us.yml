@@ -106,7 +106,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if python reel.py --region us --enabled; then
-            pip install -q playwright && python -m playwright install --with-deps chromium
+            pip install -q playwright imageio-ffmpeg && python -m playwright install --with-deps chromium
             python reel.py --region us
           else echo "릴스 꺼짐 → 카드 이미지로 게시"; fi
       - name: Instagram 게시 (ig=true일 때)
@@ -130,7 +130,7 @@ jobs:
         if: ${{ inputs.dry_run }}
         continue-on-error: true
         run: |
-          pip install -q playwright && python -m playwright install --with-deps chromium
+          pip install -q playwright imageio-ffmpeg && python -m playwright install --with-deps chromium
           python reel.py --region us --preview
       - name: 테스트 영상 보관 (dry-run일 때)
         if: ${{ inputs.dry_run }}
