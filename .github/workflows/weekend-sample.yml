@@ -1,0 +1,36 @@
+name: weekend-sample
+# 토요일 동물 상식·일요일 넷플릭스 카드 시안을 만들어 samples 브랜치(weekend/)에 올린다. 게시하지 않음.
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 폰트 설치
+        run: sudo apt-get update -y && sudo apt-get install -y fonts-noto-cjk
+      - run: pip install -r requirements.txt
+      - name: 시안 만들기
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: |
+          for r in kr us; do
+            python facts.py --region $r --dry-run --force || echo "facts $r 실패"
+            python netflix.py --region $r --dry-run --force || echo "netflix $r 실패"
+          done
+          mkdir -p /tmp/s/weekend && cp out/facts-*-20*.jpg out/netflix-*-20*.jpg /tmp/s/weekend/ 2>/dev/null || true
+          ls /tmp/s/weekend
+      - name: samples 브랜치에 저장
+        run: |
+          git config user.name "github-actions"; git config user.email "actions@users.noreply.github.com"
+          git stash -u -q || true
+          git fetch origin samples || true
+          git checkout -B samples origin/samples 2>/dev/null || git checkout --orphan samples
+          git rm -rq --cached . 2>/dev/null || true
+          rm -rf weekend && cp -r /tmp/s/weekend weekend && git add weekend && git commit -qm "weekend samples" && git push -q origin samples
