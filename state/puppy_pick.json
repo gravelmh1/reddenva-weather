@@ -1,26 +1,27 @@
 {
  "used": [
-  "wm:File:Koala and joey.jpg"
+  "wm:File:Koala and joey.jpg",
+  "wm:File:Boy c11.jpg"
  ],
  "pick": {
-  "week": "2026-W47",
-  "id": "wm:File:Koala and joey.jpg",
-  "artist": "Benjamint444",
+  "week": "2026-W48",
+  "id": "wm:File:Boy c11.jpg",
+  "artist": "Bchappell702",
   "license": "CC BY-SA 3.0",
   "src": "Wikimedia Commons",
-  "focus_x": 0.31,
-  "focus_y": 0.38,
-  "name_ko": "아기 코알라",
-  "name_en": "Koala joey",
+  "focus_x": 0.65,
+  "focus_y": 0.25,
+  "name_ko": "아기 아키타",
+  "name_en": "Akita puppy",
   "lines_ko": [
-   "엄마 등에 딱 달라붙는 중.",
-   "내려올 생각은 전혀 없음."
+   "세상에 불만 있는 얼굴.",
+   "그냥 털이 그렇게 난 것."
   ],
   "lines_en": [
-   "Clinging tightly to mom.",
-   "Zero plans to let go."
+   "Looks like it hates the world.",
+   "Just natural facial features."
   ],
-  "aside_ko": "부럽다",
-  "aside_en": "Jealous"
+  "aside_ko": "억울",
+  "aside_en": "Not my fault"
  }
 }
