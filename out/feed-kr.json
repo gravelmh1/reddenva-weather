@@ -1,6 +1,6 @@
 {
  "region": "kr",
- "updated": "2026-11-25T04:01:31Z",
+ "updated": "2026-11-25T21:05:32Z",
  "categories": [
   {
    "series": "books",
@@ -21,6 +21,14 @@
   {
    "series": "trip",
    "label": "주말 여행"
+  },
+  {
+   "series": "facts",
+   "label": "동물 상식"
+  },
+  {
+   "series": "netflix",
+   "label": "넷플릭스"
   }
  ],
  "items": [
