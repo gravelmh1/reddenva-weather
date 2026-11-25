@@ -113,7 +113,8 @@ def choose(year, week_no, used):
 def build(region, pick, day, photo):
     ko = region == "kr"; d = dt.date.fromisoformat(day); L = "ko" if ko else "en"
     _, en, kname, lk, le = FACTS[pick["n"]]
-    credit = " · ".join(x for x in (pick["artist"], pick["license"], pick["src"]) if x)
+    artist = re.sub(r"\s*[\(<].*$|\S+@\S+", "", pick["artist"]).strip()
+    credit = " · ".join(x for x in (artist, pick["license"], pick["src"]) if x)
     c = dict(top=(f"SATURDAY FACT · {d:%Y.%m.%d}" if ko else f"SATURDAY FACT · {d:%b %d, %Y}".upper()), date=day,
              handle=f"@reddenva.{region}", photo=photo, focus=(pick["focus_x"], pick["focus_y"]), pose="a11.png", fact=True,
              badge="신기한 동물 사실" if ko else "Weird animal fact", name=kname if ko else en, lines=lk if ko else le, aside=pick[f"aside_{L}"],
