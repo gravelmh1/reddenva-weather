@@ -1,5 +1,5 @@
 name: ig-check
-# 일회성 점검: Instagram 토큰이 두 계정에 접근되는지만 확인 (게시 안 함). 결과는 state/ig_check.txt
+# 일회성 점검: Instagram 토큰이 두 계정에 접근되는지만 확인 (게시 안 함). 결과는 state/ig_check.txt (재점검 2)
 on:
   push:
     paths: [".github/workflows/ig-check.yml"]
