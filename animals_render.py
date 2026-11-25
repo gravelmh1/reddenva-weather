@@ -22,9 +22,9 @@ def card(c: dict, out: str):
     d.text((M, y), c["badge"], font=font("Black", 30), fill=OR)
     d.text((M, y + 44), c["name"], font=fit(d, c["name"], "Black", 68, W - 2 * M - 250, 40), fill=NAVY)
     for j, ln in enumerate(c["lines"][:2]):
-        d.text((M, y + 140 + j * 48), ln, font=fit(d, ln, "Medium", 36, W - 2 * M - 250, 24), fill=NAVY)
+        d.text((M, y + 140 + j * 48), ln, font=fit(d, ln, "Bold" if (j == 0 and c.get("fact")) else "Medium", 36, W - 2 * M - 250, 24), fill=NAVY)
     # 레드덴바 + 한마디
-    s = Image.open(os.path.join(POSES, "a00.png")).convert("RGBA"); s = s.crop(s.getbbox()); k = 190 / s.height
+    s = Image.open(os.path.join(POSES, c.get("pose", "a00.png"))).convert("RGBA"); s = s.crop(s.getbbox()); k = 190 / s.height
     s = s.resize((int(s.width * k), 190), Image.LANCZOS); sx = W - M - s.width; sy = y + 62; im.paste(s, (sx, sy), s)
     if c.get("aside"):
         af = fit(d, c["aside"], "Bold", 24, 230, 16); aw = int(d.textlength(c["aside"], font=af)) + 36

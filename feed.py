@@ -20,6 +20,8 @@ SERIES = {
     "puppy": ("animal", "아기 동물", "Baby animal"),
     "deriv": ("deriv", "파생 브리핑", "Derivatives brief"),
     "trip": ("trip", "주말 여행", "Weekend trip"),
+    "facts": ("facts", "동물 상식", "Animal facts"),
+    "netflix": ("netflix", "넷플릭스", "Netflix"),
 }
 KO_DAYS = "월화수목금토일"
 EN_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
