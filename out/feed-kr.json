@@ -1,6 +1,6 @@
 {
  "region": "kr",
- "updated": "2026-11-24T21:05:36Z",
+ "updated": "2026-11-25T04:01:31Z",
  "categories": [
   {
    "series": "books",
@@ -24,6 +24,17 @@
   }
  ],
  "items": [
+  {
+   "series": "animal",
+   "label": "아기 동물",
+   "date": "2026-11-25",
+   "date_label": "2026.11.25 (수)",
+   "title": "이번 주 아기 동물: 아기 아키타",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/puppy-kr-2026-11-25.jpg"
+   ]
+  },
   {
    "series": "news",
    "label": "좋은 뉴스",
