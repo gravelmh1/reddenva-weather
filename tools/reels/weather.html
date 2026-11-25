@@ -60,22 +60,24 @@
 <div class="abs" id="s3head" style="top:250px"><div class="kicker">이번 주</div><div class="title" id="s3title"></div></div>
 <div class="abs" id="s3panel" style="top:500px"><div class="panel" id="week"></div></div>
 
-<!-- 장면 4: 끝 -->
-<div class="abs" id="s4char" style="top:560px"><img class="char" id="c4" height="400"></div>
-<div class="abs" id="s4t" style="top:1040px"><div class="title" id="outro"></div></div>
-<div class="abs" id="s4h" style="top:1180px"><div class="handle" id="handle"></div></div>
 
+
+<!-- 마지막: 원래 카드 전체 -->
+<div class="abs" id="fk" style="top:120px"><div class="kicker">한 장으로 보기</div></div>
+<div id="final" style="position:absolute;left:40px;top:200px;width:1000px;height:1250px;overflow:hidden;border-radius:36px;box-shadow:0 30px 90px rgba(0,0,0,.5);opacity:0"></div>
 <script src="lib.js"></script>
 <script>
 const D = window.DATA;
+$("#final").innerHTML = `<div id="strip" style="display:flex;width:${1000 * D.cards.length}px">` +
+  D.cards.map(c => `<img src="${c}" style="width:1000px;height:1250px;display:block">`).join("") + "</div>";
 const POSE = n => `../../assets/poses/${n}.png`;
 $("#chip").textContent = `${D.city} · ${D.date} ${D.dow}`;
 $("#pill").innerHTML = `<span class="tri">${D.delta < 0 ? "▼" : "▲"}</span> 어제보다 ${Math.abs(D.delta)}° ${D.delta < 0 ? "추워요" : "따뜻해요"}`;
 $("#s2title").textContent = D.day_title;
 $("#rain").textContent = D.rain; $("#outfit").textContent = D.outfit;
 $("#s3title").textContent = D.week_title;
-$("#outro").textContent = D.outro; $("#handle").textContent = D.handle;
-$("#c1").src = POSE(D.pose); $("#c2").src = POSE(D.pose2); $("#c4").src = POSE(D.pose);
+
+$("#c1").src = POSE(D.pose); $("#c2").src = POSE(D.pose2);
 
 // 주간 막대
 const lo = Math.min(...D.week.map(w => w.lo)) - 1, hi = Math.max(...D.week.map(w => w.hi)) + 1;
@@ -95,8 +97,8 @@ let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 214748364
 const flakes = Array.from({ length: 46 }, () => ({ x: rnd() * 1080, y: rnd() * 1920, r: 3 + rnd() * 7, v: 40 + rnd() * 90, a: .15 + rnd() * .4, w: rnd() * 6 }));
 flakes.forEach(f => { const e = document.createElement("div"); e.className = "flake"; e.style.width = e.style.height = f.r * 2 + "px"; e.style.opacity = f.a; f.el = e; $("#snow").appendChild(e); });
 
-window.render = t => {
-  flakes.forEach(f => { f.el.style.transform = `translate(${f.x + Math.sin(t + f.w) * 20}px,${(f.y + t * f.v) % 1960 - 40}px)`; });
+window.render = (t, T = t) => {
+  flakes.forEach(f => { f.el.style.transform = `translate(${f.x + Math.sin(T + f.w) * 20}px,${(f.y + T * f.v) % 1960 - 40}px)`; });
   // 장면 1 (0 ~ 3.3초)
   const o1 = 1 - P(t, 3.0, 3.4, easeInOut), up1 = -80 * P(t, 3.0, 3.4, easeInOut);
   set("#s1chip", { o: P(t, 0, .4) * o1, y: -30 * (1 - P(t, 0, .4)) + up1 });
@@ -105,7 +107,7 @@ window.render = t => {
   $("#bign").textContent = fmt(lerp(D.yday, D.today, k));
   set("#big", { o: P(t, .2, .5) * o1, s: .9 + .1 * P(t, .2, .7, back) + .04 * (1 - Math.abs(1 - 2 * k)) * 0, y: up1 });
   set("#s1pill", { o: P(t, 1.45, 1.7) * o1, s: .6 + .4 * P(t, 1.45, 1.9, back), y: up1 });
-  set("#s1char", { o: P(t, .5, .8) * o1, y: 260 * (1 - P(t, .5, 1.1, back)) + breathe(t) + up1 * .5 });
+  set("#s1char", { o: P(t, .5, .8) * o1, y: 260 * (1 - P(t, .5, 1.1, back)) + breathe(T) + up1 * .5 });
   // 장면 2 (3.3 ~ 6.6초)
   const o2 = 1 - P(t, 6.3, 6.7, easeInOut), up2 = -80 * P(t, 6.3, 6.7, easeInOut);
   set("#s2head", { o: P(t, 3.3, 3.7) * o2, y: 60 * (1 - P(t, 3.3, 3.7)) + up2 });
@@ -115,7 +117,7 @@ window.render = t => {
   $("#lon").textContent = fmt(D.lo * P(t, 3.75, 4.75, easeInOut));
   set("#r1", { o: P(t, 4.4, 4.75) * o2, x: -120 * (1 - P(t, 4.4, 4.85)) + 0, y: up2 });
   set("#r2", { o: P(t, 4.65, 5.0) * o2, x: -120 * (1 - P(t, 4.65, 5.1)), y: up2 });
-  set("#s2char", { o: P(t, 4.9, 5.2) * o2, y: 200 * (1 - P(t, 4.9, 5.5, back)) + breathe(t) + up2 });
+  set("#s2char", { o: P(t, 4.9, 5.2) * o2, y: 200 * (1 - P(t, 4.9, 5.5, back)) + breathe(T) + up2 });
   // 장면 3 (6.6 ~ 9.3초)
   const o3 = 1 - P(t, 9.0, 9.35, easeInOut);
   set("#s3head", { o: P(t, 6.6, 7.0) * o3, y: 60 * (1 - P(t, 6.6, 7.0)) });
@@ -127,10 +129,10 @@ window.render = t => {
     c.querySelector(".hi").style.opacity = c.querySelector(".lo").style.opacity = P(t, a + .4, a + .7);
     c.querySelector(".d").style.opacity = P(t, a - .1, a + .2);
   });
-  // 장면 4 (9.3 ~ 10초)
-  set("#s4char", { o: P(t, 9.3, 9.55), s: .7 + .3 * P(t, 9.3, 9.75, back), y: breathe(t) });
-  set("#s4t", { o: P(t, 9.4, 9.7), y: 40 * (1 - P(t, 9.4, 9.8)) });
-  set("#s4h", { o: P(t, 9.5, 9.8) });
+  // 마지막 (9.3초~): 원래 카드 전체. 카드가 2장이면 옆으로 넘김
+  set("#fk", { o: P(t, 9.3, 9.7), y: 30 * (1 - P(t, 9.3, 9.7)) });
+  set("#final", { o: P(t, 9.3, 9.6), y: 160 * (1 - P(t, 9.3, 9.8, back)), s: .92 + .08 * P(t, 9.3, 9.8) });
+  $("#strip").style.transform = `translateX(${-1000 * P(t, 10.0, 10.45, easeInOut)}px)`;
 };
 waitImages();
 </script>
