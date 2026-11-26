@@ -304,8 +304,8 @@ def news3(region, kind, now, facts):
     p = f"""You write the 3-line news section of a {'Korean' if ko else 'US'} {'morning' if kind == 'morning' else 'market close'} market brief.
 Market numbers for context (already shown elsewhere, do not repeat them as news): {json.dumps(facts, ensure_ascii=False)}
 From the headlines below pick the 3 most market-moving, distinct stories (central bank, macro data, big company news, policy). Skip opinion, ads, stock tips, crypto hype, celebrity, duplicates.
-Write each as: "head" = short headline (max {'18 Korean characters' if ko else '42 characters'}), "line" = one factual sentence (max {'45 Korean characters' if ko else '95 characters'}).
-Use ONLY facts stated in the headline you picked. Never invent numbers or details. Write in {'Korean (뉴스 문체, ~했다/~한다)' if ko else 'plain English'}.
+Write each as: "head" = short headline (max {'18 Korean characters' if ko else '42 characters'}), "line" = 2 short sentences (max {'80 Korean characters' if ko else '170 characters'} total): what happened, then why markets care.
+Use ONLY facts stated in the headline you picked for what happened. Never invent numbers, names or details; the "why" sentence must be general (no new facts). Write in {'Korean (뉴스 문체, ~했다/~한다)' if ko else 'plain English'}.
 Return JSON: {{"items":[{{"i":index,"head":"...","line":"..."}}]}}
 Headlines:
 {lst}"""
@@ -521,19 +521,25 @@ def main():
         d.update(day=day.isoformat(), handle=f"@reddenva.{a.region}", made=now.isoformat())
     out = a.out or f"out/{a.kind}-{a.region}-{day.isoformat()}.jpg"
     render_card(d, os.path.abspath(out)); print("카드:", out)
+    out2 = None
+    if len(d.get("news") or []) >= 3:  # 둘째 장: 주요 뉴스 3개를 내용까지 (자고 일어나서 궁금한 것)
+        out2 = out.replace(".jpg", "-2.jpg")
+        try: render_card(dict(d, page="news"), os.path.abspath(out2)); print("뉴스 카드:", out2)
+        except Exception as e: print("뉴스 카드 실패:", e); out2 = None
     cap = caption(d); print(cap)
     import reel_data
-    reel_data.save(a.kind, a.region, dict(d, cards=[os.path.abspath(out)]))
+    reel_data.save(a.kind, a.region, dict(d, cards=[os.path.abspath(out)] + ([os.path.abspath(out2)] if out2 else [])))
     json.dump(d, open(out.replace(".jpg", ".json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     if a.dry_run or a.from_json: print("(dry-run) 게시용 정보 안 씀"); return
     from books import git_push
     git_push(["out"], f"{a.kind} {a.region} {day} card")
     sha = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
     url = f"https://raw.githubusercontent.com/{os.environ['GITHUB_REPOSITORY']}/{sha}/{out}"
+    url2 = url.replace(".jpg", "-2.jpg") if out2 else ""
     for _ in range(12):
-        if requests.head(url, timeout=15).ok: break
+        if requests.head(url, timeout=15).ok and (not url2 or requests.head(url2, timeout=15).ok): break
         time.sleep(5)
-    json.dump({"date": day.isoformat(), "image_url": url, "caption": cap, "title": d["title"]}, open(lp, "w", encoding="utf-8"), ensure_ascii=False)
+    json.dump({"date": day.isoformat(), "image_url": url, "image_url2": url2, "caption": cap, "title": d["title"]}, open(lp, "w", encoding="utf-8"), ensure_ascii=False)
     git_push(["out"], f"{a.kind} {a.region} {day} latest.json"); print("저장 완료:", url)
 
 

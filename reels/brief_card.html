@@ -120,6 +120,14 @@
   .nw i { flex: none; font-style: normal; width: 34px; height: 34px; border-radius: 50%; background: var(--acc); color: #fff; font-size: 21px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
   .nw .h { font-size: 26px; font-weight: 900; line-height: 1.28; }
   .nw .l { display: none; }
+  /* 둘째 장: 주요 뉴스 */
+  .np { margin-top: 26px; }
+  .np h2 { font-size: 40px; margin-bottom: 18px; }
+  .ni { display: flex; gap: 22px; background: #fff; border: 2px solid var(--edge); border-radius: 26px; padding: 30px 32px; margin-bottom: 22px; }
+  .ni i { flex: none; font-style: normal; width: 58px; height: 58px; border-radius: 50%; background: var(--acc); color: #fff; font-size: 34px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+  .ni .h { font-size: 42px; font-weight: 900; line-height: 1.25; letter-spacing: -0.04em; }
+  .ni .l { word-break: keep-all; font-size: 31px; line-height: 1.5; color: #2a3550; margin-top: 10px; font-weight: 500; }
+  .ni .s { font-size: 22px; color: var(--sub); margin-top: 10px; font-weight: 700; }
   footer { position: absolute; left: 48px; right: 48px; bottom: 18px; display: flex; justify-content: space-between; font-size: 19px; color: var(--sub); }
   footer b { color: var(--acc); }
   .nc .nw { padding: 2px 0; }
@@ -264,11 +272,15 @@ const S = {
     return `<div class="p news">` + s.items.map((n, i) => `<div class="nw"><i>${i + 1}</i><div><div class="h">${esc(n.head)}</div><div class="l">${esc(n.line)}</div></div></div>`).join("") + "</div>";
   },
 };
-for (const s0 of D.sections.filter(x => x.card !== false)) { const s = s0.card_n ? Object.assign({}, s0, { items: s0.items.slice(0, s0.card_n) }) : s0; h += `<section data-t="${s.type}"><h2>${esc(s.title)}${s.small ? `<small>${esc(s.small)}</small>` : ""}</h2>${S[s.type](s)}</section>`; }
+if (D.page === "news") {
+  const ns = D.sections.find(x => x.type === "news");
+  h += `<section class="np"><h2>${esc(ns.title)}</h2>` + ns.items.map((n, i) => `<div class="ni"><i>${i + 1}</i><div><div class="h">${esc(n.head)}</div><div class="l">${esc(n.line)}</div><div class="s">${esc(n.src)}</div></div></div>`).join("") + "</section>";
+} else for (const s0 of D.sections.filter(x => x.card !== false)) { const s = s0.card_n ? Object.assign({}, s0, { items: s0.items.slice(0, s0.card_n) }) : s0; h += `<section data-t="${s.type}"><h2>${esc(s.title)}${s.small ? `<small>${esc(s.small)}</small>` : ""}</h2>${S[s.type](s)}</section>`; }
 h += `<footer><span>${esc(D.foot)}</span><b>${esc(D.handle)}</b></footer>`;
 const card = document.getElementById("card"); card.innerHTML = h;
 const over = () => { const last = card.querySelector("section:last-of-type"); return last && last.getBoundingClientRect().bottom > 1350 - 56; };
 Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; }))).then(() => document.fonts.ready).then(() => {
+  if (D.page === "news") { window.READY = true; return; }
   if (over()) card.classList.add("t1");
   if (over()) card.classList.add("nc");  // 뉴스를 제목만 한 줄씩
   if (over()) { const n = card.querySelector('section[data-t="news"]'); if (n) n.remove(); }  // 그래도 넘치면 뉴스는 캡션·릴스로만

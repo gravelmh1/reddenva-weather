@@ -360,7 +360,10 @@ def brief(d, region):
         if hs:
             sc.append(dict(type="heat", groups=[dict(title=hs["title"], cols=4 if len(hs["items"]) > 6 else 3, items=[dict(n=q["name"], p=q["pct"], bg=heatbg(q["pct"], ko)) for q in hs["items"]])],
                            top=230, dur=2.0 + 0.1 * len(hs["items"]) + 1.2))
-    return th, sc + [cards_scene(d["cards"], ko)]
+    cards = d["cards"]
+    if len(cards) > 1:  # 둘째 장 = 주요 뉴스 3개. 읽을 시간 주기
+        sc.append(dict(type="cards", kicker=(("간밤 미국 주요 뉴스" if d["kind"] == "morning" else "오늘 장중 핵심 뉴스") if ko else "Top headlines"), srcs=["file://" + cards[1]], dur=7.5))
+    return th, sc + [cards_scene(cards[:1], ko)]
 
 
 ADAPT = dict(dart=dart, weather=weather, morning=brief, close=brief, deriv=deriv, books=books, news=news, puppy=puppy, facts=facts, trip=trip, netflix=netflix)
