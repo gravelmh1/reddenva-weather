@@ -33,7 +33,7 @@ elif sys.argv[2] == "--clear":
     json.dump(NONE, open(post, "w", encoding="utf-8")); print("post.json 비움")
 elif sys.argv[2] == "--write":
     slot = sys.argv[3]
-    src = [f"out/{region}-latest.json"] if slot == "weather" else [f"out/{slot}-{region}-latest.json"] if slot in ("morning", "close") else [f"out/books-{region}-latest.json", f"out/news-{region}-latest.json", f"out/puppy-{region}-latest.json", f"out/deriv-{region}-latest.json", f"out/trip-{region}-latest.json", f"out/facts-{region}-latest.json", f"out/netflix-{region}-latest.json"]
+    src = [f"out/{region}-latest.json"] if slot == "weather" else [f"out/{slot}-{region}-latest.json"] if slot in ("morning", "close") else [f"out/books-{region}-latest.json", f"out/news-{region}-latest.json", f"out/dart-{region}-latest.json", f"out/puppy-{region}-latest.json", f"out/deriv-{region}-latest.json", f"out/trip-{region}-latest.json", f"out/facts-{region}-latest.json", f"out/netflix-{region}-latest.json"]
     for p in src:
         if today(p):
             m = json.load(open(p, encoding="utf-8")); m.setdefault("image_url2", ""); m.setdefault("image_url3", "")  # 2·3장이면 Make가 캐러셀로
