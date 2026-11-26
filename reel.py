@@ -222,6 +222,17 @@ SERIES = {"kr": {"weather": "[[acc:서울]] 날씨", "books": "이번 주 [[acc:
 EN_DAY_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
+# 시리즈마다 배경 톤만 살짝 다르게 (밝기·채도는 비슷하게 맞춰서 격자에서 구분되지만 튀지 않게)
+G = lambda a, b, c: f"radial-gradient(1200px 900px at 50% 18%, {a} 0%, {b} 58%, {c} 100%)"
+SERIES_BG = {
+    "weather": G("#25467f", "#152a50", "#0c1a35"),   # 네이비
+    "puppy":   G("#5b3247", "#331b29", "#1c0f17"),   # 로즈 플럼
+    "deriv":   G("#2f3542", "#1a1e27", "#0f1217"),   # 차콜 그래파이트
+    "trip":    G("#1f4d52", "#112d31", "#09191c"),   # 딥 틸
+    "facts":   G("#43502f", "#262e1b", "#141a0e"),   # 모스 올리브
+}
+
+
 def open_scene(kind, region):
     """모든 릴스의 첫 화면(=섬네일). 날짜 아이콘 + '목요일 파생 브리핑' 같은 제목."""
     tz = "Asia/Seoul" if region == "kr" else "America/Los_Angeles"
@@ -241,6 +252,7 @@ def build(kind, region):
     d = reel_data.load(kind, region)
     if not d: raise SystemExit(f"reel_in/{kind}-{region}.json 없음 (이번 실행에서 카드를 안 만들었음)")
     th, scenes = ADAPT[kind](d, region)
+    if kind in SERIES_BG: th["vars"]["bg"] = SERIES_BG[kind]
     return {"theme": th, "scenes": [open_scene(kind, region)] + scenes}
 
 
