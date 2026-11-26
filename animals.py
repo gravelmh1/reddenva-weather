@@ -78,7 +78,14 @@ def pexels_videos(q, key):
 
 
 def commons_videos(q):
-    """위키미디어 공용 영상(CC0·CC BY·퍼블릭 도메인만). Pexels 키가 없을 때 쓰는 무료 대안. 출처·라이선스 표기."""
+    """위키미디어 공용 영상(CC0·CC BY·퍼블릭 도메인만). Pexels 키가 없을 때 쓰는 무료 대안. 출처·라이선스 표기.
+    공용엔 영상이 적어서 견종 이름으로 안 나오면 'puppy'처럼 넓혀서 다시 찾는다."""
+    out = _commons_videos(q)
+    if len(out) < 3 and len(q.split()) > 1: out += [c for c in _commons_videos(q.split()[-1]) if c["id"] not in {o["id"] for o in out}]
+    return out
+
+
+def _commons_videos(q):
     r = requests.get("https://commons.wikimedia.org/w/api.php", headers=UA, timeout=25, params={
         "action": "query", "format": "json", "generator": "search", "gsrnamespace": 6, "gsrsearch": f"{q} filetype:video", "gsrlimit": 25,
         "prop": "videoinfo", "viprop": "url|size|mime|extmetadata|derivatives", "viurlwidth": 1280})
