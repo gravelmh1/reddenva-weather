@@ -222,15 +222,10 @@ SERIES = {"kr": {"weather": "[[acc:서울]] 날씨", "books": "이번 주 [[acc:
 EN_DAY_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
-# 시리즈마다 배경 톤만 살짝 다르게 (밝기·채도는 비슷하게 맞춰서 격자에서 구분되지만 튀지 않게)
-G = lambda a, b, c: f"radial-gradient(1200px 900px at 50% 18%, {a} 0%, {b} 58%, {c} 100%)"
-SERIES_BG = {
-    "weather": G("#25467f", "#152a50", "#0c1a35"),   # 네이비
-    "puppy":   G("#5b3247", "#331b29", "#1c0f17"),   # 로즈 플럼
-    "deriv":   G("#2f3542", "#1a1e27", "#0f1217"),   # 차콜 그래파이트
-    "trip":    G("#1f4d52", "#112d31", "#09191c"),   # 딥 틸
-    "facts":   G("#43502f", "#262e1b", "#141a0e"),   # 모스 올리브
-}
+# 시리즈마다 단색 배경 (색 계열은 확실히 다르게, 밝기·채도는 비슷하게 눌러서 세련되게)
+SERIES_BG = {"weather": "#1f4e8c", "books": "#6b4a2e", "news": "#f1e4c8", "puppy": "#93475f",
+             "deriv": "#2b313c", "trip": "#1d6461", "facts": "#56632c", "netflix": "#6e1d29"}
+SERIES_ACC = {"books": "#f3c97a", "netflix": "#ffb0a8", "puppy": "#ffc59e", "facts": "#f6d28a", "trip": "#ffc08a"}  # 배경 위에서 잘 보이게
 
 
 def open_scene(kind, region):
@@ -253,6 +248,7 @@ def build(kind, region):
     if not d: raise SystemExit(f"reel_in/{kind}-{region}.json 없음 (이번 실행에서 카드를 안 만들었음)")
     th, scenes = ADAPT[kind](d, region)
     if kind in SERIES_BG: th["vars"]["bg"] = SERIES_BG[kind]
+    if kind in SERIES_ACC: th["vars"]["acc"] = SERIES_ACC[kind]
     return {"theme": th, "scenes": [open_scene(kind, region)] + scenes}
 
 
