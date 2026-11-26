@@ -230,6 +230,7 @@ def today_wx(region, day, when="today"):
             "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code"}).json()["daily"]
     code = int(j["weather_code"][0] or 0); txt, ic = sky(code, ko)
     hi, lo, rain = j["temperature_2m_max"][0], j["temperature_2m_min"][0], int(j["precipitation_probability_max"][0] or 0)
+    if rain >= 60 and ic in ("sun", "part", "cloud", "fog"): txt, ic = ("비 소식" if ko else "Rain likely"), "rain"
     hc, lc = (hi, lo) if ko else ((hi - 32) / 1.8, (lo - 32) / 1.8)
     pose = ("w08" if code >= 95 else "w10" if code in (71, 73, 75, 77, 85, 86) else "w06" if rain >= 60 else "w05" if rain >= 40 else "w18" if code in (45, 48)
             else "w16" if hc >= 33 else "w13" if lc <= -5 else "w14" if lc <= 2 else "w15" if hc >= 28 and code <= 1 else {0: "w00", 1: "w01", 2: "w02", 3: "w04"}.get(code, "w03"))
@@ -368,7 +369,7 @@ def kr_close(now):
                          "text": f"선물 {bs['fut']:.2f}", "sign": True})
     mood = mood_of(kospi["pct"])
     facts = {"코스피": f"{kospi['last']:,.2f} ({kospi['pct']:+.2f}%)", **({"코스닥": f"{kosdaq['pct']:+.2f}%"} if kosdaq else {}),
-             **{q["name"]: f"{q['pct']:+.2f}%" for q in stocks[:3]}, **({"K200 선물 외국인(억원)": fl["fut"]["frn"]} if fl.get("fut") else {}), **({"K200 베이시스": bs["basis"]} if bs else {})}
+             **({"K200 선물 외국인(억원)": fl["fut"]["frn"]} if fl.get("fut") else {}), **({"K200 베이시스": bs["basis"]} if bs else {})}
     side = [m for m in macro if m["name"] in ("코스닥", "K200 베이시스")]
     secs = [{"type": "hero", "title": "오늘의 코스피", "item": kospi, "side": side, "ch": 330}]
     if fl.get("fut"): secs.append({"type": "flows", "title": "코스피200 선물 수급", "small": "투자자별 순매수 · 억원", "rows": [["코스피200 선물", fl["fut"]]]})
