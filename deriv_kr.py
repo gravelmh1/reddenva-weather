@@ -23,6 +23,9 @@ N = lambda s: int(str(s).replace(",", "").replace("+", ""))
 D8 = lambda s: dt.date(int(s[:4]), int(s[4:6]), int(s[6:8]))
 
 
+now_ny = lambda: dt.datetime.now(ZoneInfo("America/New_York"))
+
+
 def get(url, **kw):
     for i in range(3):
         try:
@@ -50,12 +53,20 @@ def fetch(base):
         if j.get("bizdate") != k.strftime("%Y%m%d"): continue
         d["inv"][k] = {"frn": N(j["foreignValue"]), "ins": N(j["institutionalValue"]), "ind": N(j["personalValue"])}
         time.sleep(0.15)
-    print("투자자별", len(d["inv"]), "일 · 외국인 누적", sum(v["frn"] for v in d["inv"].values()))
+    print("투자자별", len(d["inv"]), "일 · 외국인 누적", sum(v["frn"] for v in d["inv"].values()),
+          "· 11/18까지", sum(v["frn"] for k, v in d["inv"].items() if k <= dt.date(2026, 11, 18)), "· 최근", list(d["inv"].items())[-3:])
     j = get("https://m.stock.naver.com/front-api/marketIndex/prices", params={"category": "bond", "reutersCode": "KR10YT=RR", "page": 1, "pageSize": 10}).json()
     d["ktb"] = [(dt.date.fromisoformat(r["localTradedAt"][:10]), float(r["closePrice"])) for r in j["result"]]
     d["ktb"] = [r for r in d["ktb"] if r[0] <= base]
-    r = get("https://fred.stlouisfed.org/graph/fredgraph.csv", params={"id": "VIXCLS", "cosd": (base - dt.timedelta(days=20)).isoformat()})
-    d["vix"] = [(dt.date.fromisoformat(a), float(b)) for a, b in (ln.split(",") for ln in r.text.strip().splitlines()[1:]) if b not in (".", "")]
+    try:  # VIX: Yahoo 먼저, 안 되면 FRED
+        res = get("https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX", params={"range": "1mo", "interval": "1d"}).json()["chart"]["result"][0]
+        ny = ZoneInfo("America/New_York")
+        d["vix"] = [(dt.datetime.fromtimestamp(t, ny).date(), round(c, 2)) for t, c in zip(res["timestamp"], res["indicators"]["quote"][0]["close"]) if c]
+        d["vix"] = [r for r in d["vix"] if r[0] < now_ny().date() or now_ny().hour >= 17]  # 미국 장 마감된 날만
+    except Exception as e:
+        print("Yahoo VIX 실패 → FRED", e)
+        r = get("https://fred.stlouisfed.org/graph/fredgraph.csv", params={"id": "VIXCLS", "cosd": (base - dt.timedelta(days=20)).isoformat()})
+        d["vix"] = [(dt.date.fromisoformat(a), float(b)) for a, b in (ln.split(",") for ln in r.text.strip().splitlines()[1:]) if b not in (".", "")]
     body = {"dmSearch": {"tmpV40": "1000000", "tmpV41": "1", "tmpV1": "D", "tmpV45": (base - dt.timedelta(days=366)).strftime("%Y%m%d"),
                          "tmpV46": base.strftime("%Y%m%d"), "OBJ_NM": "STATSCU0100000070BO"}}
     r = requests.post("https://freesis.kofia.or.kr/meta/getMetaDataList.do", json=body, headers=dict(H, Referer="https://freesis.kofia.or.kr/"), timeout=40); r.raise_for_status()
