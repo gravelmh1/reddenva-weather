@@ -190,7 +190,7 @@ const T = {
     let h = `<div class="col">${head(s)}<div class="panel chart" id="${id}" ${A("rise", .1)} style="margin-top:60px">
       <div class="legend">${s.series.map(x => `<span><i style="background:${x.c}"></i>${esc(x.name)}</span>`).join("")}${s.unit ? `<span style="opacity:.7">${esc(s.unit)}</span>` : ""}</div>
       <svg width="960" height="760" style="position:absolute;left:0;top:0"></svg></div>`;
-    if (s.foot) h += `<div class="foot" ${A("fade", .5)} style="margin-top:28px">${rich(s.foot)}</div>`;
+    if (s.foot) h += `<div class="foot" ${A("fade", .5)} style="margin-top:28px${s.footbig ? ";font-size:44px;font-weight:700;opacity:1;color:var(--fg)" : ""}">${rich(s.foot)}</div>`;
     return h + "</div>";
   },
   board(s) {  // 시세판: 이름 · 값 · 등락률(숫자 올라감) · 미니 차트(그려짐)
@@ -271,7 +271,7 @@ function setupChart(s) {
     mk("line", { x1: X0, x2: X1, y1: yOf(s.base), y2: yOf(s.base), stroke: "var(--psub)", "stroke-width": 3, "stroke-dasharray": "10 12", opacity: .7 });
     const l = document.createElement("div"); l.className = "lab"; l.style.cssText = `left:${X1 + 12}px;top:${yOf(s.base) - 18}px;font-size:26px;white-space:nowrap`; l.textContent = s.baselab || ""; box.appendChild(l);
   }
-  if (s.xlabs) s.xlabs.forEach((t, i) => { const l = document.createElement("div"); l.className = "lab"; l.style.cssText = `top:${Y1 + 14}px;left:${X0 + (X1 - X0) * i / (s.xlabs.length - 1) - 60}px;width:120px;text-align:center`; l.textContent = t; box.appendChild(l); });
+  if (s.xlabs) s.xlabs.forEach((t, i) => { const l = document.createElement("div"); l.className = "lab"; l.style.cssText = `top:${Y1 + 14}px;left:${X0 + (X1 - X0) * i / (s.xlabs.length - 1) - 100}px;width:200px;text-align:center;white-space:nowrap`; l.textContent = t; box.appendChild(l); });
   s.lines = s.series.map(x => {
     const L = { v: x.v, c: x.c, dp: x.dp || 0, sign: !!x.sign, below: x.below, nolab: x.nolab };
     L.glow = mk("path", { fill: "none", stroke: x.c, "stroke-width": 16, "stroke-opacity": .18, "stroke-linejoin": "round", "stroke-linecap": "round" });

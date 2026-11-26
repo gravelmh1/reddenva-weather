@@ -128,6 +128,110 @@ def k200_basis(day):
     if k in fut and k in spot: return {"fut": fut[k], "spot": spot[k], "basis": round(fut[k] - spot[k], 2)}
 
 
+# ------------------------------------------------------------------ 반도체 현물가 (이 채널의 메인): D램 현물 · GPU 임대료
+QPX = "https://chip.qpx.kr/prices/{}"  # DRAMeXchange 현물 표를 매일 남긴 이력 (차트용)
+DX_ITEMS = [("DDR5 16Gb (2Gx8) 4800/5600", "DDR5 16Gb"), ("DDR4 16Gb (2Gx8) 3200", "DDR4 16Gb"), ("DDR4 8Gb (1Gx8) 3200", "DDR4 8Gb"), ("MLC 64Gb 8GBx8", "NAND 64Gb")]
+
+
+def back(series, d, days):
+    t = d - dt.timedelta(days=days); old = [v for k, v in series if k <= t]
+    return old[-1] if old else None
+
+
+def chg_n(series, d, days):
+    o = back(series, d, days); last = series[-1][1]
+    return round((last / o - 1) * 100, 2) if o else None
+
+
+def dramx():
+    """DRAMeXchange 첫 화면 표: 품목 → (세션 평균가, 세션 변동 %), 업데이트 시각."""
+    h = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "|", get("https://www.dramexchange.com/").text))
+    h = re.sub(r"(\| ?)+", "|", h)
+    out = {}
+    for label, name in DX_ITEMS:
+        m = re.search(re.escape(label) + r" ?\|([\d.]+)\|([\d.]+)\|([\d.]+)\|([\d.]+)\|([\d.]+)\|(-?[\d.]+) ?%", h)
+        if m: out[name] = (float(m.group(5)), float(m.group(6)))
+    up = re.search(r"DRAM Spot Price\|Last Update: ?([A-Za-z]{3})\.(\d+) (\d{4}) (\d\d):(\d\d)", h)
+    when = dt.datetime.strptime(f"{up.group(1)} {up.group(2)} {up.group(3)} {up.group(4)}:{up.group(5)}", "%b %d %Y %H:%M").replace(tzinfo=ZoneInfo("Asia/Taipei")) if up else None
+    print("DRAMeXchange", when, out)
+    return out, when
+
+
+def dram_hist(slug="dram-spot__ddr5-16gb-2gx8-4800-5600"):
+    t = get(QPX.format(slug)).text
+    rows = re.findall(r'<td class="strong mono">(\d{4}-\d\d-\d\d)</td><td class="num">([\d.]+)</td><td class="num">([\d.]+)</td><td class="num strong">([\d.]+)</td>', t)
+    return sorted((dt.date.fromisoformat(a), float(avg)) for a, hi, lo, avg in rows)
+
+
+def drams(now):
+    """메인 = DDR5 16Gb (지금 게시된 세션 평균 + 3개월 차트), 나머지 품목은 값과 세션 변동."""
+    try: tab, when = dramx()
+    except Exception as e: print("DRAMeXchange 실패", e); tab, when = {}, None
+    ser = safe(dram_hist) or []
+    out = []
+    if "DDR5 16Gb" in tab:
+        last, pc = tab["DDR5 16Gb"]; d = (when or now).astimezone(KST).date()
+        hist = [x for x in ser if x[0] < d] + [(d, last)]
+    elif ser:
+        hist = ser; d, last = ser[-1]; pc = None
+    else: hist = []
+    if hist:
+        prev = last / (1 + pc / 100) if pc is not None else hist[-2][1]
+        win = [v for k, v in hist if k > d - dt.timedelta(days=92)]
+        q = mk("DDR5 16Gb", last, prev, d, win, "$", 3)
+        q.update(w1=chg_n(hist, d, 7), m1=chg_n(hist, d, 30), since=(d - dt.timedelta(days=91)).isoformat(), full="DDR5 16Gb (2Gx8) 4800/5600")
+        out.append(q)
+    for name in ("DDR4 16Gb", "DDR4 8Gb", "NAND 64Gb"):
+        if name in tab:
+            v, pc = tab[name]; out.append(mk(name, v, v / (1 + pc / 100), (when or now).date(), [], "$", 3))
+    return out
+
+
+def gpu(now):
+    j = get("https://gpu-index.semianalysis.com/api/public-data").json()
+    rows = [(parsedate_to_datetime(r["date"]).date(), r) for r in j["index"]]
+    rows = [x for x in rows if x[0] <= now.astimezone(dt.timezone.utc).date()]
+    out = []
+    for key, name in (("h100", "H100"), ("b200", "B200"), ("a100", "A100")):
+        ser = [(k, r[key]) for k, r in rows if r.get(key)]
+        if len(ser) < 3: continue
+        d = ser[-1][0]; win = [v for k, v in ser if k > d - dt.timedelta(days=92)]
+        q = mk(name, ser[-1][1], ser[-2][1], d, win, "$", 2)
+        q.update(w1=chg_n(ser, d, 7), m1=chg_n(ser, d, 30), since=(d - dt.timedelta(days=91)).isoformat(), per="/hr")
+        out.append(q)
+    return out
+
+
+def chips(now, ko):
+    dr = safe(drams, now) or []
+    gp = safe(gpu, now) or []
+    if not dr and not gp: return None
+    return {"type": "chips", "title": "반도체 현물가" if ko else "Chip spot prices", "small": "DRAMeXchange · SemiAnalysis GPU Index",
+            "dram": dr, "gpu": gp}
+
+
+# ------------------------------------------------------------------ 오늘 날씨 (모닝 브리프 머리에): Open-Meteo, 무료
+def sky(code, ko):
+    if code >= 95: return ("천둥번개" if ko else "Storms"), "storm"
+    if code in (71, 73, 75, 77, 85, 86): return ("눈" if ko else "Snow"), "snow"
+    if code >= 51: return ("비" if ko else "Rain"), "rain"
+    if code in (45, 48): return ("안개" if ko else "Fog"), "fog"
+    if code == 0: return ("맑음" if ko else "Sunny"), "sun"
+    if code in (1, 2): return ("구름 조금" if ko else "Some clouds"), "part"
+    return ("흐림" if ko else "Cloudy"), "cloud"
+
+
+def today_wx(region, day):
+    import weather
+    r = weather.REGIONS[region]; ko = region == "kr"
+    j = get("https://api.open-meteo.com/v1/forecast", params={"latitude": r["lat"], "longitude": r["lon"], "timezone": r["tz"],
+            "start_date": day.isoformat(), "end_date": day.isoformat(), "temperature_unit": "celsius" if ko else "fahrenheit",
+            "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code"}).json()["daily"]
+    txt, ic = sky(int(j["weather_code"][0] or 0), ko)
+    return {"city": r["city"] if ko else "LA", "sky": txt, "icon": ic, "hi": round(j["temperature_2m_max"][0]), "lo": round(j["temperature_2m_min"][0]),
+            "rain": int(j["precipitation_probability_max"][0] or 0), "unit": r["unit"]}
+
+
 # ------------------------------------------------------------------ 뉴스 3줄 · 레드덴바 한마디 (Gemini, 실패하면 빼거나 규칙 문장)
 def gnews(q, ko, d0, d1):
     q = f"{q} after:{d0.isoformat()} before:{(d1 + dt.timedelta(days=1)).isoformat()}"
@@ -222,8 +326,8 @@ def safe(f, *a, **k):
 def kr_morning(now):
     us = lambda s, n, **k: safe(yahoo, s, now, n, **k)
     idx = [x for x in (us("^GSPC", "S&P 500"), us("^IXIC", "나스닥"), us("^SOX", "필라델피아 반도체")) if x]
-    chips = [x for x in (us("NVDA", "엔비디아", unit="$"), us("MU", "마이크론", unit="$"), us("TSM", "TSMC", unit="$"), us("AVGO", "브로드컴", unit="$"),
-                         safe(naver, "005930", now, "삼성전자", "원", 0), safe(naver, "000660", now, "SK하이닉스", "원", 0)) if x]
+    chips = [x for x in (us("NVDA", "엔비디아", unit="$"), us("MU", "마이크론", unit="$"), safe(naver, "005930", now, "삼성전자", "원", 0), safe(naver, "000660", now, "SK하이닉스", "원", 0),
+                         us("TSM", "TSMC", unit="$"), us("AVGO", "브로드컴", unit="$")) if x]
     macro = [x for x in (us("EWY", "한국 ETF(EWY)", unit="$"), us("KRW=X", "원/달러", unit="원", session=False),
                          us("^TNX", "美 국채 10년", unit="%", dp=3, kind="bp"), us("^VIX", "VIX", kind="pt"),
                          us("CL=F", "WTI 유가", unit="$", session=False), us("GC=F", "금", unit="$", dp=1, session=False)) if x]
@@ -238,8 +342,8 @@ def kr_morning(now):
          "sub": (f"미국 {HOL_NAME.get(exp, ('휴장',))[0]} 휴장 · {lab(usd)} 종가 기준" if hol else f"{lab(usd)} 미국 장 마감 기준"),
          "mood": mood, "pose": POSE[mood], "facts": facts,
          "sections": [{"type": "big", "title": "간밤 미국 증시", "items": idx},
-                      {"type": "rows", "title": "반도체 체크", "items": chips},
-                      {"type": "mini", "title": "오늘 한국장 앞두고", "items": macro, "cols": 6}],
+                      {"type": "rows", "title": "반도체 종목", "items": chips, "card_n": 4},
+                      {"type": "mini", "title": "오늘 한국장 앞두고", "items": macro, "cols": 6, "card": False}],
          "hook": {"kicker": "간밤 미국", "lines": [f"{q['name'].replace('필라델피아 ', '')} {pct_rich(q['pct'])}" for q in idx[1:3]] if not hol else ["미국 증시", "[[acc:휴장]]"]},
          "foot": "자료: Yahoo Finance, 네이버 증권 · 투자 권유 아님"}
     return d
@@ -257,9 +361,9 @@ def kr_close(now):
     mood = mood_of(kospi["pct"])
     facts = {"코스피": f"{kospi['last']:,.2f} ({kospi['pct']:+.2f}%)", **({"코스닥": f"{kosdaq['pct']:+.2f}%"} if kosdaq else {}),
              **{q["name"]: f"{q['pct']:+.2f}%" for q in stocks[:3]}, **({"외국인 현물(억원)": fl["spot"]["frn"]} if "spot" in fl else {})}
-    secs = [{"type": "hero", "title": "오늘의 코스피", "item": kospi, "side": macro}]
+    secs = [{"type": "hero", "title": "오늘의 코스피", "item": kospi, "side": [m for m in macro if m["name"] != "국고채 10년"], "side_all": macro, "ch": 100}]
     if fl: secs.append({"type": "flows", "title": "누가 샀나", "small": "투자자별 순매수 · 억원", "rows": [[k, v] for k, v in (("코스피 현물", fl.get("spot")), ("코스피200 선물", fl.get("fut"))) if v]})
-    secs += [{"type": "rows", "title": "시총 상위 종목", "items": stocks}]
+    secs += [{"type": "rows", "title": "시총 상위 종목", "items": stocks, "card": False}]
     who = {"frn": "외국인", "ins": "기관", "ind": "개인"}
     if "spot" in fl:
         s = fl["spot"]; b = max(s, key=s.get)
@@ -283,11 +387,11 @@ def us_morning(now):
     mood = mood_of(lead["pct"] * 2)  # 선물은 변동이 작아서 2배로 본다
     facts = {q["name"]: f"{q['pct']:+.2f}%" for q in fut + idx[:2] + world[:3]}
     return {"region": "us", "kind": "morning", "title": "Morning Brief", "kicker": "MORNING BRIEF",
-            "sub": f"Futures as of {nl:%-I:%M} a.m. ET · closes from {lab(usd, False)}", "mood": mood, "pose": "a05" if mood == "flat" else POSE[mood], "facts": facts,
+            "sub": f"Futures {nl:%-I:%M} a.m. ET · closes {usd:%-m/%-d}", "mood": mood, "pose": "a05" if mood == "flat" else POSE[mood], "facts": facts,
             "sections": [{"type": "big", "title": "Futures right now", "items": fut},
-                         {"type": "rows", "title": f"Yesterday's close · {lab(usd, False)}", "items": idx},
-                         {"type": "mini", "title": "Overnight around the world", "items": world, "cols": 6},
-                         {"type": "mini", "title": "Rates, oil & more", "items": macro, "cols": 6}],
+                         {"type": "mini", "title": f"Yesterday's close · {lab(usd, False)}", "items": idx, "cols": 4},
+                         {"type": "heat", "title": "Overnight around the world", "items": world, "cols": 6},
+                         {"type": "mini", "title": "Rates, oil & more", "items": macro, "cols": 6, "card": False}],
             "hook": {"kicker": "Before the bell", "lines": [f"{q['name'].replace(' futures', '')} {pct_rich(q['pct'], us=True)}" for q in fut[:2]], "sub": "Futures vs. yesterday's settle"},
             "foot": "Source: Yahoo Finance · not investment advice"}
 
@@ -312,10 +416,10 @@ def us_close(now):
     best = max(sec, key=lambda q: q["pct"]) if sec else None
     return {"region": "us", "kind": "close", "title": "Closing Brief", "kicker": "CLOSING BRIEF", "sub": f"{lab(day, False)} · U.S. close, 4 p.m. ET",
             "mood": mood, "pose": POSE[mood], "facts": facts, "hero": spx,
-            "sections": [{"type": "hero", "title": "S&P 500 today", "item": spx, "side": idx},
+            "sections": [{"type": "hero", "title": "S&P 500 today", "item": spx, "side": [q for q in idx if q["name"] != "Russell 2000"], "side_all": idx, "ch": 90},
                          {"type": "heat", "title": "Sectors", "small": "SPDR sector ETFs", "items": sorted(sec, key=lambda q: -q["pct"])},
-                         {"type": "heat", "title": "Magnificent 7", "items": mag, "cols": 7},
-                         {"type": "mini", "title": "Rates, oil & more", "items": macro, "cols": 6}], "sectors": sec, "mag": mag,
+                         {"type": "heat", "title": "Magnificent 7", "items": mag, "cols": 7, "card": False},
+                         {"type": "mini", "title": "Rates, oil & more", "items": macro, "cols": 6, "card": False}], "sectors": sec, "mag": mag,
             "hook": {"kicker": f"{lab(day, False)} close", "lines": [f"S&P 500 {pct_rich(spx['pct'], us=True)}"] + ([f"{best['name']} led {pct_rich(best['pct'], us=True)}"] if best else [])},
             "foot": "Source: Yahoo Finance · not investment advice"}
 
@@ -368,6 +472,14 @@ def main():
         d = json.load(open(a.from_json, encoding="utf-8"))
     else:
         t = time.time(); d = BUILD[(a.region, a.kind)](now); print(f"시세 {time.time() - t:.0f}초")
+        ch = chips(now, a.region == "kr")
+        if ch:
+            d["sections"].insert(0, ch); d["chips"] = ch
+            for q in ch["dram"][:1] + ch["gpu"][:1]: d["facts"][q["name"] + (" GPU 시간당 임대료" if q in ch["gpu"] else " D램 현물")] = f"${q['last']} ({q['pct']:+.2f}%, 1주 {q['w1']:+.2f}%)" if q.get("w1") is not None else f"${q['last']} ({q['pct']:+.2f}%)"
+            print("반도체", [(q["name"], q["last"], q["pct"], q["date"]) for q in ch["dram"] + ch["gpu"]])
+        if a.kind == "morning":
+            d["wx"] = safe(today_wx, a.region, day); print("날씨", d["wx"])
+            if d["wx"]: w = d["wx"]; d["facts"]["오늘 " + w["city"] + " 날씨" if a.region == "kr" else w["city"] + " weather today"] = f"{w['sky']} {w['hi']}°/{w['lo']}° 강수 {w['rain']}%"
         d["comment"] = quip(a.region, a.kind, d["facts"], d["mood"])
         try: d["news"] = news3(a.region, a.kind, now, d["facts"])
         except Exception as e: print("뉴스 건너뜀:", type(e).__name__, e); d["news"] = []

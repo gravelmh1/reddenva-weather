@@ -255,6 +255,23 @@ def brief(d, region):
     sc = [hook]
     for s in d["sections"]:
         t = s["type"]
+        if t == "chips":
+            for q, lab in [(x, "D램 현물가" if ko else "DRAM spot price") for x in s["dram"][:1]] + [(x, "GPU 임대료" if ko else "GPU rental") for x in s["gpu"][:1]]:
+                c = up if q["pct"] > 0 else dn if q["pct"] < 0 else "#8a94a8"
+                mv = f"[[{'up' if q['pct'] > 0 else 'dn'}:{q['pct']:+.2f}%]]" if q["pct"] else ("보합" if ko else "unch.")
+                wk = " · ".join(f"{a} {q[k]:+.2f}%" for k, a in (("w1", "1주" if ko else "1W"), ("m1", "1달" if ko else "1M")) if q.get(k) is not None)
+                since = dt.date.fromisoformat(q["since"]); last = dt.date.fromisoformat(q["date"])
+                sc.append(dict(type="chart", kicker=f"{lab} · {q.get('full', q['name']) if q in s['dram'] else q['name']}", title=f"${q['last']:,.{q.get('dp', 2)}f}{q.get('per', '')}  {mv}",
+                               series=[dict(name=q["name"], c=c, v=q["spark"], dp=q.get("dp", 2))], xlabs=[f"{since.month}/{since.day}", "3개월" if ko else "3 months", f"{last.month}/{last.day}"],
+                               tight=True, symmetric=False, tickdp=2 if q in s["gpu"] else 1, drawdur=2.0, dur=2.8 + 2.4, foot=wk, footbig=True))
+            oth = [qtile(x, up, dn) for x in s["dram"][1:]] + [qtile(x, up, dn) for x in s["gpu"][1:]]
+            if oth: sc.append(dict(type="tiles", kicker="다른 메모리 · GPU" if ko else "Other memory & GPUs", tiles=oth, nsz=80, dur=1.6 + 0.4 * len(oth) + 1.0))
+            w = d.get("wx")
+            if w:
+                tl = [dict(l="하늘" if ko else "Sky", v=w["sky"], c=w["city"], cc="var(--psub)"), dict(l="최고" if ko else "High", v=f"{w['hi']}°", c="", cc="var(--psub)"),
+                      dict(l="최저" if ko else "Low", v=f"{w['lo']}°", c="", cc="var(--psub)"), dict(l="비 올 확률" if ko else "Chance of rain", v=f"{w['rain']}%", c="", cc="var(--psub)")]
+                sc.append(dict(type="tiles", kicker=f"오늘 {w['city']} 날씨" if ko else f"{w['city']} weather today", tiles=tl, nsz=80, dur=3.6))
+            continue
         if t in ("big", "rows") and s.get("items"):
             rows = [qrow(q, up, dn) for q in s["items"][:6]]
             sc.append(dict(type="board", kicker=s["title"], rows=rows, gap=.18, dur=1.6 + 0.55 * len(rows) + 1.2))
@@ -266,7 +283,7 @@ def brief(d, region):
                            xlabs=xl, tight=True, symmetric=False, tickdp=0, drawdur=2.0, dur=2.8 + 2.4,
                            foot=("점선 = 전일 종가" if ko else "Dashed line = previous close")))
             if s.get("side"):
-                tl = [qtile(x, up, dn) for x in s["side"]]
+                tl = [qtile(x, up, dn) for x in s.get("side_all") or s["side"]]
                 sc.append(dict(type="tiles", kicker="그 밖의 숫자" if ko else "The other indexes", tiles=tl, nsz=80, dur=1.6 + 0.4 * len(tl) + 1.0))
         elif t == "flows":
             who = [("frn", "외국인"), ("ins", "기관"), ("ind", "개인")]
