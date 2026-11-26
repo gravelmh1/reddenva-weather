@@ -138,7 +138,7 @@ def deriv_kr(d):
     allv = ser[0]["v"] + ser[-1]["v"]
     if min(allv) < 0 < max(allv): chart["symmetric"] = True
     tiles = [dict(l=t, v=v, c=cs, cc=cc) for t, v, cs, sub, cc in d["tiles"]]
-    t3 = dict(type="tiles", kicker="이번 주 숫자", title=f"{d['asof']} 마감 기준", tiles=tiles, nsz=92, foot="자료: 네이버 증권, FRED · 투자 권유 아님", dur=2.0 + 3.6)
+    t3 = dict(type="tiles", kicker="이번 주 숫자", title=f"{d['asof']} 마감 기준", tiles=tiles, nsz=92, foot="자료: 네이버 증권, Yahoo Finance · 투자 권유 아님", dur=2.0 + 3.6)
     th = theme("terminal"); th["vars"].update(up="#ff5a5f", dn="#4d8dff")  # 한국식: 빨강 상승, 파랑 하락
     return th, [hook, chart, t3, cards_scene(d["cards"], True)]
 
