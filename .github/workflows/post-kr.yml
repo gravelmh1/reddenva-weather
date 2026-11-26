@@ -62,6 +62,11 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python news.py --region kr ${{ inputs.dry_run && '--dry-run --force' || '' }}
+      - name: (주간) 파생 브리핑 카드 만들기 (목요일에만 실제 실행)
+        if: ${{ steps.slot.outputs.slot == 'weekly' }}
+        run: |
+          pip install -q matplotlib numpy
+          python deriv_kr.py ${{ inputs.dry_run && '--dry-run --force' || '' }}
       - name: (주간) 강아지 카드 만들기 (수요일에만 실제 실행)
         if: ${{ steps.slot.outputs.slot == 'weekly' }}
         env:
