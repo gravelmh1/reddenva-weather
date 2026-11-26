@@ -9,7 +9,7 @@ on:
         type: boolean
         default: true
       slot:
-        description: "auto(현지 시각으로 자동) / weather / weekly"
+        description: "auto(현지 시각으로 자동) / weather / weekly / morning(모닝 브리프) / close(마감 브리프)"
         type: string
         default: auto
       ig:
@@ -35,10 +35,10 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@users.noreply.github.com"
-          if [ "${{ inputs.slot }}" = "weather" ] || [ "${{ inputs.slot }}" = "weekly" ]; then echo "slot=${{ inputs.slot }}" >> "$GITHUB_OUTPUT"; else python post_slot.py kr >> "$GITHUB_OUTPUT"; fi
+          if [ "${{ inputs.slot }}" = "weather" ] || [ "${{ inputs.slot }}" = "weekly" ] || [ "${{ inputs.slot }}" = "morning" ] || [ "${{ inputs.slot }}" = "close" ]; then echo "slot=${{ inputs.slot }}" >> "$GITHUB_OUTPUT"; else python post_slot.py kr >> "$GITHUB_OUTPUT"; fi
           cat "$GITHUB_OUTPUT"
-      - name: (주간) 시작할 때 post.json 비우기
-        if: ${{ steps.slot.outputs.slot == 'weekly' && !inputs.dry_run }}
+      - name: (주간·브리프) 시작할 때 post.json 비우기
+        if: ${{ (steps.slot.outputs.slot == 'weekly' || steps.slot.outputs.slot == 'morning' || steps.slot.outputs.slot == 'close') && !inputs.dry_run }}
         run: |
           python post_slot.py kr --clear
           git add out
@@ -90,6 +90,15 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python netflix.py --region kr ${{ inputs.dry_run && '--dry-run --force' || '' }}
+      - name: (브리프) 모닝·마감 브리프 카드 만들기 (장 쉬는 날은 건너뜀)
+        if: ${{ steps.slot.outputs.slot == 'morning' || steps.slot.outputs.slot == 'close' }}
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          pip install -q playwright
+          export CHROME_PATH="$(command -v google-chrome || command -v chromium || true)"
+          [ -n "$CHROME_PATH" ] || python -m playwright install --with-deps chromium
+          python brief.py --region kr --kind ${{ steps.slot.outputs.slot }} ${{ inputs.dry_run && '--dry-run --force' || '' }}
       - name: Make가 읽을 파일(post.json) 쓰기
         if: ${{ always() && !inputs.dry_run && steps.slot.outputs.slot != '' }}
         run: |
@@ -126,7 +135,8 @@ jobs:
         env:
           THREADS_TOKEN_KR: ${{ secrets.THREADS_TOKEN_KR }}
         run: |
-          if [ "${{ steps.slot.outputs.slot }}" = "weather" ]; then python threads_post.py --region kr; else python threads_post.py --region kr --kind books-; python threads_post.py --region kr --kind news-; python threads_post.py --region kr --kind puppy-; python threads_post.py --region kr --kind deriv-; python threads_post.py --region kr --kind trip-; python threads_post.py --region kr --kind facts-; python threads_post.py --region kr --kind netflix-; fi
+          if [ "${{ steps.slot.outputs.slot }}" = "morning" ] || [ "${{ steps.slot.outputs.slot }}" = "close" ]; then python threads_post.py --region kr --kind ${{ steps.slot.outputs.slot }}-;
+          elif [ "${{ steps.slot.outputs.slot }}" = "weather" ]; then python threads_post.py --region kr; else python threads_post.py --region kr --kind books-; python threads_post.py --region kr --kind news-; python threads_post.py --region kr --kind puppy-; python threads_post.py --region kr --kind deriv-; python threads_post.py --region kr --kind trip-; python threads_post.py --region kr --kind facts-; python threads_post.py --region kr --kind netflix-; fi
           git add state
           git diff --cached --quiet || (git commit -q -m "kr threads posted" && git pull --rebase -q && git push -q)
       - name: (릴스) 테스트 영상 만들기 (dry-run일 때, 게시 안 함)
