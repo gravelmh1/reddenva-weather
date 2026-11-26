@@ -36,6 +36,7 @@ def main():
     else:
         pid = publish.threads(a.region, meta["image_url"], meta["caption"])
     print(f"Threads 게시 완료: @{me.get('username')} {pid}")
+    import links; links.save(a.region, f"{a.kind.rstrip('-') or 'weather'}-{day}", "threads", pid)
     os.makedirs("state", exist_ok=True)
     open(sf, "w").write(day)
 

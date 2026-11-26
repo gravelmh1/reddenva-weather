@@ -1,0 +1,28 @@
+name: links
+# 게시 번호(media id)로 공개 링크를 찾아 state/links-{region}.json 에 남긴다 (수동 실행용)
+on:
+  workflow_dispatch:
+    inputs:
+      region: { description: "kr / us", required: true, default: "kr" }
+      label: { description: "예: morning-2026-11-27", required: true }
+      ig: { description: "Instagram media id", required: false, default: "" }
+      threads: { description: "Threads media id", required: false, default: "" }
+permissions:
+  contents: write
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -q -r requirements.txt
+      - env:
+          IG_TOKEN_KR: ${{ secrets.IG_TOKEN_KR }}
+          IG_TOKEN_US: ${{ secrets.IG_TOKEN_US }}
+          THREADS_TOKEN_KR: ${{ secrets.THREADS_TOKEN_KR }}
+          THREADS_TOKEN_US: ${{ secrets.THREADS_TOKEN_US }}
+        run: |
+          python links.py --region ${{ inputs.region }} --label ${{ inputs.label }} ${{ inputs.ig && format('--ig {0}', inputs.ig) || '' }} ${{ inputs.threads && format('--threads {0}', inputs.threads) || '' }}
+          git config user.name weather-bot; git config user.email weather-bot@users.noreply.github.com
+          git add state; git diff --cached --quiet || (git commit -q -m "links" && git pull --rebase -q && git push -q)

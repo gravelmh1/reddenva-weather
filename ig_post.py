@@ -60,6 +60,7 @@ def main():
     else:
         pid = publish.instagram(a.region, urls[0], meta["caption"])
     print(f"Instagram 게시 완료: @{me.get('username')} {pid}")
+    import links; links.save(a.region, f"{a.slot}-{day}", "instagram", pid)
     os.makedirs("state", exist_ok=True)
     open(sf, "w").write(day)
 
