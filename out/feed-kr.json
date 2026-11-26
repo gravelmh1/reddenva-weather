@@ -1,6 +1,6 @@
 {
  "region": "kr",
- "updated": "2026-11-26T04:33:27Z",
+ "updated": "2026-11-26T21:05:49Z",
  "categories": [
   {
    "series": "books",
@@ -29,6 +29,14 @@
   {
    "series": "netflix",
    "label": "넷플릭스"
+  },
+  {
+   "series": "brief",
+   "label": "모닝 브리프"
+  },
+  {
+   "series": "brief",
+   "label": "마감 브리프"
   }
  ],
  "items": [
