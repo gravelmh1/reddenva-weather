@@ -13,7 +13,7 @@ def colors(region):
     return ((214, 56, 40), (36, 96, 200)) if region == "kr" else ((30, 140, 90), (214, 56, 40))
 
 
-def pct(x): return f"{x * 100:+.1f}%"
+def pct(x): return "0.0%" if abs(x) < 5e-4 else f"{x * 100:+.1f}%"
 
 
 def money(v, region):
