@@ -122,6 +122,31 @@ def naver_ktb(now):
     return mk("국고채 10년", rows[-1][1], rows[-2][1], rows[-1][0], [r[1] for r in rows[-20:]], "%", 3, "bp")
 
 
+def naver_fut_intraday(day, last):
+    """코스피200 선물 그날 분봉 (네이버). 이상하면 빈 목록."""
+    rows = fchart("FUT", "minute", 500)
+    k = day.strftime("%Y%m%d"); pts = []
+    for a in rows:
+        if not a[0].startswith(k): continue
+        v = next((float(x) for x in (a[4], a[1]) if x not in ("null", "", "0")), None)
+        if v and abs(v / last - 1) < .06: pts.append(v)
+    print("선물 분봉", len(rows), "→ 그날", len(pts), rows[:2])
+    return thin(pts) + [last] if len(pts) >= 20 else []
+
+
+def naver_program(day):
+    """코스피 프로그램 매매 순매수(억원): 차익 · 비차익 · 전체."""
+    t = get("https://finance.naver.com/sise/programDealTrendDay.naver", params={"bizdate": day.strftime("%Y%m%d"), "sosok": ""}).content.decode("euc-kr", "replace")
+    t = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "|", t)); t = re.sub(r"(\| ?)+", "|", t)
+    m = re.search(day.strftime("%y.%m.%d") + r"\|((?:-?[\d,]+\|){9})", t)
+    print("프로그램", m.group(0)[:120] if m else t[t.find("차익"):t.find("차익") + 300])
+    if not m: return None
+    v = [int(x.replace(",", "")) for x in m.group(1).strip("|").split("|")]
+    # 백만원 단위면 억원으로
+    sc = 100 if max(abs(x) for x in v) > 2_000_000 else 1
+    return {"arb": round(v[2] / sc), "non": round(v[5] / sc), "tot": round(v[8] / sc)}
+
+
 def k200_basis(day):
     fut = {a[0][:8]: float(a[4]) for a in fchart("FUT", n=10)}; spot = {a[0][:8]: float(a[4]) for a in fchart("KPI200", n=10)}
     k = day.strftime("%Y%m%d")
@@ -361,22 +386,30 @@ def kr_morning(now):
 def kr_close(now):
     kospi = naver("KOSPI", now, "코스피"); day = dt.date.fromisoformat(kospi["date"])
     kosdaq = safe(naver, "KOSDAQ", now, "코스닥")
-    stocks = [x for x in (safe(naver, c, now, n, "원", 0) for c, n in (("005930", "삼성전자"), ("000660", "SK하이닉스"), ("373220", "LG에너지솔루션"),
-                                                                       ("005380", "현대차"))) if x]
-    fl = naver_flows(day); bs = safe(k200_basis, day)
-    macro = [x for x in (kosdaq, safe(yahoo, "KRW=X", now, "원/달러", unit="원", session=False), safe(naver_ktb, now)) if x]
-    if bs: macro.append({"name": "K200 베이시스", "last": bs["basis"], "dp": 2, "unit": "pt", "kind": "text",
-                         "text": f"선물 {bs['fut']:.2f}", "sign": True})
+    sam = safe(naver, "005930", now, "삼성전자", "원", 0); hyn = safe(naver, "000660", now, "SK하이닉스", "원", 0)
+    fl = naver_flows(day); bs = safe(k200_basis, day); prg = safe(naver_program, day); ktb = safe(naver_ktb, now)
+    fut = None
+    try:
+        fd = [(a[0][:8], float(a[4])) for a in fchart("FUT", n=5)]; fd = [x for x in fd if x[0] <= day.strftime("%Y%m%d")]
+        fut = mk("코스피200 선물", fd[-1][1], fd[-2][1], day, safe(naver_fut_intraday, day, fd[-1][1]) or [], "", 2)
+    except Exception as e: print("선물 실패", e)
+    side = []
+    if ktb: side.append(ktb)
+    if bs: side.append({"name": "K200 베이시스", "last": bs["basis"], "dp": 2, "unit": "pt", "kind": "text", "text": f"선물 {bs['fut']:.2f} · 현물 {bs['spot']:.2f}", "sign": True})
     mood = mood_of(kospi["pct"])
     facts = {"코스피": f"{kospi['last']:,.2f} ({kospi['pct']:+.2f}%)", **({"코스닥": f"{kosdaq['pct']:+.2f}%"} if kosdaq else {}),
-             **({"K200 선물 외국인(억원)": fl["fut"]["frn"]} if fl.get("fut") else {}), **({"K200 베이시스": bs["basis"]} if bs else {})}
-    side = [m for m in macro if m["name"] in ("코스닥", "K200 베이시스")]
-    secs = [{"type": "hero", "title": "오늘의 코스피", "item": kospi, "side": side, "ch": 330}]
-    if fl.get("fut"): secs.append({"type": "flows", "title": "코스피200 선물 수급", "small": "투자자별 순매수 · 억원", "rows": [["코스피200 선물", fl["fut"]]]})
+             **{q["name"]: f"{q['pct']:+.2f}%" for q in (sam, hyn) if q},
+             **({"K200 선물 외국인(억원)": fl["fut"]["frn"]} if fl.get("fut") else {}), **({"K200 베이시스": bs["basis"]} if bs else {}),
+             **({"프로그램 순매수(억원)": prg["tot"]} if prg else {})}
+    secs = [{"type": "charts", "title": "장중 흐름", "small": "지수 · 반도체 대장주", "items": [q for q in (kospi, kosdaq, fut, sam, hyn) if q], "stack": side, "hero": kospi}]
+    rows = []
+    if fl.get("fut"): rows.append(["코스피200 선물", fl["fut"]])
+    if prg: rows.append(["프로그램 매매", prg])
+    if rows: secs.append({"type": "flows", "title": "수급", "small": "순매수 · 억원", "rows": rows})
     who = {"frn": "외국인", "ins": "기관", "ind": "개인"}
     if fl.get("fut"):
-        s = fl["fut"]; b = max(s, key=lambda k: abs(s[k]))
-        hl = [f"코스피 {pct_rich(kospi['pct'])}", f"선물 {who[b]} [[{'up' if s[b] > 0 else 'dn'}:{s[b]:+,}억]]"]
+        f = fl["fut"]; b = max(f, key=lambda k: abs(f[k]))
+        hl = [f"코스피 {pct_rich(kospi['pct'])}", f"선물 {who[b]} [[{'up' if f[b] > 0 else 'dn'}:{f[b]:+,}억]]"]
     else: hl = [f"코스피 {pct_rich(kospi['pct'])}"]
     return {"region": "kr", "kind": "close", "title": "마감 브리프", "kicker": "CLOSING BRIEF", "sub": f"{lab(day)} 한국 장 마감 15:30 기준",
             "mood": mood, "pose": POSE[mood], "facts": facts, "sections": secs, "hero": kospi, "flows": fl,
@@ -424,7 +457,7 @@ def us_close(now):
     best = max(sec, key=lambda q: q["pct"]) if sec else None
     return {"region": "us", "kind": "close", "title": "Closing Brief", "kicker": "CLOSING BRIEF", "sub": f"{lab(day, False)} · U.S. close, 4 p.m. ET",
             "mood": mood, "pose": POSE[mood], "facts": facts, "hero": spx,
-            "sections": [{"type": "hero", "title": "S&P 500 today", "item": spx, "side": [q for q in idx if q["name"] in ("Nasdaq", "Semis (SOX)")], "ch": 260},
+            "sections": [{"type": "charts", "title": "Indexes today", "items": [spx] + [q for q in idx if q["name"] in ("Nasdaq", "Semis (SOX)")], "hero": spx},
                          {"type": "heat", "title": "Sectors", "small": "SPDR sector ETFs", "items": sorted(sec, key=lambda q: -q["pct"])}], "sectors": sec, "mag": mag,
             "hook": {"kicker": f"{lab(day, False)} close", "lines": [f"S&P 500 {pct_rich(spx['pct'], us=True)}"] + ([f"{best['name']} led {pct_rich(best['pct'], us=True)}"] if best else [])},
             "foot": "Source: Yahoo Finance · not investment advice"}
@@ -487,9 +520,9 @@ def main():
         d["wx"] = safe(today_wx, a.region, wd, "today" if a.kind == "morning" else "tomorrow"); print("날씨", d["wx"])
         if d["wx"]: w = d["wx"]; d["facts"][f"{w['when']} {w['city']} 날씨" if a.region == "kr" else f"{w['city']} weather {w['when'].lower()}"] = f"{w['sky']} {w['hi']}°/{w['lo']}° 강수 {w['rain']}%"
         d["comment"] = quip(a.region, a.kind, d["facts"], d["mood"])
-        try: d["news"] = news3(a.region, a.kind, now, d["facts"]) if a.kind == "morning" else []
+        try: d["news"] = news3(a.region, a.kind, now, d["facts"])
         except Exception as e: print("뉴스 건너뜀:", type(e).__name__, e); d["news"] = []
-        if d["news"]: d["sections"].append({"type": "news", "title": "간밤 미국 주요 뉴스" if a.region == "kr" else "Top headlines", "items": d["news"]})
+        if d["news"]: d["sections"].append({"type": "news", "title": ("간밤 미국 주요 뉴스" if a.kind == "morning" else "오늘 장중 핵심 뉴스") if a.region == "kr" else "Top headlines", "items": d["news"]})
         d.update(day=day.isoformat(), handle=f"@reddenva.{a.region}", made=now.isoformat())
     out = a.out or f"out/{a.kind}-{a.region}-{day.isoformat()}.jpg"
     render_card(d, os.path.abspath(out)); print("카드:", out)

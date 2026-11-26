@@ -96,6 +96,12 @@
   .axis { display: flex; justify-content: space-between; font-size: 18px; color: var(--sub); }
   /* flows */
   .flows { padding: 4px 24px; }
+  .cg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .ct { padding: 10px 15px 8px; } .ct .n { font-size: 22px; font-weight: 700; color: var(--sub); }
+  .ct .l2 { display: flex; align-items: baseline; gap: 8px; white-space: nowrap; } .ct .v { font-size: 34px; font-weight: 900; } .ct .c { font-size: 21px; font-weight: 900; }
+  .ct svg { display: block; margin: 4px auto 0; }
+  .cs { display: grid; gap: 12px; } .cs .p { padding: 12px 18px; display: flex; flex-direction: column; justify-content: center; }
+  .cs .n { font-size: 22px; font-weight: 700; color: var(--sub); } .cs .v { font-size: 38px; font-weight: 900; line-height: 1.1; } .cs .c { font-size: 21px; font-weight: 900; }
   .fr { display: grid; grid-template-columns: 200px 1fr 1fr 1fr; align-items: center; height: 82px; gap: 14px; }
   .fr + .fr { border-top: 1.5px solid var(--edge); }
   .fr .lab { font-size: 26px; font-weight: 900; }
@@ -116,9 +122,9 @@
   .nw .l { display: none; }
   footer { position: absolute; left: 48px; right: 48px; bottom: 18px; display: flex; justify-content: space-between; font-size: 19px; color: var(--sub); }
   footer b { color: var(--acc); }
-  .nc .nw { padding: 5px 0; }
+  .nc .nw { padding: 2px 0; }
   .t1 section { margin-top: 12px; } .t1 h2 { margin-bottom: 6px; } .t1 .say { padding: 10px 22px; margin-top: 12px; }
-  .t1 .row { height: 72px; } .t1 .big .p { padding: 12px 20px 6px; } .t1 .mini .p { padding: 8px 16px; }
+  .t1 .fr { height: 66px; } .t1 .fc .v { font-size: 29px; } .t1 .row { height: 72px; } .t1 .big .p { padding: 12px 20px 6px; } .t1 .mini .p { padding: 8px 16px; }
 </style></head>
 <body><div id="card"></div>
 <script>
@@ -232,9 +238,18 @@ const S = {
       <div class="side" style="grid-template-rows:repeat(${side.length},1fr)">` + side.map(x => `<div class="p"><div class="n">${esc(x.name)}</div>
       <div class="l2"><span class="v num">${val(x)}</span><span class="c num">${chg(x, true)}</span></div></div>`).join("") + "</div></div>";
   },
+  charts(s) {
+    const n = 3, W = Math.floor((968 - 12 * (n - 1)) / n) - 50, H = Math.round(W * 3 / 4);
+    let h = `<div class="cg">` + s.items.map(q => `<div class="p ct"><div class="n">${esc(q.name)}</div>
+      <div class="l2"><span class="v num">${val(q)}</span><span class="c num">${chg(q, true)}</span></div>
+      ${spark(q, W, H, { sw: 3.5, dot: true, bw: 1.4 })}</div>`).join("");
+    if (s.stack && s.stack.length) h += `<div class="cs">` + s.stack.map(x => `<div class="p"><div class="n">${esc(x.name)}</div><div class="v num">${val(x)}</div><div class="c num">${chg(x, true)}</div></div>`).join("") + "</div>";
+    return h + "</div>";
+  },
   flows(s) {
-    const who = KO ? [["frn", "외국인"], ["ins", "기관"], ["ind", "개인"]] : [["frn", "Foreign"], ["ins", "Inst."], ["ind", "Retail"]];
-    return `<div class="p flows">` + s.rows.map(([lab, r]) => {
+    const WHO = KO ? [["frn", "외국인"], ["ins", "기관"], ["ind", "개인"]] : [["frn", "Foreign"], ["ins", "Inst."], ["ind", "Retail"]];
+    const PRG = [["arb", "차익"], ["non", "비차익"], ["tot", "전체"]];
+    return `<div class="p flows">` + s.rows.map(([lab, r]) => { const who = "tot" in r ? PRG : WHO;
       const mx = Math.max(...Object.values(r).map(Math.abs), 1);
       return `<div class="fr"><div class="lab">${esc(lab)}</div>` + who.map(([k, w]) => `<div class="fc ${cls(r[k])}"><div class="w">${w}</div><div class="v num">${fmt(r[k], 0, true)}</div>
         <div class="bar" style="width:${Math.max(4, 100 * Math.abs(r[k]) / mx)}%"></div></div>`).join("") + "</div>";

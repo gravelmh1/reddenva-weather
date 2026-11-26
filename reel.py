@@ -283,18 +283,18 @@ def brief(d, region):
     else:
         hk = d["hook"]
         sc.append(dict(type="hook", kicker=hk["kicker"], lines=hk["lines"], size="s", sub=f"“{d['comment']}”", pose=d.get("pose", "a05"), poseh=360, dur=min(4.6, 1.8 + rd(*hk["lines"], d["comment"], ko=ko))))
-        h = sec("hero")
+        h = sec("hero") or sec("charts")
         if h:
-            q = h["item"]; c = up if q["pct"] > 0 else dn if q["pct"] < 0 else "#8a94a8"
+            q = h.get("item") or h["hero"]; c = up if q["pct"] > 0 else dn if q["pct"] < 0 else "#8a94a8"
             xl = ["09:00", "12:00", "15:30"] if ko else ["9:30", "12:45", "4:00"]
             sc.append(dict(type="chart", kicker=h["title"], title=f"{qval(q)}  {mvs(q)}", series=[dict(name=q["name"], c=c, v=q["spark"], dp=q.get("dp", 2))],
                            base=q["prev"], baselab="전일" if ko else "prev.", xlabs=xl, tight=True, symmetric=False, tickdp=0, drawdur=1.8, dur=4.6,
                            foot=("점선 = 전일 종가" if ko else "Dashed line = previous close")))
         f = sec("flows")
         if f:
-            who = [("frn", "외국인"), ("ins", "기관"), ("ind", "개인")]
-            groups = [dict(title=lab, rows=[dict(n=w, v=r[k], c=up if r[k] > 0 else dn) for k, w in who]) for lab, r in f["rows"]]
-            sc.append(dict(type="flows", kicker="누가 샀나", title="순매수 · 억원", groups=groups, dur=1.8 + 1.3 * len(groups) + 0.8))
+            WHO = [("frn", "외국인"), ("ins", "기관"), ("ind", "개인")]; PRG = [("arb", "차익"), ("non", "비차익"), ("tot", "전체")]
+            groups = [dict(title=lab, rows=[dict(n=w, v=r[k], c=up if r[k] > 0 else dn) for k, w in (PRG if "tot" in r else WHO)]) for lab, r in f["rows"]]
+            sc.append(dict(type="flows", kicker="수급", title="순매수 · 억원", groups=groups, dur=1.8 + 1.3 * len(groups) + 0.8))
         hs = sec("heat")
         if hs:
             sc.append(dict(type="heat", groups=[dict(title=hs["title"], cols=4 if len(hs["items"]) > 6 else 3, items=[dict(n=q["name"], p=q["pct"], bg=heatbg(q["pct"], ko)) for q in hs["items"]])],
