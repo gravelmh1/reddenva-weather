@@ -25,9 +25,10 @@ HOL_NAME = {dt.date(2026, 11, 26): ("추수감사절", "Thanksgiving"), dt.date(
 
 
 def get(url, **kw):
+    hd = {**H, **kw.pop("headers", {})}
     for i in range(3):
         try:
-            r = requests.get(url, headers=H, timeout=25, **kw); r.raise_for_status(); return r
+            r = requests.get(url, headers=hd, timeout=25, **kw); r.raise_for_status(); return r
         except Exception:
             if i == 2: raise
             time.sleep(2 + i * 2)
@@ -123,28 +124,22 @@ def naver_ktb(now):
 
 
 def naver_fut_intraday(day, last):
-    """코스피200 선물 그날 분봉 (네이버). 이상하면 빈 목록."""
-    rows = fchart("FUT", "minute", 500)
-    k = day.strftime("%Y%m%d"); pts = []
-    for a in rows:
-        if not a[0].startswith(k): continue
-        v = next((float(x) for x in (a[4], a[1]) if x not in ("null", "", "0")), None)
-        if v and abs(v / last - 1) < .06: pts.append(v)
-    print("선물 분봉", len(rows), "→ 그날", len(pts), rows[:2])
+    """코스피200 선물 그날 분봉 (네이버 차트 API, 08:45~15:45)."""
+    j = get("https://api.stock.naver.com/chart/domestic/futures/FUT/minute", headers={"Referer": "https://m.stock.naver.com/"}).json()
+    k = day.strftime("%Y%m%d")
+    pts = [float(r["currentPrice"]) for r in j if str(r.get("localDateTime", "")).startswith(k) and r.get("currentPrice")]
+    pts = [v for v in pts if abs(v / last - 1) < .06]
+    print("선물 분봉", len(j), "→ 그날", len(pts))
     return thin(pts) + [last] if len(pts) >= 20 else []
 
 
 def naver_program(day):
-    """코스피 프로그램 매매 순매수(억원): 차익 · 비차익 · 전체."""
-    t = get("https://finance.naver.com/sise/programDealTrendDay.naver", params={"bizdate": day.strftime("%Y%m%d"), "sosok": ""}).content.decode("euc-kr", "replace")
-    t = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "|", t)); t = re.sub(r"(\| ?)+", "|", t)
-    m = re.search(day.strftime("%y.%m.%d") + r"\|((?:-?[\d,]+\|){9})", t)
-    print("프로그램", m.group(0)[:120] if m else t[t.find("차익"):t.find("차익") + 300])
-    if not m: return None
-    v = [int(x.replace(",", "")) for x in m.group(1).strip("|").split("|")]
-    # 백만원 단위면 억원으로
-    sc = 100 if max(abs(x) for x in v) > 2_000_000 else 1
-    return {"arb": round(v[2] / sc), "non": round(v[5] / sc), "tot": round(v[8] / sc)}
+    """코스피 프로그램 매매 순매수(억원): 차익 · 비차익 · 전체. 네이버 지수 통합 정보 (당일만)."""
+    p = get("https://m.stock.naver.com/api/index/KOSPI/integration").json().get("programTrendInfo") or {}
+    print("프로그램", p)
+    if p.get("bizdate") != day.strftime("%Y%m%d"): return None
+    N = lambda x: int(str(x).replace(",", "").replace("+", ""))
+    return {"arb": N(p["indexDifferenceReal"]), "non": N(p["indexBiDifferenceReal"]), "tot": N(p["indexTotalReal"])}
 
 
 def k200_basis(day):
