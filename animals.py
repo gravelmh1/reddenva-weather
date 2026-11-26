@@ -77,6 +77,28 @@ def pexels_videos(q, key):
     return out
 
 
+def commons_videos(q):
+    """위키미디어 공용 영상(CC0·CC BY·퍼블릭 도메인만). Pexels 키가 없을 때 쓰는 무료 대안. 출처·라이선스 표기."""
+    r = requests.get("https://commons.wikimedia.org/w/api.php", headers=UA, timeout=25, params={
+        "action": "query", "format": "json", "generator": "search", "gsrnamespace": 6, "gsrsearch": f"{q} filetype:video", "gsrlimit": 25,
+        "prop": "videoinfo", "viprop": "url|size|mime|extmetadata|derivatives", "viurlwidth": 1280})
+    out = []
+    for p in sorted(r.json().get("query", {}).get("pages", {}).values(), key=lambda p: p.get("index", 99)):
+        vi = (p.get("videoinfo") or [{}])[0]; em = vi.get("extmetadata", {}); lic = em.get("LicenseShortName", {}).get("value", "")
+        dur = float(vi.get("duration") or 0); w, h = vi.get("width", 0), vi.get("height", 0)
+        if not (6 <= dur <= 180) or min(w, h) < 720 or not vi.get("thumburl"): continue
+        if not re.match(r"(CC0|CC BY|Public domain)", lic, re.I) or re.search(r"\bND\b", lic): continue
+        ders = [d for d in vi.get("derivatives", []) if "1080" in d.get("transcodekey", "") or "720" in d.get("transcodekey", "")]
+        src = (sorted(ders, key=lambda d: ("1080" not in d["transcodekey"], "webm" not in d["transcodekey"]))[0]["src"] if ders else vi["url"])
+        artist = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", em.get("Artist", {}).get("value", ""))).strip()[:32] or "Wikimedia Commons"
+        th = vi["thumburl"]; name = th.rsplit("/", 1)[-1]
+        frames = [th[: -len(name)] + name.replace("px--", f"px-seek%3D{int(dur * k)}-", 1) for k in (.35, .65)] if "px--" in name else []
+        out.append({"id": "wmv:" + p["title"], "url": th, "frames": frames, "video": src, "vw": w, "vh": h, "dur": min(dur, 40), "portrait": h > w,
+                    "artist": artist, "license": "퍼블릭 도메인" if re.match(r"(CC0|Public)", lic, re.I) else lic, "src": "Wikimedia Commons"})
+    out.sort(key=lambda c: not c["portrait"])
+    return out
+
+
 def judge(cands, en, ko):
     """Gemini가 후보 사진(영상이면 영상의 장면 몇 컷)을 보고 고른다. 쓸 만한 게 없으면 None."""
     key = os.environ["GEMINI_API_KEY"].strip(); parts = []
@@ -124,7 +146,7 @@ def choose(year, week_no, used, video=False):
     key = os.environ.get("PEXELS_API_KEY", "").strip(); t0 = time.time(); idx = order(year)
     for k in range(5):
         q, en, ko = SUBJECTS[idx[(week_no + k) % len(idx)]]
-        src = pexels_videos(q, key) if video else pexels(q, key) if key else commons(q)
+        src = (pexels_videos(q, key) if key else commons_videos(q)) if video else pexels(q, key) if key else commons(q)
         cands = [c for c in src if c["id"] not in used][:8 if video else 10]; got = []
         for c in cands:
             try:
@@ -187,10 +209,9 @@ def main():
     else:
         c = j = None
         if a.video:
-            if not os.environ.get("PEXELS_API_KEY", "").strip(): print("PEXELS_API_KEY 없음 → 사진으로")
-            else:
-                try: c, j = choose(iso[0], iso[1], set(hist.get("used", [])), video=True)
-                except Exception as e: print("영상 못 찾음 → 사진으로:", e)
+            if not os.environ.get("PEXELS_API_KEY", "").strip(): print("PEXELS_API_KEY 없음 → 위키미디어 공용 영상에서 찾음")
+            try: c, j = choose(iso[0], iso[1], set(hist.get("used", [])), video=True)
+            except Exception as e: print("영상 못 찾음 → 사진으로:", e)
         if not c: c, j = choose(iso[0], iso[1], set(hist.get("used", [])))
         c["im"].save(photo, quality=92)
         pick = {"week": week, "id": c["id"], "artist": c["artist"], "license": c["license"], "src": c["src"], **{k: j[k] for k in ("focus_x", "focus_y", "name_ko", "name_en", "lines_ko", "lines_en", "aside_ko", "aside_en")}}
