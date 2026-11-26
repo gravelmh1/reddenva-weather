@@ -1,0 +1,277 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- 모닝·마감 브리프 카드 (1080x1350). brief.py가 window.DATA를 넣고 브라우저로 찍는다.
+     섹션 종류: big(큰 타일 3개) · rows(종목 줄, 2열) · mini(작은 타일) · hero(지수 하루 차트 + 옆 목록) · flows(투자자별 순매수) · heat(색 칸) · news(3줄) -->
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root { --bg: #f3f5f9; --panel: #fff; --edge: #e1e5ee; --ink: #111a2e; --sub: #5f6a80; --acc: #d9822b; --up: #e8343a; --dn: #1f6fe5; --flat: #7d879b; }
+  html, body { width: 1080px; height: 1350px; overflow: hidden; background: var(--bg); }
+  body { font-family: "Noto Sans CJK KR", "Noto Sans CJK JP", "Noto Sans", sans-serif; color: var(--ink); letter-spacing: -0.02em; }
+  #card { position: relative; width: 1080px; min-height: 1350px; padding: 0 48px; }
+  .num { font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+  .up { color: var(--up); } .dn { color: var(--dn); } .fl { color: var(--flat); }
+  header { position: relative; height: 150px; display: flex; align-items: center; gap: 22px; border-bottom: 3px solid var(--ink); }
+  .dtile { flex: none; width: 104px; border-radius: 16px; overflow: hidden; background: #fff; border: 2px solid #d6dae2; text-align: center; }
+  .dtile .band { background: #d6421a; color: #fff; font-size: 21px; font-weight: 700; padding: 5px 0 4px; white-space: nowrap; }
+  .dtile .day { font-size: 58px; font-weight: 900; line-height: 1.12; color: #121e34; padding-bottom: 2px; letter-spacing: -0.05em; }
+  .ht .k { font-size: 20px; font-weight: 700; color: var(--acc); letter-spacing: .06em; }
+  .ht h1 { font-size: 56px; font-weight: 900; line-height: 1.08; letter-spacing: -0.04em; }
+  .ht .s { font-size: 23px; color: var(--sub); font-weight: 700; margin-top: 2px; }
+  header img { position: absolute; right: -4px; bottom: 6px; height: 136px; }
+  .wx { position: absolute; right: 196px; top: 22px; height: 106px; display: flex; align-items: center; gap: 10px; padding: 0 22px; background: #fff; border: 2px solid #d6dae2; border-radius: 18px; }
+  .wx svg { width: 70px; height: 70px; flex: none; }
+  .wx .c { font-size: 20px; font-weight: 700; color: var(--sub); white-space: nowrap; }
+  .wx .t { font-size: 36px; font-weight: 900; line-height: 1.05; white-space: nowrap; } .wx .t span { color: var(--sub); font-size: 28px; }
+  .wx .r { font-size: 20px; font-weight: 700; color: #1f6fe5; white-space: nowrap; }
+  .say { margin-top: 14px; display: flex; align-items: center; gap: 14px; background: var(--ink); color: #fff; border-radius: 20px; padding: 13px 24px; font-size: 29px; font-weight: 700; }
+  .say b { flex: none; font-size: 19px; font-weight: 700; color: var(--ink); background: #ffb27a; border-radius: 999px; padding: 4px 14px; }
+  section { margin-top: 16px; }
+  h2 { font-size: 29px; font-weight: 900; margin-bottom: 9px; display: flex; align-items: baseline; gap: 12px; }
+  h2 small { font-size: 19px; color: var(--sub); font-weight: 500; }
+  .p { background: var(--panel); border: 1.5px solid var(--edge); border-radius: 22px; }
+  /* chips: 반도체 현물가 (메인) */
+  .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .chip { padding: 18px 22px 14px; border: 2.5px solid var(--ink); }
+  .chip .lab { font-size: 23px; font-weight: 900; display: flex; justify-content: space-between; align-items: baseline; }
+  .chip .lab span { font-size: 19px; color: var(--sub); font-weight: 700; }
+  .chip .row1 { display: flex; align-items: baseline; gap: 12px; margin-top: 2px; }
+  .chip .v { font-size: 60px; font-weight: 900; line-height: 1.05; }
+  .chip .v small { font-size: 26px; color: var(--sub); font-weight: 700; margin-left: 2px; }
+  .chip .c { font-size: 30px; font-weight: 900; }
+  .chip .wk { font-size: 21px; font-weight: 700; color: var(--sub); margin-top: 2px; }
+  .chip .wk b { font-weight: 900; }
+  .chip svg { display: block; margin-top: 8px; }
+  .chip .ax { display: flex; justify-content: space-between; font-size: 18px; color: var(--sub); margin-top: 2px; }
+  .chips.one { grid-template-columns: 1fr; }
+  .gl { display: grid; gap: 2px; margin-top: 6px; }
+  .one .gl { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .gl > div { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+  .gl i { flex: none; width: 22px; height: 7px; border-radius: 4px; align-self: center; }
+  .gl .n { font-size: 24px; font-weight: 900; width: 66px; }
+  .gl .x { font-size: 34px; font-weight: 900; }
+  .gl .c { font-size: 24px; font-weight: 900; margin-left: auto; }
+  .chip .oth { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .chip .oth div { flex: 1; background: #f3f5f9; border-radius: 12px; padding: 5px 10px; white-space: nowrap; }
+  .chip .oth .n { font-size: 18px; color: var(--sub); font-weight: 700; }
+  .chip .oth .x { font-size: 22px; font-weight: 900; }
+  /* big */
+  .big { display: grid; gap: 14px; }
+  .big .p { padding: 16px 22px 10px; overflow: hidden; }
+  .big .n { font-size: 25px; font-weight: 700; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .big .v { font-size: 46px; font-weight: 900; line-height: 1.1; }
+  .big .c { font-size: 31px; font-weight: 900; }
+  .big svg { display: block; margin-top: 4px; }
+  /* rows */
+  .rows { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+  .row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 10px 18px; height: 80px; }
+  .row .n { font-size: 28px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .r { text-align: right; line-height: 1.1; }
+  .row .r .v { font-size: 21px; color: var(--sub); font-weight: 700; }
+  .row .r .c { font-size: 30px; font-weight: 900; }
+  /* mini */
+  .mini { display: grid; gap: 10px 12px; }
+  .mini .p { padding: 12px 18px; }
+  .mini .n { font-size: 22px; font-weight: 700; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mini .v { font-size: 32px; font-weight: 900; line-height: 1.15; white-space: nowrap; }
+  .mini .c { font-size: 24px; font-weight: 900; white-space: nowrap; }
+  .mini.c6 .p { padding: 10px 12px; } .mini.c6 .n { font-size: 19px; } .mini.c6 .v { font-size: 27px; } .mini.c6 .c { font-size: 21px; }
+  .mini.c4 .v { font-size: 30px; }
+  .mini.big3 .v { font-size: 42px; line-height: 1.05; } .mini.big3 .c { font-size: 24px; line-height: 1.1; } .mini.big3 .n { font-size: 22px; line-height: 1.2; } .mini.big3 .p { padding: 6px 18px; }
+  .c43 { display: flex; justify-content: center; }
+  .row .r .v2 { font-size: 32px; font-weight: 900; } .row .r .c { font-size: 24px !important; }
+  .mini.sp .l2 { display: flex; align-items: baseline; gap: 10px; } .mini.sp .p { padding: 10px 16px 8px; }
+  /* hero */
+  .hero { display: grid; grid-template-columns: 1fr 300px; gap: 14px; }
+  .hero .main { padding: 16px 22px 8px; }
+  .hero .hv { display: flex; align-items: baseline; gap: 16px; }
+  .hero .hv .v { font-size: 62px; font-weight: 900; line-height: 1.05; }
+  .hero .hv .c { font-size: 34px; font-weight: 900; }
+  .hero .pv { font-size: 20px; color: var(--sub); font-weight: 700; }
+  .hero .side { display: grid; gap: 10px; }
+  .hero .side .p { padding: 6px 18px; display: flex; flex-direction: column; justify-content: center; }
+  .hero .side .n { font-size: 20px; color: var(--sub); font-weight: 700; }
+  .hero .side .l2 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .hero .side .v { font-size: 28px; font-weight: 900; white-space: nowrap; }
+  .hero .side .c { font-size: 23px; font-weight: 900; white-space: nowrap; }
+  .axis { display: flex; justify-content: space-between; font-size: 18px; color: var(--sub); }
+  /* flows */
+  .flows { padding: 4px 24px; }
+  .cg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .ct { padding: 10px 15px 8px; } .ct .n { font-size: 22px; font-weight: 700; color: var(--sub); }
+  .ct .l2 { display: flex; align-items: baseline; gap: 8px; white-space: nowrap; } .ct .v { font-size: 34px; font-weight: 900; } .ct .c { font-size: 21px; font-weight: 900; }
+  .ct svg { display: block; margin: 4px auto 0; }
+  .cs { display: grid; gap: 12px; } .cs .p { padding: 12px 18px; display: flex; flex-direction: column; justify-content: center; }
+  .cs .n { font-size: 22px; font-weight: 700; color: var(--sub); } .cs .v { font-size: 38px; font-weight: 900; line-height: 1.1; } .cs .c { font-size: 21px; font-weight: 900; }
+  .fr { display: grid; grid-template-columns: 200px 1fr 1fr 1fr; align-items: center; height: 82px; gap: 14px; }
+  .fr + .fr { border-top: 1.5px solid var(--edge); }
+  .fr .lab { font-size: 26px; font-weight: 900; }
+  .fc .w { font-size: 20px; color: var(--sub); font-weight: 700; }
+  .fc .v { font-size: 33px; font-weight: 900; line-height: 1.1; }
+  .fc .bar { height: 7px; border-radius: 4px; margin-top: 3px; background: currentColor; opacity: .85; }
+  /* heat */
+  .heat { display: grid; gap: 8px; }
+  .heat .cell { border-radius: 16px; padding: 10px 8px; text-align: center; color: #fff; }
+  .heat .cell .n { font-size: 22px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .heat .cell .c { font-size: 30px; font-weight: 900; }
+  /* news */
+  .news { padding: 4px 24px; }
+  .nw { display: flex; gap: 14px; align-items: center; padding: 8px 0; }
+  .nw + .nw { border-top: 1.5px solid var(--edge); }
+  .nw i { flex: none; font-style: normal; width: 34px; height: 34px; border-radius: 50%; background: var(--acc); color: #fff; font-size: 21px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+  .nw .h { font-size: 26px; font-weight: 900; line-height: 1.28; }
+  .nw .l { display: none; }
+  footer { position: absolute; left: 48px; right: 48px; bottom: 18px; display: flex; justify-content: space-between; font-size: 19px; color: var(--sub); }
+  footer b { color: var(--acc); }
+  .nc .nw { padding: 2px 0; }
+  .t1 section { margin-top: 12px; } .t1 h2 { margin-bottom: 6px; } .t1 .say { padding: 10px 22px; margin-top: 12px; }
+  .t1 .fr { height: 66px; } .t1 .fc .v { font-size: 29px; } .t1 .row { height: 72px; } .t1 .big .p { padding: 12px 20px 6px; } .t1 .mini .p { padding: 8px 16px; }
+</style></head>
+<body><div id="card"></div>
+<script>
+const D = window.DATA, KO = D.region === "kr";
+if (!KO) { document.documentElement.style.setProperty("--up", "#14a05a"); document.documentElement.style.setProperty("--dn", "#e5484d"); }
+const esc = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const cls = v => v > 0 ? "up" : v < 0 ? "dn" : "fl";
+const arrow = v => v > 0 ? "▲" : v < 0 ? "▼" : "–";
+const fmt = (v, dp = 2, sign = false) => (sign && v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toLocaleString("en-US", { minimumFractionDigits: dp, maximumFractionDigits: dp });
+function val(q) {
+  if (q.kind === "text") return fmt(q.last, q.dp, q.sign) + (q.unit && q.unit !== "pt" ? q.unit : "");
+  const v = fmt(q.last, q.dp);
+  if (q.unit === "$") return "$" + v; if (q.unit === "%") return v + "%"; if (q.unit === "원") return v + (q.name.includes("/") ? "" : "원");
+  return v;
+}
+function chg(q, short) {
+  if (q.kind === "text") return `<span class="fl">${esc(q.text)}</span>`;
+  const m = q.kind === "bp" ? q.bp : q.pct;
+  if (q.kind === "bp") return `<span class="${cls(m)}">${arrow(m)} ${Math.abs(m).toFixed(1)}bp</span>`;
+  if (q.kind === "pt") return `<span class="${cls(q.chg)}">${arrow(q.chg)} ${Math.abs(q.chg).toFixed(2)}${short ? "" : ` (${fmt(q.pct, 1, true)}%)`}</span>`;
+  return `<span class="${cls(m)}">${fmt(m, 2, true)}%</span>`;
+}
+const mv = q => q.kind === "bp" ? q.bp : q.kind === "text" ? 0 : q.pct;
+function spark(q, w, h, opt = {}) {
+  const v = q.spark || []; if (v.length < 2) return `<svg width="${w}" height="${h}"></svg>`;
+  const base = "base" in opt ? opt.base : q.prev; const all = v.concat(base != null ? [base] : []);
+  let lo = Math.min(...all), hi = Math.max(...all); if (hi - lo < 1e-9) { hi += 1; lo -= 1; }
+  const pad = opt.pad ?? 6, X = i => pad + (w - 2 * pad) * i / (v.length - 1), Y = y => pad + (h - 2 * pad) * (hi - y) / (hi - lo);
+  const c = `var(--${cls(mv(q)) === "fl" ? "flat" : cls(mv(q))})`, d = v.map((y, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(y).toFixed(1)).join("");
+  const gid = "g" + Math.random().toString(36).slice(2);
+  return `<svg width="${w}" height="${h}" style="overflow:visible"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".22"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></linearGradient></defs>
+    ${base != null ? `<line x1="${pad}" x2="${w - pad}" y1="${Y(base)}" y2="${Y(base)}" stroke="#b9c0cf" stroke-width="${opt.bw || 1.5}" stroke-dasharray="5 6"/>` : ""}
+    ${opt.fill !== false ? `<path d="${d}L${X(v.length - 1)} ${h}L${X(0)} ${h}Z" fill="url(#${gid})"/>` : ""}
+    <path d="${d}" fill="none" stroke="${c}" stroke-width="${opt.sw || 3}" stroke-linejoin="round" stroke-linecap="round"/>
+    ${opt.dot ? `<circle cx="${X(v.length - 1)}" cy="${Y(v[v.length - 1])}" r="7" fill="${c}" stroke="#fff" stroke-width="3"/>` : ""}</svg>`;
+}
+function heatColor(p) {
+  const k = Math.min(1, Math.abs(p) / 2.5), up = KO ? [232, 52, 58] : [20, 160, 90], dn = KO ? [31, 111, 229] : [229, 72, 77], g = [150, 158, 175];
+  const c = p >= 0 ? up : dn, m = .25 + .75 * k; return `rgb(${c.map((x, i) => Math.round(g[i] + (x - g[i]) * m)).join(",")})`;
+}
+function wxIcon(k) {
+  const sun = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#ffb21e"/>` + [...Array(8)].map((_, i) => { const a = i * Math.PI / 4; return `<line x1="${x + Math.cos(a) * (r + 5)}" y1="${y + Math.sin(a) * (r + 5)}" x2="${x + Math.cos(a) * (r + 11)}" y2="${y + Math.sin(a) * (r + 11)}" stroke="#ffb21e" stroke-width="4" stroke-linecap="round"/>`; }).join("");
+  const cloud = (dx, dy, f) => `<path transform="translate(${dx},${dy})" d="M18 52h34a12 12 0 0 0 0-24 17 17 0 0 0-32-4 12 12 0 0 0-2 28z" fill="${f}"/>`;
+  const drops = c => [20, 34, 48].map(x => c === "snow" ? `<circle cx="${x}" cy="62" r="4" fill="#8fb4e8"/>` : `<line x1="${x}" y1="58" x2="${x - 4}" y2="68" stroke="#3d7fe0" stroke-width="4" stroke-linecap="round"/>`).join("");
+  const body = { sun: sun(35, 35, 15), part: sun(26, 24, 11) + cloud(4, 4, "#c9d2e0"), cloud: cloud(0, -4, "#aeb8c8"), fog: cloud(0, -8, "#bcc4d2") + `<line x1="10" y1="60" x2="60" y2="60" stroke="#aeb8c8" stroke-width="4"/>`,
+    rain: cloud(0, -10, "#95a2b6") + drops("rain"), snow: cloud(0, -10, "#b4bfce") + drops("snow"), storm: cloud(0, -10, "#7d899c") + `<path d="M36 46l-8 12h8l-5 12 13-16h-8l5-8z" fill="#ffb21e"/>` }[k] || "";
+  return `<svg viewBox="0 0 70 70">${body}</svg>`;
+}
+const wxBox = w => `<div class="wx">${w.pose ? "" : wxIcon(w.icon)}<div><div class="c">${esc(w.when || (KO ? "오늘" : "Today"))} ${esc(w.city)} · ${esc(w.sky)}</div>
+  <div class="t num">${w.hi}°<span> / ${w.lo}°</span></div><div class="r">${KO ? "비 올 확률" : "Rain"} ${w.rain}%</div></div></div>`;
+const day = new Date(D.day + "T12:00:00");
+const band = KO ? `${day.getMonth() + 1}월 ${"일월화수목금토"[day.getDay()]}` : day.toLocaleDateString("en-US", { month: "short", weekday: "short" }).toUpperCase().replace(",", "");
+let h = `<header><div class="dtile"><div class="band">${band}</div><div class="day">${day.getDate()}</div></div>
+  <div class="ht"><div class="k">${esc(D.kicker)} · ${esc(D.handle)}</div><h1>${esc(D.title)}</h1><div class="s">${esc(D.sub)}</div></div>
+  ${D.wx ? wxBox(D.wx) : ""}<img src="../assets/poses/${(D.wx && D.wx.pose) || D.pose || "a05"}.png"></header>`;
+if (D.comment) h += `<div class="say"><b>${KO ? "레드덴바" : "RED DENVA"}</b><span>${esc(D.comment)}</span></div>`;
+const shortDate = iso => { const d = new Date(iso + "T12:00:00"); return `${d.getMonth() + 1}/${d.getDate()}`; };
+const wk = q => [q.w1 != null ? `${KO ? "1주" : "1W"} <b class="${cls(q.w1)}">${fmt(q.w1, 2, true)}%</b>` : "", q.m1 != null ? `${KO ? "1달" : "1M"} <b class="${cls(q.m1)}">${fmt(q.m1, 2, true)}%</b>` : ""].filter(Boolean).join(" · ");
+const chg1 = q => Math.abs(q.pct) < 0.005 ? `<span class="fl">${KO ? "보합" : "unch."}</span>` : `<span class="${cls(q.pct)}">${arrow(q.pct)} ${Math.abs(q.pct).toFixed(2)}%</span>`;
+const CW = 320, CH = 240;  // 카드 안 차트 비율은 무조건 4:3
+function chipPanel(q, lab, sub, others, otherFmt) {
+  return `<div class="p chip"><div class="lab">${esc(lab)}<span>${esc(sub)}</span></div>
+    <div class="row1"><span class="v num">$${fmt(q.last, q.dp)}${q.per ? `<small>${q.per}</small>` : ""}</span><span class="c num">${chg1(q)}</span></div>
+    <div class="wk">${wk(q)}</div><div class="c43">${spark(q, CW, CH, { sw: 4, dot: true, base: null })}</div>
+    <div class="ax"><span>${shortDate(q.since)}</span><span>${KO ? "3개월" : "3 months"}</span><span>${shortDate(q.date)}</span></div>
+    ${others.length ? `<div class="oth">${others.map(otherFmt).join("")}</div>` : ""}</div>`;
+}
+const GPUC = { B200: "#d9822b", H100: "#111a2e", A100: "#2a9d8f" };
+function gpuPanel(gp, wide) {
+  gp = gp.slice().sort((a, b) => b.last - a.last);
+  const W = wide ? 600 : CW, H = W * 3 / 4, pad = 8, rb = q => q.spark.map(v => (v / q.spark[0] - 1) * 100), all = gp.flatMap(rb).concat([0]);
+  const lo = Math.min(...all), hi = Math.max(...all), Y = y => pad + (H - 2 * pad) * (hi - y) / ((hi - lo) || 1);
+  const zero = `<line x1="${pad}" x2="${W - pad}" y1="${Y(0)}" y2="${Y(0)}" stroke="#b9c0cf" stroke-width="1.5" stroke-dasharray="5 6"/>`;
+  const lines = zero + gp.map(q => { const v = rb(q), X = i => pad + (W - 2 * pad) * i / (v.length - 1), c = GPUC[q.name] || "#888";
+    return `<path d="${v.map((y, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(y).toFixed(1)).join("")}" fill="none" stroke="${c}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="${X(v.length - 1)}" cy="${Y(v[v.length - 1])}" r="6" fill="${c}" stroke="#fff" stroke-width="2.5"/>`; }).join("");
+  const q0 = gp[0];
+  return `<div class="p chip"><div class="lab">${KO ? "GPU 임대료" : "GPU rental"}<span>${KO ? "1시간당 · 하루 변동" : "per hour · daily change"}</span></div>
+    <div class="gl">${gp.map(q => `<div><i style="background:${GPUC[q.name]}"></i><span class="n">${esc(q.name)}</span><span class="x num">$${fmt(q.last, 2)}</span><span class="c num">${chg1(q)}</span></div>`).join("")}</div>
+    <div class="c43"><svg width="${W}" height="${H}" style="display:block;margin-top:10px;overflow:visible">${lines}</svg></div>
+    <div class="ax"><span>${shortDate(q0.since)}</span><span>${KO ? "3개월 등락률 (점선 = 3개월 전)" : "3-month % change (dashed = start)"}</span><span>${shortDate(q0.date)}</span></div></div>`;
+}
+const S = {
+  chips(s) {
+    const dr = s.dram || [], gp = s.gpu || [];
+    let h = `<div class="chips${dr[0] && gp[0] ? "" : " one"}">`;
+    if (dr[0]) h += chipPanel(dr[0], KO ? "D램 현물 · DDR5 16Gb" : "DRAM spot · DDR5 16Gb", KO ? "칩당 평균가" : "avg per chip", [], x => "");
+    if (gp[0]) h += gpuPanel(gp, !dr[0]);
+    return h + "</div>";
+  },
+  big(s) {
+    const n = s.items.length, w = Math.floor((968 - 14 * (n - 1)) / n) - 44;
+    return `<div class="big" style="grid-template-columns:repeat(${n},1fr)">` + s.items.map(q => `<div class="p"><div class="n">${esc(q.name)}</div>
+      <div class="v num">${val(q)}</div><div class="c num">${chg(q)}</div>${spark(q, w, 46)}</div>`).join("") + "</div>";
+  },
+  rows(s) {
+    return `<div class="rows">` + s.items.map(q => `<div class="p row"><div class="n">${esc(q.name)}${q.note ? `<small>${esc(q.note)}</small>` : ""}</div>
+      <div class="r num"><div class="v2">${val(q)}</div><div class="c">${chg(q, true)}</div></div></div>`).join("") + "</div>";
+  },
+  mini(s) {
+    const c = s.cols || 3;
+    return `<div class="mini ${c >= 6 ? "c6" : c >= 4 ? "c4" : ""}${s.spark ? " big3" : ""}" style="grid-template-columns:repeat(${c},1fr)">` + s.items.map(q => `<div class="p"><div class="n">${esc(q.name)}</div>
+      <div class="v num">${val(q)}</div><div class="c num">${chg(q, c >= 4)}</div></div>`).join("") + "</div>";
+  },
+  hero(s) {
+    const q = s.item, side = s.side || [];
+    const ax = KO ? ["09:00", "12:00", "15:30"] : ["9:30", "12:45", "4:00"];
+    return `<div class="hero"><div class="p main"><div class="hv"><span class="v num">${val(q)}</span><span class="c num">${chg(q)}</span></div>
+      <div class="pv">${KO ? "전일" : "Prev."} ${fmt(q.prev, q.dp)} · ${q.chg > 0 ? "+" : q.chg < 0 ? "−" : ""}${fmt(Math.abs(q.chg), q.dp)} ${KO ? "· 점선 = 전일 종가" : "· dashed = prev. close"}</div>
+      <div style="margin-top:6px">${spark(q, 600, 450, { sw: 4, dot: true })}</div><div class="axis">${ax.map(x => `<span>${x}</span>`).join("")}</div></div>
+      <div class="side" style="grid-template-rows:repeat(${side.length},1fr)">` + side.map(x => `<div class="p"><div class="n">${esc(x.name)}</div>
+      <div class="l2"><span class="v num">${val(x)}</span><span class="c num">${chg(x, true)}</span></div></div>`).join("") + "</div></div>";
+  },
+  charts(s) {
+    const n = 3, W = Math.floor((968 - 12 * (n - 1)) / n) - 50, H = Math.round(W * 3 / 4);
+    let h = `<div class="cg">` + s.items.map(q => `<div class="p ct"><div class="n">${esc(q.name)}</div>
+      <div class="l2"><span class="v num">${val(q)}</span><span class="c num">${chg(q, true)}</span></div>
+      ${spark(q, W, H, { sw: 3.5, dot: true, bw: 1.4 })}</div>`).join("");
+    if (s.stack && s.stack.length) h += `<div class="cs">` + s.stack.map(x => `<div class="p"><div class="n">${esc(x.name)}</div><div class="v num">${val(x)}</div><div class="c num">${chg(x, true)}</div></div>`).join("") + "</div>";
+    return h + "</div>";
+  },
+  flows(s) {
+    const WHO = KO ? [["frn", "외국인"], ["ins", "기관"], ["ind", "개인"]] : [["frn", "Foreign"], ["ins", "Inst."], ["ind", "Retail"]];
+    const PRG = [["arb", "차익"], ["non", "비차익"], ["tot", "전체"]];
+    return `<div class="p flows">` + s.rows.map(([lab, r]) => { const who = "tot" in r ? PRG : WHO;
+      const mx = Math.max(...Object.values(r).map(Math.abs), 1);
+      return `<div class="fr"><div class="lab">${esc(lab)}</div>` + who.map(([k, w]) => `<div class="fc ${cls(r[k])}"><div class="w">${w}</div><div class="v num">${fmt(r[k], 0, true)}</div>
+        <div class="bar" style="width:${Math.max(4, 100 * Math.abs(r[k]) / mx)}%"></div></div>`).join("") + "</div>";
+    }).join("") + "</div>";
+  },
+  heat(s) {
+    const c = s.cols || Math.min(6, s.items.length);
+    return `<div class="heat" style="grid-template-columns:repeat(${c},1fr)">` + s.items.map(q => `<div class="cell" style="background:${heatColor(q.pct)}">
+      <div class="n">${esc(q.name)}</div><div class="c num">${fmt(q.pct, 2, true)}%</div></div>`).join("") + "</div>";
+  },
+  news(s) {
+    return `<div class="p news">` + s.items.map((n, i) => `<div class="nw"><i>${i + 1}</i><div><div class="h">${esc(n.head)}</div><div class="l">${esc(n.line)}</div></div></div>`).join("") + "</div>";
+  },
+};
+for (const s0 of D.sections.filter(x => x.card !== false)) { const s = s0.card_n ? Object.assign({}, s0, { items: s0.items.slice(0, s0.card_n) }) : s0; h += `<section data-t="${s.type}"><h2>${esc(s.title)}${s.small ? `<small>${esc(s.small)}</small>` : ""}</h2>${S[s.type](s)}</section>`; }
+h += `<footer><span>${esc(D.foot)}</span><b>${esc(D.handle)}</b></footer>`;
+const card = document.getElementById("card"); card.innerHTML = h;
+const over = () => { const last = card.querySelector("section:last-of-type"); return last && last.getBoundingClientRect().bottom > 1350 - 56; };
+Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; }))).then(() => document.fonts.ready).then(() => {
+  if (over()) card.classList.add("t1");
+  if (over()) card.classList.add("nc");  // 뉴스를 제목만 한 줄씩
+  if (over()) { const n = card.querySelector('section[data-t="news"]'); if (n) n.remove(); }  // 그래도 넘치면 뉴스는 캡션·릴스로만
+  window.READY = true;
+});
+</script></body></html>
