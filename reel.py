@@ -215,11 +215,33 @@ def netflix(d, region):
 ADAPT = dict(weather=weather, deriv=deriv, books=books, news=news, puppy=puppy, facts=facts, trip=trip, netflix=netflix)
 
 
+SERIES = {"kr": {"weather": "[[acc:서울]] 날씨", "books": "이번 주 [[acc:책]]", "news": "[[acc:좋은 뉴스]]", "puppy": "[[acc:아기 동물]]",
+                 "deriv": "[[acc:파생]] 브리핑", "trip": "[[acc:주말 여행]]", "facts": "[[acc:동물 상식]]", "netflix": "[[acc:넷플릭스]]"},
+          "us": {"weather": "[[acc:LA]] weather", "books": "[[acc:Book]] of the week", "news": "[[acc:Good news]]", "puppy": "[[acc:Baby animal]]",
+                 "deriv": "[[acc:Derivatives]]", "trip": "[[acc:Weekend trip]]", "facts": "[[acc:Animal facts]]", "netflix": "[[acc:Netflix]] top 10"}}
+EN_DAY_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+
+def open_scene(kind, region):
+    """모든 릴스의 첫 화면(=섬네일). 날짜 아이콘 + '목요일 파생 브리핑' 같은 제목."""
+    tz = "Asia/Seoul" if region == "kr" else "America/Los_Angeles"
+    from zoneinfo import ZoneInfo
+    day = dt.datetime.now(ZoneInfo(tz)).date(); w = day.weekday()
+    if region == "kr":
+        band, first = f"{day.month}월 {KO_DAY[w]}", ("오늘의" if kind == "weather" else f"{KO_DAY[w]}요일")
+    else:
+        band, first = f"{day:%b} · {EN_DAY[w]}".upper(), ("Today's" if kind == "weather" else EN_DAY_FULL[w])
+    title = SERIES[region][kind]
+    size = "s" if len(re.sub(r"\[\[\w+:|\]\]", "", title)) > (7 if region == "kr" else 11) else ""
+    return dict(type="open", band=band, day=str(day.day), lines=[first, title], size=size,
+                handle=f"@reddenva.{region}", pose="a00", poseh=230, dur=2.3)
+
+
 def build(kind, region):
     d = reel_data.load(kind, region)
     if not d: raise SystemExit(f"reel_in/{kind}-{region}.json 없음 (이번 실행에서 카드를 안 만들었음)")
     th, scenes = ADAPT[kind](d, region)
-    return {"theme": th, "scenes": scenes}
+    return {"theme": th, "scenes": [open_scene(kind, region)] + scenes}
 
 
 # ------------------------------------------------------------------ 업로드 (GitHub Release)

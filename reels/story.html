@@ -1,7 +1,7 @@
 <!doctype html>
 <html><head><meta charset="utf-8">
 <!-- 릴스 장면 엔진. reel.py가 window.DATA = {theme, scenes:[...]} 를 넣고, render.py가 render(t)로 한 프레임씩 찍는다.
-     장면 종류: hook · tiles · list · quote · photo · week · chart · cards. 아래 1500px 밑은 릴스 캡션·버튼 자리라 비워둔다. -->
+     장면 종류: open · hook · tiles · list · quote · photo · week · chart · cards. 아래 1500px 밑은 릴스 캡션·버튼 자리라 비워둔다. -->
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 1080px; height: 1920px; overflow: hidden; }
@@ -65,6 +65,12 @@
   .cardwrap { width: 1000px; height: 1250px; overflow: hidden; border-radius: 36px; box-shadow: 0 30px 90px rgba(0,0,0,.45); }
   .strip { display: flex; }
   .strip img { width: 1000px; height: 1250px; display: block; }
+  .dtile { width: 300px; border-radius: 40px; overflow: hidden; background: #fff; box-shadow: 0 24px 70px rgba(0,0,0,.35); text-align: center; }
+  .dtile .band { background: #e0482a; color: #fff; font-size: 58px; font-weight: 900; padding: 16px 0 14px; letter-spacing: .02em; }
+  .dtile .day { color: #14284d; font-size: 210px; font-weight: 900; line-height: 1.08; letter-spacing: -0.06em; padding: 4px 0 18px; }
+  .otitle { font-size: 156px; font-weight: 900; line-height: 1.06; letter-spacing: -0.05em; max-width: 1020px; }
+  .otitle.s { font-size: 124px; }
+  .ohandle { font-size: 44px; font-weight: 700; color: var(--sub); letter-spacing: .02em; }
   img.pose { display: block; filter: drop-shadow(0 18px 30px rgba(0,0,0,.3)); }
   #fx { position: absolute; inset: 0; pointer-events: none; }
   .flake { position: absolute; border-radius: 50%; background: #dfe9ff; }
@@ -83,6 +89,13 @@ const head = (s, d = 0) => (s.kicker ? `<div class="kicker" ${A("rise", d)}>${ri
 const cnt = (n, dp, sign, d, dur = 1.0, from = 0) => `<span data-count="${from},${n},${dp || 0},${sign ? 1 : 0},${d},${dur}">${fmtNum(n, dp || 0, sign)}</span>`;
 
 const T = {
+  open(s) {  // 첫 화면 = 섬네일: 날짜 아이콘 + 시리즈 제목을 크게 (인스타 격자 3:4 안쪽에 들어가게 가운데)
+    let h = `<div class="col" style="top:${s.top || 300}px">`;
+    h += `<div class="dtile" ${A("pop", 0)}><div class="band" style="white-space:nowrap;font-size:${s.band.length > 6 ? 46 : 58}px">${esc(s.band)}</div><div class="day">${esc(s.day)}</div></div>`;
+    (s.lines || []).forEach((ln, i) => { h += `<div class="otitle ${s.size || ""}" ${A("word", .2 + i * .22)} style="margin-top:${i ? 0 : 64}px">${rich(ln)}</div>`; });
+    if (s.handle) h += `<div class="ohandle" ${A("fade", .7)} style="margin-top:40px">${esc(s.handle)}</div>`;
+    return h + poseImg(s.pose, s.poseh || 250, .55) + "</div>";
+  },
   hook(s) {
     let h = `<div class="col" style="top:${s.top || 250}px">`;
     if (s.chip) h += `<div ${A("drop", 0)}><span class="chip">${rich(s.chip)}</span></div>`;
