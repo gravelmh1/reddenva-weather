@@ -94,6 +94,14 @@ def naver(sym, now, name, unit="", dp=2):
             t = dt.datetime.strptime(a[0][:12], "%Y%m%d%H%M")
             if t.date() == d and a[4] not in ("", "0"): spark.append(float(a[4]))
     except Exception as e: print("분봉 실패", sym, e)
+    if len(spark) < 40:  # 네이버 분봉이 성기면 Yahoo 5분봉으로 그린다 (값·등락률은 네이버 그대로)
+        try:
+            ys = {"KOSPI": "^KS11", "KOSDAQ": "^KQ11"}.get(sym, f"{sym}.KS")
+            j5 = get(f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(ys)}", params={"range": "5d", "interval": "5m"}).json()["chart"]["result"][0]
+            ysp = [c for t, c in zip(j5.get("timestamp", []), j5["indicators"]["quote"][0]["close"]) if c is not None and dt.datetime.fromtimestamp(t, KST).date() == d]
+            print("분봉", sym, "네이버", len(spark), "→ Yahoo", len(ysp))
+            if len(ysp) > len(spark): spark = ysp + [last]
+        except Exception as e: print("Yahoo 분봉 실패", sym, e)
     return mk(name, last, prev, d, spark or [c for _, c in daily[-20:]], unit, dp)
 
 
@@ -141,13 +149,14 @@ def gnews(q, ko, d0, d1):
 def gem(prompt, temp=0.4):
     key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not key: raise RuntimeError("GEMINI_API_KEY 없음")
-    ms = [m["name"].split("/")[-1] for m in get("https://generativelanguage.googleapis.com/v1beta/models", params={"key": key, "pageSize": 100}).json().get("models", [])
-          if "generateContent" in m.get("supportedGenerationMethods", []) and re.match(r"gemini-[\d.]+-(flash|pro)", m["name"].split("/")[-1]) and "image" not in m["name"] and "tts" not in m["name"]]
-    ms.sort(key=lambda m: (("flash" not in m), -float(re.search(r"[\d.]+", m).group().rstrip(".") or 0)))
+    from books import models  # 다른 시리즈와 같은 모델 고르기 (빠른 flash-lite 먼저)
+    ms = models(key)
     last = None
-    for m in ms[:4]:
-        r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent", headers={"x-goog-api-key": key}, timeout=60,
-                          json={"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"temperature": temp, "responseMimeType": "application/json"}})
+    for m in (ms[:3] * 2):
+        try:
+            r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent", headers={"x-goog-api-key": key}, timeout=35,
+                              json={"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"temperature": temp, "responseMimeType": "application/json"}})
+        except requests.RequestException as e: last = f"{m} {type(e).__name__}"; continue
         if not r.ok: last = f"{m} {r.status_code}"; continue
         try: return json.loads(r.json()["candidates"][0]["content"]["parts"][0]["text"])
         except Exception as e: last = f"{m} {e}"
@@ -183,11 +192,11 @@ def quip(region, kind, facts, mood):
     try:
         p = f"""You are Red Denva, a sleepy, deadpan red panda who posts a daily {'Korean' if ko else 'US'} stock market brief.
 Write ONE short comment about today's numbers below: dry, witty, specific to the numbers (mention one concrete thing), never cheesy, no emojis, no hashtags, no investment advice, no predictions.
-{'Korean, casual polite (~요), max 30 characters.' if ko else 'English, max 70 characters.'}
+{'Korean, casual polite (~요), max 30 characters.' if ko else 'English, max 55 characters.'}
 Mood: {mood}. Numbers: {json.dumps(facts, ensure_ascii=False)}
 Return JSON {{"text":"..."}}"""
         t = gem(p, 0.8)["text"].strip().strip('"“”')
-        if 4 <= len(t) <= (40 if ko else 90): return t
+        if 4 <= len(t) <= (36 if ko else 66): return t
     except Exception as e: print("한마디 Gemini 실패 → 규칙 문장", e)
     return RULE[region][mood]
 
