@@ -30,6 +30,14 @@ jobs:
           D="${{ inputs.day }}"; OPT="--dry-run --force ${D:+--day $D} ${{ inputs.video && '--video' || '' }}"
           python animals.py --region kr $OPT
           python animals.py --region us $OPT
+      - name: 수요일 다트 투자 샘플 (지난 4주를 과거 시세로 채운 데모, 저장·게시 안 함)
+        continue-on-error: true
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          D="${{ inputs.day }}"
+          python dart.py --region kr --dry-run --force ${D:+--day $D} --demo 4
+          python dart.py --region us --dry-run --force ${D:+--day $D} --demo 4
       - name: 릴스 렌더 (러너의 Chrome 사용)
         env:
           CHROME_PATH: /usr/bin/google-chrome
@@ -37,7 +45,9 @@ jobs:
           mkdir -p samples/puppy
           python reel.py --region kr --kind puppy --local samples/puppy/reel-puppy-kr.mp4
           python reel.py --region us --kind puppy --local samples/puppy/reel-puppy-us.mp4
-          cp out/puppy-*.jpg samples/puppy/
+          python reel.py --region kr --kind dart --local samples/puppy/reel-dart-kr.mp4 || true
+          python reel.py --region us --kind dart --local samples/puppy/reel-dart-us.mp4 || true
+          cp out/puppy-*.jpg samples/puppy/; cp out/dart-*.jpg samples/puppy/ || true
       - name: samples 브랜치에 저장
         run: |
           mkdir /tmp/s && cp -r samples/puppy /tmp/s/

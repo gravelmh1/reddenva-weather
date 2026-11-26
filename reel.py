@@ -15,7 +15,7 @@ import requests
 import reel_data
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-KINDS = ["books", "news", "puppy", "deriv", "trip", "facts", "netflix", "morning", "close"]
+KINDS = ["books", "news", "dart", "puppy", "deriv", "trip", "facts", "netflix", "morning", "close"]
 CARD_LAST = {"ko": "한 장으로 보기", "en": "The full card"}
 
 
@@ -165,6 +165,46 @@ def news(d, region):
     q = " ".join(x.strip() for x in c["quote"])
     quote = dict(type="quote", kicker="오늘의 한 줄" if ko else "Quote of the week", text=f"“{q.strip('“”')}”", by=f"— {c['author']}", dur=1.6 + rd(q, ko=ko))
     return theme("cream"), [hook, lst, quote, cards_scene(d["cards"], ko)]
+
+
+def dart(d, region):
+    """수요일 다트 투자: 지난주 결과 → 주간 전적·누적 성적 → 종목판에 다트 → 이번 주 종목 → 카드."""
+    import random
+    c = d["c"]; ko = region == "kr"; new, last, tot = c["new"], c.get("last"), c.get("tot")
+    up, dn = ("up", "dn")
+    pc = lambda x: f"{x * 100:+.1f}%"
+    sc = []
+    if last:
+        win = last["win"]
+        sc.append(dict(type="hook", kicker="지난주 다트" if ko else "Last week's dart", label=last["name"],
+                       big=dict(to=round(last["wk_ret"] * 100, 1), dp=1, sign=True, suf="%"),
+                       sub=(f"같은 1주 {c['index_name']} {pc(last['wk_idx'])}" if ko else f"{c['index_name']} {pc(last['wk_idx'])} that week"),
+                       pill=(("다트 승" if win else "지수 승") if ko else ("Darts win" if win else "Index wins")), pillc="#e0482a" if win else "#5a6478",
+                       pose="a04" if win else "a06", poseh=260, bigc="var(--up)" if last["wk_ret"] >= 0 else "var(--dn)", dur=4.2))
+    if tot:
+        tiles = [dict(l="레드덴바 다트" if ko else "Red Denva's darts", n=round(tot["ret"] * 100, 1), dp=1, sign=True, suf="%", vc="var(--up)" if tot["ret"] >= 0 else "var(--dn)"),
+                 dict(l=c["index_name"] + (" 그냥 사기" if ko else " index"), n=round(tot["ret_idx"] * 100, 1), dp=1, sign=True, suf="%", vc="var(--up)" if tot["ret_idx"] >= 0 else "var(--dn)")]
+        rec = (f"다트 [[acc:{tot['wins']}승]] {tot['losses']}패" if ko else f"Darts [[acc:{tot['wins']}-{tot['losses']}]]")
+        lead = tot["ret"] - tot["ret_idx"]
+        verdict = ((f"누적은 다트가 {abs(lead) * 100:.1f}%p 앞섬" if lead > 0 else f"누적은 지수가 {abs(lead) * 100:.1f}%p 앞섬") if ko else
+                   (f"Darts lead by {abs(lead) * 100:.1f} pts overall" if lead > 0 else f"Index leads by {abs(lead) * 100:.1f} pts overall"))
+        sc.append(dict(type="tiles", kicker="주간 전적" if ko else "Weekly record", title=rec, tiles=tiles, nsz=120,
+                       rows=[["누적" if ko else "Total", verdict]], pose="a16" if lead > 0 else "a15", poseh=220, dur=4.6))
+    names = [n for _, n in d["board"]]; hit = names.index(new["name"])
+    rng = random.Random(hash(new["sym"]) & 0xffff); seq = []
+    for _ in range(17):
+        seq.append(rng.choice([i for i in range(len(names)) if not seq or i != seq[-1]]))
+    seq.append(hit)
+    sc.append(dict(type="dart", kicker=f"{c['week']}주차" if ko else f"Week {c['week']}", title="이번 주 다트는…" if ko else "This week's dart…",
+                   names=names, hit=hit, seq=seq, spin0=.6, spin=2.4, top=190, dur=4.6))
+    code = new["sym"].replace(".KS", "")
+    sc.append(dict(type="hook", kicker="이번 주 다트" if ko else "This week's dart", lines=[new["name"]], size="s" if len(new["name"]) > (6 if ko else 10) else "",
+                   sub=" · ".join(x for x in (code, new.get("what", "")) if x), pill=new.get("quip") or None, pillc="#14284d", pose="a00", poseh=280,
+                   dur=2.2 + rd(new["name"], new.get("what", ""), new.get("quip", ""), ko=ko)))
+    th = theme("terminal")
+    if ko: th["vars"].update(up="#ff5a5f", dn="#4d8dff")
+    else: th["vars"].update(up="#2fd08a", dn="#ff5a5f")
+    return th, sc + [cards_scene(d["cards"], ko)]
 
 
 def video_frames(path, fx, secs, fps=30):
@@ -328,20 +368,20 @@ def brief(d, region):
     return th, sc + [cards_scene(d["cards"], ko)]
 
 
-ADAPT = dict(weather=weather, morning=brief, close=brief, deriv=deriv, books=books, news=news, puppy=puppy, facts=facts, trip=trip, netflix=netflix)
+ADAPT = dict(dart=dart, weather=weather, morning=brief, close=brief, deriv=deriv, books=books, news=news, puppy=puppy, facts=facts, trip=trip, netflix=netflix)
 
 
-SERIES = {"kr": {"weather": "[[acc:서울]] 날씨", "books": "이번 주 [[acc:책]]", "news": "[[acc:좋은 뉴스]]", "puppy": "[[acc:아기 동물]]",
+SERIES = {"kr": {"weather": "[[acc:서울]] 날씨", "books": "이번 주 [[acc:책]]", "news": "[[acc:좋은 뉴스]]", "puppy": "[[acc:아기 동물]]", "dart": "[[acc:다트]] 투자",
                  "deriv": "[[acc:파생]] 브리핑", "trip": "[[acc:주말 여행]]", "facts": "[[acc:동물 상식]]", "netflix": "[[acc:넷플릭스]]",
                  "morning": "[[acc:모닝]] 브리프", "close": "[[acc:마감]] 브리프"},
-          "us": {"weather": "[[acc:LA]] weather", "books": "[[acc:Book]] of the week", "news": "[[acc:Good news]]", "puppy": "[[acc:Baby animal]]",
+          "us": {"weather": "[[acc:LA]] weather", "books": "[[acc:Book]] of the week", "news": "[[acc:Good news]]", "puppy": "[[acc:Baby animal]]", "dart": "[[acc:Dart]] portfolio",
                  "deriv": "[[acc:Derivatives]]", "trip": "[[acc:Weekend trip]]", "facts": "[[acc:Animal facts]]", "netflix": "[[acc:Netflix]] top 10",
                  "morning": "[[acc:Morning]] Brief", "close": "[[acc:Closing]] Brief"}}
 EN_DAY_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
 # 시리즈마다 단색 배경 (색 계열은 확실히 다르게, 밝기·채도는 비슷하게 눌러서 세련되게)
-SERIES_BG = {"weather": "#1f4e8c", "books": "#6b4a2e", "news": "#f1e4c8", "puppy": "#93475f",
+SERIES_BG = {"dart": "#3b2f5c", "weather": "#1f4e8c", "books": "#6b4a2e", "news": "#f1e4c8", "puppy": "#93475f",
              "deriv": "#2b313c", "trip": "#1d6461", "facts": "#56632c", "netflix": "#6e1d29", "morning": "#2a2550", "close": "#14233d"}
 SERIES_ACC = {"books": "#f3c97a", "netflix": "#ffb0a8", "puppy": "#ffc59e", "facts": "#f6d28a", "trip": "#ffc08a"}  # 배경 위에서 잘 보이게
 
@@ -370,7 +410,7 @@ def build(kind, region):
     th, scenes = ADAPT[kind](d, region)
     if kind in SERIES_BG: th["vars"]["bg"] = SERIES_BG[kind]
     if kind in SERIES_ACC: th["vars"]["acc"] = SERIES_ACC[kind]
-    return {"theme": th, "scenes": [open_scene(kind, region, d.get("day") if kind in ("morning", "close", "puppy") else None)] + scenes}
+    return {"theme": th, "scenes": [open_scene(kind, region, d.get("day") if kind in ("morning", "close", "puppy", "dart") else None)] + scenes}
 
 
 # ------------------------------------------------------------------ 업로드 (GitHub Release)
