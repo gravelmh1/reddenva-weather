@@ -824,7 +824,7 @@
       56.545,
       56.475,
       56.51,
-      56.6,
+      56.6087,
       56.49,
       56.51
      ]
@@ -1202,18 +1202,18 @@
    "items": [
     {
      "head": "Inflation Gauge Jumps",
-     "line": "The Federal Reserve’s preferred inflation gauge jumped to 3.8% as Wall Street braces for a rate hike.",
+     "line": "The Federal Reserve's preferred inflation gauge rose to 3.8% as Wall Street braced for a rate hike.",
      "src": "Yahoo Finance"
     },
     {
-     "head": "Global Stocks Tumble",
+     "head": "Tariffs Rattle Markets",
      "line": "World stocks tumbled as Trump tariffs rattled markets and the artificial intelligence rally faded.",
      "src": "Reuters"
     },
     {
-     "head": "Treasury Yields Fall",
-     "line": "Treasury yields extended their fall following a flurry of new United States economic data.",
-     "src": "WSJ"
+     "head": "Tech Stocks Pull Back",
+     "line": "Nvidia and Anthropic tumbled over 6% as tech stocks pulled Wall Street lower.",
+     "src": "The Independent"
     }
    ]
   }
@@ -1506,7 +1506,7 @@
     56.545,
     56.475,
     56.51,
-    56.6,
+    56.6087,
     56.49,
     56.51
    ]
@@ -2185,7 +2185,7 @@
     362.26,
     359.37,
     360.6,
-    364.3045,
+    364.2834,
     364.125,
     365.01,
     363.025,
@@ -2385,7 +2385,7 @@
     271.79,
     272.16,
     272.25,
-    272.95,
+    272.975,
     273.1
    ]
   },
@@ -2404,7 +2404,7 @@
     239.705,
     238.61,
     239.1,
-    240.91,
+    240.93,
     241.47,
     241.14,
     239.81,
@@ -2530,8 +2530,8 @@
     148.175,
     147.435,
     147.7205,
-    148.52,
-    149.29,
+    148.53,
+    149.27,
     149.3
    ]
   }
@@ -2555,22 +2555,22 @@
   "pose": "w04",
   "when": "Tomorrow"
  },
- "comment": "Tech dropped 0.83%. I am going back to sleep.",
+ "comment": "Tech dropped 0.83%. Time for a nap.",
  "news": [
   {
    "head": "Inflation Gauge Jumps",
-   "line": "The Federal Reserve’s preferred inflation gauge jumped to 3.8% as Wall Street braces for a rate hike.",
+   "line": "The Federal Reserve's preferred inflation gauge rose to 3.8% as Wall Street braced for a rate hike.",
    "src": "Yahoo Finance"
   },
   {
-   "head": "Global Stocks Tumble",
+   "head": "Tariffs Rattle Markets",
    "line": "World stocks tumbled as Trump tariffs rattled markets and the artificial intelligence rally faded.",
    "src": "Reuters"
   },
   {
-   "head": "Treasury Yields Fall",
-   "line": "Treasury yields extended their fall following a flurry of new United States economic data.",
-   "src": "WSJ"
+   "head": "Tech Stocks Pull Back",
+   "line": "Nvidia and Anthropic tumbled over 6% as tech stocks pulled Wall Street lower.",
+   "src": "The Independent"
   }
  ],
  "day": "2026-11-25",
