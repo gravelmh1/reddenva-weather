@@ -81,7 +81,8 @@ def commons_videos(q):
     """위키미디어 공용 영상(CC0·CC BY·퍼블릭 도메인만). Pexels 키가 없을 때 쓰는 무료 대안. 출처·라이선스 표기.
     공용엔 영상이 적어서 견종 이름으로 안 나오면 'puppy'처럼 넓혀서 다시 찾는다."""
     out = _commons_videos(q)
-    if len(out) < 3 and len(q.split()) > 1: out += [c for c in _commons_videos(q.split()[-1]) if c["id"] not in {o["id"] for o in out}]
+    if len(out) < 3 and len(q.split()) > 1:
+        out += [dict(c, broad=q.split()[-1]) for c in _commons_videos(q.split()[-1]) if c["id"] not in {o["id"] for o in out}]
     return out
 
 
@@ -163,7 +164,10 @@ def choose(year, week_no, used, video=False):
         print(f"{en}: 후보 {len(got)}장")
         if got:
             j = judge(got, en, ko)
-            if j: return got[int(j["best"])], j
+            if j:
+                c = got[int(j["best"])]
+                if c.get("broad") == "puppy" and j["name_ko"] == ko: j.update(name_ko="아기 강아지", name_en="Puppy")  # 넓혀 찾은 영상은 견종을 모름
+                return c, j
         if time.time() - t0 > 80: break
     raise RuntimeError("쓸 만한 아기 동물 사진을 못 찾음 → 이번 주는 올리지 않음")
 

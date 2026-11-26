@@ -56,12 +56,13 @@
   .vtop .vd { flex: none; width: 96px; border-radius: 20px; overflow: hidden; background: #fff; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.35); text-shadow: none; }
   .vtop .vd b { display: block; background: #e0482a; color: #fff; font-size: 22px; padding: 4px 0 3px; }
   .vtop .vd i { display: block; font-style: normal; color: #14284d; font-size: 54px; font-weight: 900; line-height: 1.1; letter-spacing: -0.04em; padding-bottom: 4px; }
-  .vtext { position: absolute; left: 64px; right: 64px; top: 1060px; color: #fff; text-align: left; text-shadow: 0 3px 18px rgba(0,0,0,.45); }
+  .vtext { position: absolute; left: 64px; right: 64px; bottom: 470px; color: #fff; text-align: left; text-shadow: 0 3px 18px rgba(0,0,0,.45); }
   .vtext .badge { display: inline-block; padding: 12px 30px; border-radius: 999px; background: var(--acc); color: #3a1a10; font-size: 38px; font-weight: 900; text-shadow: none; }
   .vtext .vt { font-size: 112px; font-weight: 900; line-height: 1.05; margin-top: 20px; letter-spacing: -0.045em; }
   .vtext .vl { font-size: 56px; font-weight: 700; line-height: 1.32; margin-top: 22px; }
   .vtext .vl + .vl { margin-top: 6px; }
-  .vcredit { position: absolute; right: 64px; top: 1462px; color: rgba(255,255,255,.7); font-size: 26px; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+  .vtext .vt.s { font-size: 92px; } .vtext .vt.xs { font-size: 76px; }
+  .vcredit { position: absolute; left: 64px; right: 64px; top: 1478px; color: rgba(255,255,255,.62); font-size: 24px; text-align: right; text-shadow: 0 1px 6px rgba(0,0,0,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .wk { width: 960px; height: 760px; padding: 40px 18px; display: flex; }
   .wc { flex: 1; position: relative; text-align: center; border-radius: 30px; }
   .wc.today { background: var(--today); }
@@ -189,7 +190,7 @@ const T = {
     return `<div class="vid"><img src="${s.frames}/f0001.jpg"><div class="vs1"></div><div class="vs2"></div></div>
       <div class="vtop" ${A("drop", .1)}>${s.dnum ? `<div class="vd"><b>${esc(s.dband)}</b><i>${esc(s.dnum)}</i></div>` : ""}<span>${esc(s.top || "")}</span></div>
       <div class="vtext">${s.badge ? `<span class="badge" ${A("pop", .35)}>${rich(s.badge)}</span>` : ""}
-        ${s.title ? `<div class="vt" ${A("rise", .6)}>${rich(s.title)}</div>` : ""}
+        ${s.title ? `<div class="vt ${s.title.length > 13 ? "xs" : s.title.length > 9 ? "s" : ""}" ${A("rise", .6)}>${rich(s.title)}</div>` : ""}
         ${(s.lines || []).map((l, i) => `<div class="vl" ${A("rise", (s.lat || [1.6, 3.4])[i] ?? 1.6 + i * 1.8)}>${rich(l)}</div>`).join("")}</div>
       ${s.credit ? `<div class="vcredit" ${A("fade", .8)}>${esc(s.credit)}</div>` : ""}`;
   },
