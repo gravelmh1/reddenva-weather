@@ -49,7 +49,7 @@ def yahoo(sym, now, name, unit="", dp=2, kind="pct", session=True):
     daily = [x for x in daily if done(x[0])]
     j5 = get(f"https://query1.finance.yahoo.com/v8/finance/chart/{q}", params={"range": "5d", "interval": "5m", "includePrePost": "false" if session else "true"}).json()["chart"]["result"][0]
     pts = [(dt.datetime.fromtimestamp(t, tz), c) for t, c in zip(j5.get("timestamp", []), j5["indicators"]["quote"][0]["close"]) if c is not None]
-    pts = [p for p in pts if p[0] <= nl]
+    pts = [p for p in pts if p[0] <= nl and daily and abs(p[1] / daily[-1][1] - 1) < .3]
     if session:
         d, last = daily[-1]; prev = daily[-2][1]
         spark = [c for t, c in pts if t.date() == d] or [c for _, c in daily[-20:]]
@@ -89,18 +89,14 @@ def naver(sym, now, name, unit="", dp=2):
     daily = [x for x in daily if x[0] < nl.date() or (x[0] == nl.date() and nl.time() >= dt.time(15, 45))]
     d, last = daily[-1]; prev = daily[-2][1]
     spark = []
-    try:
-        for a in fchart(sym, "minute", 900):
-            t = dt.datetime.strptime(a[0][:12], "%Y%m%d%H%M")
-            if t.date() == d and a[4] not in ("", "0"): spark.append(float(a[4]))
-    except Exception as e: print("분봉 실패", sym, e)
-    if len(spark) < 40:  # 네이버 분봉이 성기면 Yahoo 5분봉으로 그린다 (값·등락률은 네이버 그대로)
+    if True:  # 하루 차트는 Yahoo 5분봉 (값·등락률은 네이버 그대로)
         try:
             ys = {"KOSPI": "^KS11", "KOSDAQ": "^KQ11"}.get(sym, f"{sym}.KS")
             j5 = get(f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(ys)}", params={"range": "5d", "interval": "5m"}).json()["chart"]["result"][0]
             ysp = [c for t, c in zip(j5.get("timestamp", []), j5["indicators"]["quote"][0]["close"]) if c is not None and dt.datetime.fromtimestamp(t, KST).date() == d]
-            print("분봉", sym, "네이버", len(spark), "→ Yahoo", len(ysp))
-            if len(ysp) > len(spark): spark = ysp + [last]
+            print("분봉", sym, "Yahoo", len(ysp))
+            ysp = [c for c in ysp if abs(c / last - 1) < .15]  # 엉뚱한 값 걸러내기
+            if len(ysp) >= 10: spark = ysp + [last]
         except Exception as e: print("Yahoo 분봉 실패", sym, e)
     return mk(name, last, prev, d, spark or [c for _, c in daily[-20:]], unit, dp)
 
