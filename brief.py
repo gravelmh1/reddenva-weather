@@ -222,7 +222,7 @@ def sky(code, ko):
     return ("흐림" if ko else "Cloudy"), "cloud"
 
 
-def today_wx(region, day):
+def today_wx(region, day, when="today"):
     import weather
     r = weather.REGIONS[region]; ko = region == "kr"
     j = get("https://api.open-meteo.com/v1/forecast", params={"latitude": r["lat"], "longitude": r["lon"], "timezone": r["tz"],
@@ -234,7 +234,8 @@ def today_wx(region, day):
     pose = ("w08" if code >= 95 else "w10" if code in (71, 73, 75, 77, 85, 86) else "w06" if rain >= 60 else "w05" if rain >= 40 else "w18" if code in (45, 48)
             else "w16" if hc >= 33 else "w13" if lc <= -5 else "w14" if lc <= 2 else "w15" if hc >= 28 and code <= 1 else {0: "w00", 1: "w01", 2: "w02", 3: "w04"}.get(code, "w03"))
     return {"city": r["city"] if ko else "LA", "sky": txt, "icon": ic, "hi": round(j["temperature_2m_max"][0]), "lo": round(j["temperature_2m_min"][0]),
-            "rain": rain, "unit": r["unit"], "pose": pose}
+            "rain": rain, "unit": r["unit"], "pose": pose,
+            "when": ({"today": "오늘", "tomorrow": "내일"} if ko else {"today": "Today", "tomorrow": "Tomorrow"})[when]}
 
 
 # ------------------------------------------------------------------ 뉴스 3줄 · 레드덴바 한마디 (Gemini, 실패하면 빼거나 규칙 문장)
@@ -268,7 +269,7 @@ def gem(prompt, temp=0.4):
     raise RuntimeError(f"Gemini 실패: {last}")
 
 
-NEWS_Q = {("kr", "morning"): "뉴욕증시 OR 미국증시 OR 나스닥 OR 반도체 OR 엔비디아 OR 연준 OR 국제유가 OR 환율", ("kr", "close"): "코스피 OR 증시 OR 한국은행 OR 환율 OR 반도체",
+NEWS_Q = {("kr", "morning"): "뉴욕증시 OR 미국증시 OR 연준 OR 파월 OR 미국 국채 OR 엔비디아 OR 국제유가 OR 트럼프", ("kr", "close"): "코스피 OR 증시 OR 한국은행 OR 환율 OR 반도체",
           ("us", "morning"): "stocks OR futures OR Fed OR earnings OR economy", ("us", "close"): "stocks OR Wall Street OR Fed OR earnings OR Treasury yields"}
 
 
@@ -349,9 +350,8 @@ def kr_morning(now):
     d = {"region": "kr", "kind": "morning", "title": "모닝 브리프", "kicker": "MORNING BRIEF",
          "sub": (f"미국 {HOL_NAME.get(exp, ('휴장',))[0]} 휴장 · {lab(usd)} 종가 기준" if hol else f"{lab(usd)} 미국 장 마감 기준"),
          "mood": mood, "pose": POSE[mood], "facts": facts,
-         "sections": [{"type": "big", "title": "간밤 미국 증시", "items": idx},
-                      {"type": "rows", "title": "반도체 종목", "items": chips, "card_n": 4},
-                      {"type": "mini", "title": "오늘 한국장 앞두고", "items": macro, "cols": 6, "card": False}],
+         "sections": [{"type": "mini", "title": "간밤 미국 증시", "items": [q for q in idx if q["name"] != "필라델피아 반도체"] + [q for q in macro if q["name"] in ("美 국채 10년", "WTI 유가", "VIX", "금")], "cols": 3, "spark": True},
+                      {"type": "rows", "title": "반도체 종목", "items": chips, "card_n": 2}],
          "hook": {"kicker": "간밤 미국", "lines": [f"{q['name'].replace('필라델피아 ', '')} {pct_rich(q['pct'])}" for q in idx[1:3]] if not hol else ["미국 증시", "[[acc:휴장]]"]},
          "foot": "자료: Yahoo Finance, 네이버 증권 · 투자 권유 아님"}
     return d
@@ -368,14 +368,14 @@ def kr_close(now):
                          "text": f"선물 {bs['fut']:.2f}", "sign": True})
     mood = mood_of(kospi["pct"])
     facts = {"코스피": f"{kospi['last']:,.2f} ({kospi['pct']:+.2f}%)", **({"코스닥": f"{kosdaq['pct']:+.2f}%"} if kosdaq else {}),
-             **{q["name"]: f"{q['pct']:+.2f}%" for q in stocks[:3]}, **({"외국인 현물(억원)": fl["spot"]["frn"]} if "spot" in fl else {})}
-    secs = [{"type": "hero", "title": "오늘의 코스피", "item": kospi, "side": [m for m in macro if m["name"] != "국고채 10년"], "side_all": macro, "ch": 100}]
-    if fl: secs.append({"type": "flows", "title": "누가 샀나", "small": "투자자별 순매수 · 억원", "rows": [[k, v] for k, v in (("코스피 현물", fl.get("spot")), ("코스피200 선물", fl.get("fut"))) if v]})
-    secs += [{"type": "rows", "title": "시총 상위 종목", "items": stocks, "card": False}]
+             **{q["name"]: f"{q['pct']:+.2f}%" for q in stocks[:3]}, **({"K200 선물 외국인(억원)": fl["fut"]["frn"]} if fl.get("fut") else {}), **({"K200 베이시스": bs["basis"]} if bs else {})}
+    side = [m for m in macro if m["name"] in ("코스닥", "K200 베이시스")]
+    secs = [{"type": "hero", "title": "오늘의 코스피", "item": kospi, "side": side, "ch": 330}]
+    if fl.get("fut"): secs.append({"type": "flows", "title": "코스피200 선물 수급", "small": "투자자별 순매수 · 억원", "rows": [["코스피200 선물", fl["fut"]]]})
     who = {"frn": "외국인", "ins": "기관", "ind": "개인"}
-    if "spot" in fl:
-        s = fl["spot"]; b = max(s, key=s.get)
-        hl = [f"코스피 {pct_rich(kospi['pct'])}", f"{who[b]} [[{'up' if s[b] > 0 else 'dn'}:{abs(s[b]):,}억]] 순매수"]
+    if fl.get("fut"):
+        s = fl["fut"]; b = max(s, key=lambda k: abs(s[k]))
+        hl = [f"코스피 {pct_rich(kospi['pct'])}", f"선물 {who[b]} [[{'up' if s[b] > 0 else 'dn'}:{s[b]:+,}억]]"]
     else: hl = [f"코스피 {pct_rich(kospi['pct'])}"]
     return {"region": "kr", "kind": "close", "title": "마감 브리프", "kicker": "CLOSING BRIEF", "sub": f"{lab(day)} 한국 장 마감 15:30 기준",
             "mood": mood, "pose": POSE[mood], "facts": facts, "sections": secs, "hero": kospi, "flows": fl,
@@ -390,16 +390,15 @@ def us_morning(now):
                          y("^STOXX50E", "Euro Stoxx 50"), y("^GDAXI", "Germany DAX", dp=0), y("^FTSE", "UK FTSE 100", dp=0)) if x]
     macro = [x for x in (y("^TNX", "10-yr Treasury", unit="%", dp=3, kind="bp"), y("^VIX", "VIX", kind="pt"), y("CL=F", "WTI crude", unit="$", session=False),
                          y("GC=F", "Gold", unit="$", dp=1, session=False), y("BTC-USD", "Bitcoin", unit="$", dp=0, session=False), y("DX-Y.NYB", "Dollar index", session=False)) if x]
+    chipst = [x for x in (y("NVDA", "Nvidia", unit="$"), y("MU", "Micron", unit="$"), y("AVGO", "Broadcom", unit="$"), y("TSM", "TSMC", unit="$")) if x]
     nl = now.astimezone(ET_); usd = dt.date.fromisoformat(idx[0]["date"])
     lead = fut[0] if fut else idx[0]
     mood = mood_of(lead["pct"] * 2)  # 선물은 변동이 작아서 2배로 본다
     facts = {q["name"]: f"{q['pct']:+.2f}%" for q in fut + idx[:2] + world[:3]}
     return {"region": "us", "kind": "morning", "title": "Morning Brief", "kicker": "MORNING BRIEF",
             "sub": f"Futures {nl:%-I:%M} a.m. ET · closes {usd:%-m/%-d}", "mood": mood, "pose": "a05" if mood == "flat" else POSE[mood], "facts": facts,
-            "sections": [{"type": "big", "title": "Futures right now", "items": fut},
-                         {"type": "mini", "title": f"Yesterday's close · {lab(usd, False)}", "items": idx, "cols": 4},
-                         {"type": "heat", "title": "Overnight around the world", "items": world, "cols": 6},
-                         {"type": "mini", "title": "Rates, oil & more", "items": macro, "cols": 6, "card": False}],
+            "sections": [{"type": "mini", "title": "Futures right now", "items": fut[:2] + [q for q in macro if q["name"] in ("10-yr Treasury", "WTI crude", "VIX", "Gold")], "cols": 3, "spark": True},
+                         {"type": "rows", "title": f"Chip stocks · {lab(usd, False)} close", "items": chipst, "card_n": 2}],
             "hook": {"kicker": "Before the bell", "lines": [f"{q['name'].replace(' futures', '')} {pct_rich(q['pct'], us=True)}" for q in fut[:2]], "sub": "Futures vs. yesterday's settle"},
             "foot": "Source: Yahoo Finance · not investment advice"}
 
@@ -424,10 +423,8 @@ def us_close(now):
     best = max(sec, key=lambda q: q["pct"]) if sec else None
     return {"region": "us", "kind": "close", "title": "Closing Brief", "kicker": "CLOSING BRIEF", "sub": f"{lab(day, False)} · U.S. close, 4 p.m. ET",
             "mood": mood, "pose": POSE[mood], "facts": facts, "hero": spx,
-            "sections": [{"type": "hero", "title": "S&P 500 today", "item": spx, "side": [q for q in idx if q["name"] != "Russell 2000"], "side_all": idx, "ch": 90},
-                         {"type": "heat", "title": "Sectors", "small": "SPDR sector ETFs", "items": sorted(sec, key=lambda q: -q["pct"])},
-                         {"type": "heat", "title": "Magnificent 7", "items": mag, "cols": 7, "card": False},
-                         {"type": "mini", "title": "Rates, oil & more", "items": macro, "cols": 6, "card": False}], "sectors": sec, "mag": mag,
+            "sections": [{"type": "hero", "title": "S&P 500 today", "item": spx, "side": [q for q in idx if q["name"] in ("Nasdaq", "Semis (SOX)")], "ch": 260},
+                         {"type": "heat", "title": "Sectors", "small": "SPDR sector ETFs", "items": sorted(sec, key=lambda q: -q["pct"])}], "sectors": sec, "mag": mag,
             "hook": {"kicker": f"{lab(day, False)} close", "lines": [f"S&P 500 {pct_rich(spx['pct'], us=True)}"] + ([f"{best['name']} led {pct_rich(best['pct'], us=True)}"] if best else [])},
             "foot": "Source: Yahoo Finance · not investment advice"}
 
@@ -485,13 +482,13 @@ def main():
             d["sections"].insert(0, ch); d["chips"] = ch
             for q in ch["dram"][:1] + ch["gpu"][:1]: d["facts"][q["name"] + (" GPU 시간당 임대료" if q in ch["gpu"] else " D램 현물")] = f"${q['last']} ({q['pct']:+.2f}%, 1주 {q['w1']:+.2f}%)" if q.get("w1") is not None else f"${q['last']} ({q['pct']:+.2f}%)"
             print("반도체", [(q["name"], q["last"], q["pct"], q["date"]) for q in ch["dram"] + ch["gpu"]])
-        if a.kind == "morning":
-            d["wx"] = safe(today_wx, a.region, day); print("날씨", d["wx"])
-            if d["wx"]: w = d["wx"]; d["facts"]["오늘 " + w["city"] + " 날씨" if a.region == "kr" else w["city"] + " weather today"] = f"{w['sky']} {w['hi']}°/{w['lo']}° 강수 {w['rain']}%"
+        wd = day if a.kind == "morning" else day + dt.timedelta(days=1)  # 마감 브리프는 내일 날씨
+        d["wx"] = safe(today_wx, a.region, wd, "today" if a.kind == "morning" else "tomorrow"); print("날씨", d["wx"])
+        if d["wx"]: w = d["wx"]; d["facts"][f"{w['when']} {w['city']} 날씨" if a.region == "kr" else f"{w['city']} weather {w['when'].lower()}"] = f"{w['sky']} {w['hi']}°/{w['lo']}° 강수 {w['rain']}%"
         d["comment"] = quip(a.region, a.kind, d["facts"], d["mood"])
-        try: d["news"] = news3(a.region, a.kind, now, d["facts"])
+        try: d["news"] = news3(a.region, a.kind, now, d["facts"]) if a.kind == "morning" else []
         except Exception as e: print("뉴스 건너뜀:", type(e).__name__, e); d["news"] = []
-        if d["news"]: d["sections"].append({"type": "news", "title": "오늘의 뉴스" if a.region == "kr" else "Headlines", "items": d["news"]})
+        if d["news"]: d["sections"].append({"type": "news", "title": "간밤 미국 주요 뉴스" if a.region == "kr" else "Top headlines", "items": d["news"]})
         d.update(day=day.isoformat(), handle=f"@reddenva.{a.region}", made=now.isoformat())
     out = a.out or f"out/{a.kind}-{a.region}-{day.isoformat()}.jpg"
     render_card(d, os.path.abspath(out)); print("카드:", out)

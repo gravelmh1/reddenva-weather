@@ -252,12 +252,12 @@ def brief(d, region):
     sec = lambda t: next((x for x in d["sections"] if x["type"] == t), None)
     mvs = lambda q: f"[[{'up' if q['pct'] > 0 else 'dn'}:{q['pct']:+.2f}%]]" if q["pct"] else ("보합" if ko else "unch.")
     sc = []
-    if d["kind"] == "morning":
-        w = d.get("wx")
-        if w:  # 날씨: 표지 바로 다음, 날씨 옷 입은 레드덴바
-            sc.append(dict(type="hook", chip=(f"오늘 {w['city']} 날씨" if ko else f"{w['city']} weather today"), label=w["sky"],
+    w = d.get("wx")
+    if w:  # 날씨: 표지 바로 다음, 날씨 옷 입은 레드덴바 (모닝 = 오늘, 마감 = 내일)
+        sc.append(dict(type="hook", chip=(f"{w.get('when', '오늘')} {w['city']} 날씨" if ko else f"{w['city']} weather {w.get('when', 'today').lower()}"), label=w["sky"],
                            big=dict({"from": w["lo"], "to": w["hi"]}, suf="°"), pill=(f"최저 {w['lo']}° · 비 올 확률 {w['rain']}%" if ko else f"Low {w['lo']}° · Rain {w['rain']}%"),
                            pillc="#1f6fe5" if w["rain"] >= 40 else "#5b6b8c", pose=w.get("pose", "w00"), poseh=420, top=200, dur=4.0))
+    if d["kind"] == "morning":
         ch = sec("chips")
         if ch:
             for q in ch["dram"][:1]:
@@ -275,10 +275,10 @@ def brief(d, region):
                                series=[dict(name=f"{q['name']} ${q['last']:.2f}", c=col.get(q["name"], "#aaa"), v=[round((v / q["spark"][0] - 1) * 100, 2) for v in q["spark"]], dp=1, sign=True, nolab=True) for q in gp],
                                xlabs=[f"{since.month}/{since.day}", "3개월" if ko else "3 months", f"{last.month}/{last.day}"], base=0, baselab=("3개월 전" if ko else "start"),
                                tight=True, symmetric=False, tickdp=0, drawdur=1.8, dur=4.8, foot=("선 = 3개월 등락률" if ko else "Lines = 3-month % change"), footbig=True))
-        big = sec("big"); rows = sec("rows")
-        items = (big["items"] if big else []) + ((rows["items"][:2]) if rows and ko else [])
+        big = sec("mini")
+        items = big["items"] if big else []
         if items:
-            rr = [qrow(q, up, dn) for q in items[:5]]
+            rr = [qrow(q, up, dn) for q in items[:6]]
             sc.append(dict(type="board", kicker=big["title"], rows=rr, gap=.16, foot=f"“{d['comment']}”", pose=d.get("pose", "a05"), poseh=230, dur=1.4 + 0.45 * len(rr) + 2.2))
     else:
         hk = d["hook"]

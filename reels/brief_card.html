@@ -18,7 +18,7 @@
   .ht h1 { font-size: 56px; font-weight: 900; line-height: 1.08; letter-spacing: -0.04em; }
   .ht .s { font-size: 23px; color: var(--sub); font-weight: 700; margin-top: 2px; }
   header img { position: absolute; right: -4px; bottom: 6px; height: 136px; }
-  .wx { position: absolute; right: 150px; top: 22px; height: 106px; display: flex; align-items: center; gap: 10px; padding: 0 18px 0 12px; background: #fff; border: 2px solid #d6dae2; border-radius: 18px; }
+  .wx { position: absolute; right: 196px; top: 22px; height: 106px; display: flex; align-items: center; gap: 10px; padding: 0 22px; background: #fff; border: 2px solid #d6dae2; border-radius: 18px; }
   .wx svg { width: 70px; height: 70px; flex: none; }
   .wx .c { font-size: 20px; font-weight: 700; color: var(--sub); white-space: nowrap; }
   .wx .t { font-size: 36px; font-weight: 900; line-height: 1.05; white-space: nowrap; } .wx .t span { color: var(--sub); font-size: 28px; }
@@ -76,6 +76,7 @@
   .mini .c { font-size: 24px; font-weight: 900; white-space: nowrap; }
   .mini.c6 .p { padding: 10px 12px; } .mini.c6 .n { font-size: 19px; } .mini.c6 .v { font-size: 27px; } .mini.c6 .c { font-size: 21px; }
   .mini.c4 .v { font-size: 30px; }
+  .mini.sp .l2 { display: flex; align-items: baseline; gap: 10px; } .mini.sp .p { padding: 10px 16px 8px; }
   /* hero */
   .hero { display: grid; grid-template-columns: 1fr 300px; gap: 14px; }
   .hero .main { padding: 16px 22px 8px; }
@@ -163,7 +164,7 @@ function wxIcon(k) {
     rain: cloud(0, -10, "#95a2b6") + drops("rain"), snow: cloud(0, -10, "#b4bfce") + drops("snow"), storm: cloud(0, -10, "#7d899c") + `<path d="M36 46l-8 12h8l-5 12 13-16h-8l5-8z" fill="#ffb21e"/>` }[k] || "";
   return `<svg viewBox="0 0 70 70">${body}</svg>`;
 }
-const wxBox = w => `<div class="wx">${wxIcon(w.icon)}<div><div class="c">${KO ? "오늘" : "Today"} ${esc(w.city)} · ${esc(w.sky)}</div>
+const wxBox = w => `<div class="wx">${w.pose ? "" : wxIcon(w.icon)}<div><div class="c">${esc(w.when || (KO ? "오늘" : "Today"))} ${esc(w.city)} · ${esc(w.sky)}</div>
   <div class="t num">${w.hi}°<span> / ${w.lo}°</span></div><div class="r">${KO ? "비 올 확률" : "Rain"} ${w.rain}%</div></div></div>`;
 const day = new Date(D.day + "T12:00:00");
 const band = KO ? `${day.getMonth() + 1}월 ${"일월화수목금토"[day.getDay()]}` : day.toLocaleDateString("en-US", { month: "short", weekday: "short" }).toUpperCase().replace(",", "");
@@ -177,14 +178,14 @@ const chg1 = q => Math.abs(q.pct) < 0.005 ? `<span class="fl">${KO ? "보합" : 
 function chipPanel(q, lab, sub, others, otherFmt) {
   return `<div class="p chip"><div class="lab">${esc(lab)}<span>${esc(sub)}</span></div>
     <div class="row1"><span class="v num">$${fmt(q.last, q.dp)}${q.per ? `<small>${q.per}</small>` : ""}</span><span class="c num">${chg1(q)}</span></div>
-    <div class="wk">${wk(q)}</div>${spark(q, 444, 150, { sw: 4, dot: true, base: null })}
+    <div class="wk">${wk(q)}</div>${spark(q, 444, 96, { sw: 4, dot: true, base: null })}
     <div class="ax"><span>${shortDate(q.since)}</span><span>${KO ? "3개월" : "3 months"}</span><span>${shortDate(q.date)}</span></div>
     ${others.length ? `<div class="oth">${others.map(otherFmt).join("")}</div>` : ""}</div>`;
 }
 const GPUC = { B200: "#d9822b", H100: "#111a2e", A100: "#2a9d8f" };
 function gpuPanel(gp, wide) {
   gp = gp.slice().sort((a, b) => b.last - a.last);
-  const W = wide ? 920 : 444, H = wide ? 210 : 128, pad = 8, rb = q => q.spark.map(v => (v / q.spark[0] - 1) * 100), all = gp.flatMap(rb).concat([0]);
+  const W = wide ? 920 : 444, H = wide ? 210 : 84, pad = 8, rb = q => q.spark.map(v => (v / q.spark[0] - 1) * 100), all = gp.flatMap(rb).concat([0]);
   const lo = Math.min(...all), hi = Math.max(...all), Y = y => pad + (H - 2 * pad) * (hi - y) / ((hi - lo) || 1);
   const zero = `<line x1="${pad}" x2="${W - pad}" y1="${Y(0)}" y2="${Y(0)}" stroke="#b9c0cf" stroke-width="1.5" stroke-dasharray="5 6"/>`;
   const lines = zero + gp.map(q => { const v = rb(q), X = i => pad + (W - 2 * pad) * i / (v.length - 1), c = GPUC[q.name] || "#888";
@@ -215,8 +216,8 @@ const S = {
   },
   mini(s) {
     const c = s.cols || 3;
-    return `<div class="mini ${c >= 6 ? "c6" : c >= 4 ? "c4" : ""}" style="grid-template-columns:repeat(${c},1fr)">` + s.items.map(q => `<div class="p"><div class="n">${esc(q.name)}</div>
-      <div class="v num">${val(q)}</div><div class="c num">${chg(q, c >= 4)}</div></div>`).join("") + "</div>";
+    return `<div class="mini ${c >= 6 ? "c6" : c >= 4 ? "c4" : ""}${s.spark ? " sp" : ""}" style="grid-template-columns:repeat(${c},1fr)">` + s.items.map(q => `<div class="p"><div class="n">${esc(q.name)}</div>
+      ${s.spark ? `<div class="l2"><span class="v num">${val(q)}</span><span class="c num">${chg(q, true)}</span></div>${spark(q, Math.floor(968 / c) - 46, 26, { pad: 3, sw: 3, bw: 1.2 })}` : `<div class="v num">${val(q)}</div><div class="c num">${chg(q, c >= 4)}</div>`}</div>`).join("") + "</div>";
   },
   hero(s) {
     const q = s.item, side = s.side || [];
