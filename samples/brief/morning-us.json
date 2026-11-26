@@ -1081,7 +1081,28 @@
      ]
     }
    ],
-   "card_n": 2
+   "card": false
+  },
+  {
+   "type": "news",
+   "title": "Top headlines",
+   "items": [
+    {
+     "head": "US Economy Growth Up",
+     "line": "The US economy grew faster last quarter than initially reported.",
+     "src": "CNN"
+    },
+    {
+     "head": "Dell Earnings and Buyback",
+     "line": "Dell earnings beat on AI strength and the company authorized a $25 billion buyback.",
+     "src": "CNBC"
+    },
+    {
+     "head": "Inflation Gauge Accelerates",
+     "line": "The Fed’s preferred inflation gauge accelerated to 3.8% in October.",
+     "src": "CNBC"
+    }
+   ]
   }
  ],
  "hook": {
@@ -1421,8 +1442,24 @@
   "pose": "w04",
   "when": "Today"
  },
- "comment": "KOSPI down 6.16%. Yawp.",
- "news": [],
+ "comment": "KOSPI down 6.16%. I am going back to sleep.",
+ "news": [
+  {
+   "head": "US Economy Growth Up",
+   "line": "The US economy grew faster last quarter than initially reported.",
+   "src": "CNN"
+  },
+  {
+   "head": "Dell Earnings and Buyback",
+   "line": "Dell earnings beat on AI strength and the company authorized a $25 billion buyback.",
+   "src": "CNBC"
+  },
+  {
+   "head": "Inflation Gauge Accelerates",
+   "line": "The Fed’s preferred inflation gauge accelerated to 3.8% in October.",
+   "src": "CNBC"
+  }
+ ],
  "day": "2026-11-25",
  "handle": "@reddenva.us",
  "made": "2026-11-25T06:05:00-08:00"
