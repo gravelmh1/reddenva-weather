@@ -1430,6 +1430,27 @@
     }
    ],
    "cols": 6
+  },
+  {
+   "type": "news",
+   "title": "Headlines",
+   "items": [
+    {
+     "head": "US Economy Growth Faster",
+     "line": "The US economy grew faster last quarter than initially reported.",
+     "src": "CNN"
+    },
+    {
+     "head": "Hot Inflation Keeps Fed Rates",
+     "line": "Another hot inflation reading keeps the Fed on track to raise rates again.",
+     "src": "The New York Times"
+    },
+    {
+     "head": "Dell Stock Tanks",
+     "line": "Dell stock tanks after blowout earnings as Wall Street just isn't impressed.",
+     "src": "Yahoo Finance"
+    }
+   ]
   }
  ],
  "hook": {
@@ -1441,8 +1462,24 @@
   "sub": "Futures vs. yesterday's settle"
  },
  "foot": "Source: Yahoo Finance · not investment advice",
- "comment": "KOSPI dropped 6.16%. I am going back to sleep.",
- "news": [],
+ "comment": "KOSPI dropped 6.16%. Yawns. Wake me when it's over.",
+ "news": [
+  {
+   "head": "US Economy Growth Faster",
+   "line": "The US economy grew faster last quarter than initially reported.",
+   "src": "CNN"
+  },
+  {
+   "head": "Hot Inflation Keeps Fed Rates",
+   "line": "Another hot inflation reading keeps the Fed on track to raise rates again.",
+   "src": "The New York Times"
+  },
+  {
+   "head": "Dell Stock Tanks",
+   "line": "Dell stock tanks after blowout earnings as Wall Street just isn't impressed.",
+   "src": "Yahoo Finance"
+  }
+ ],
  "day": "2026-11-25",
  "handle": "@reddenva.us",
  "made": "2026-11-25T06:05:00-08:00"

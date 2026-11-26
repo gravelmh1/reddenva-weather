@@ -2231,6 +2231,27 @@
     }
    ],
    "cols": 6
+  },
+  {
+   "type": "news",
+   "title": "Headlines",
+   "items": [
+    {
+     "head": "Treasuries Rise on AI Concerns",
+     "line": "Treasuries rose across the curve as ongoing concerns regarding artificial intelligence dented risk sentiment.",
+     "src": "Bloomberg.com"
+    },
+    {
+     "head": "Stocks Tumble as Inflation Rises",
+     "line": "Stocks tumbled as an AI sell-off deepened and the Federal Reserve's preferred inflation gauge moved higher.",
+     "src": "Yahoo Finance"
+    },
+    {
+     "head": "Tariffs and AI Rattle Markets",
+     "line": "World stocks tumbled as new Trump tariffs rattled markets and the recent artificial intelligence rally faded.",
+     "src": "Reuters"
+    }
+   ]
   }
  ],
  "sectors": [
@@ -3559,8 +3580,24 @@
   ]
  },
  "foot": "Source: Yahoo Finance · not investment advice",
- "comment": "Materials gained 2.07%. Dirt had a big day. Back to sleep.",
- "news": [],
+ "comment": "Materials up two percent. Still won't wake me.",
+ "news": [
+  {
+   "head": "Treasuries Rise on AI Concerns",
+   "line": "Treasuries rose across the curve as ongoing concerns regarding artificial intelligence dented risk sentiment.",
+   "src": "Bloomberg.com"
+  },
+  {
+   "head": "Stocks Tumble as Inflation Rises",
+   "line": "Stocks tumbled as an AI sell-off deepened and the Federal Reserve's preferred inflation gauge moved higher.",
+   "src": "Yahoo Finance"
+  },
+  {
+   "head": "Tariffs and AI Rattle Markets",
+   "line": "World stocks tumbled as new Trump tariffs rattled markets and the recent artificial intelligence rally faded.",
+   "src": "Reuters"
+  }
+ ],
  "day": "2026-11-25",
  "handle": "@reddenva.us",
  "made": "2026-11-25T13:10:00-08:00"
