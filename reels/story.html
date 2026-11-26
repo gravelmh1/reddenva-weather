@@ -1,7 +1,7 @@
 <!doctype html>
 <html><head><meta charset="utf-8">
 <!-- 릴스 장면 엔진. reel.py가 window.DATA = {theme, scenes:[...]} 를 넣고, render.py가 render(t)로 한 프레임씩 찍는다.
-     장면 종류: open · hook · tiles · list · quote · photo · week · chart · cards. 아래 1500px 밑은 릴스 캡션·버튼 자리라 비워둔다. -->
+     장면 종류: open · hook · tiles · list · quote · photo · video · week · chart · cards. 아래 1500px 밑은 릴스 캡션·버튼 자리라 비워둔다. -->
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 1080px; height: 1920px; overflow: hidden; }
@@ -48,6 +48,20 @@
   .ptext .pl + .pl { margin-top: 4px; }
   .ptop { position: absolute; left: 80px; top: 186px; color: #fff; font-size: 34px; font-weight: 700; text-shadow: 0 2px 10px rgba(0,0,0,.5); }
   .credit { position: absolute; left: 60px; right: 60px; top: 1172px; color: var(--sub); font-size: 24px; text-align: right; opacity: .8; }
+  .vid { position: absolute; inset: 0; overflow: hidden; background: #000; }
+  .vid img { position: absolute; inset: 0; width: 1080px; height: 1920px; object-fit: cover; }
+  .vid .vs1 { position: absolute; left: 0; right: 0; top: 0; height: 420px; background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,0)); }
+  .vid .vs2 { position: absolute; left: 0; right: 0; bottom: 0; height: 1060px; background: linear-gradient(0deg, rgba(0,0,0,.78) 0%, rgba(0,0,0,.62) 45%, rgba(0,0,0,0) 100%); }
+  .vtop { position: absolute; left: 60px; right: 60px; top: 150px; display: flex; align-items: center; gap: 20px; color: #fff; font-size: 36px; font-weight: 700; text-shadow: 0 2px 12px rgba(0,0,0,.5); }
+  .vtop .vd { flex: none; width: 96px; border-radius: 20px; overflow: hidden; background: #fff; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.35); text-shadow: none; }
+  .vtop .vd b { display: block; background: #e0482a; color: #fff; font-size: 22px; padding: 4px 0 3px; }
+  .vtop .vd i { display: block; font-style: normal; color: #14284d; font-size: 54px; font-weight: 900; line-height: 1.1; letter-spacing: -0.04em; padding-bottom: 4px; }
+  .vtext { position: absolute; left: 64px; right: 64px; top: 1060px; color: #fff; text-align: left; text-shadow: 0 3px 18px rgba(0,0,0,.45); }
+  .vtext .badge { display: inline-block; padding: 12px 30px; border-radius: 999px; background: var(--acc); color: #3a1a10; font-size: 38px; font-weight: 900; text-shadow: none; }
+  .vtext .vt { font-size: 112px; font-weight: 900; line-height: 1.05; margin-top: 20px; letter-spacing: -0.045em; }
+  .vtext .vl { font-size: 56px; font-weight: 700; line-height: 1.32; margin-top: 22px; }
+  .vtext .vl + .vl { margin-top: 6px; }
+  .vcredit { position: absolute; right: 64px; top: 1462px; color: rgba(255,255,255,.7); font-size: 26px; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
   .wk { width: 960px; height: 760px; padding: 40px 18px; display: flex; }
   .wc { flex: 1; position: relative; text-align: center; border-radius: 30px; }
   .wc.today { background: var(--today); }
@@ -170,6 +184,14 @@ const T = {
         ${s.title ? `<div class="pt" ${A("rise", .45)}>${rich(s.title)}</div>` : ""}
         ${(s.lines || []).map((l, i) => `<div class="pl" ${A("rise", .8 + i * .45)}>${rich(l)}</div>`).join("")}</div>
       ${s.credit ? `<div class="credit" ${A("fade", .6)}>${esc(s.credit)}</div>` : ""}`;
+  },
+  video(s) {  // 영상 꽉 채우기 + 아래쪽에 이름·두 줄 (프레임은 reel.py가 미리 뽑아 둔 JPG를 한 장씩 갈아 끼움)
+    return `<div class="vid"><img src="${s.frames}/f0001.jpg"><div class="vs1"></div><div class="vs2"></div></div>
+      <div class="vtop" ${A("drop", .1)}>${s.dnum ? `<div class="vd"><b>${esc(s.dband)}</b><i>${esc(s.dnum)}</i></div>` : ""}<span>${esc(s.top || "")}</span></div>
+      <div class="vtext">${s.badge ? `<span class="badge" ${A("pop", .35)}>${rich(s.badge)}</span>` : ""}
+        ${s.title ? `<div class="vt" ${A("rise", .6)}>${rich(s.title)}</div>` : ""}
+        ${(s.lines || []).map((l, i) => `<div class="vl" ${A("rise", (s.lat || [1.6, 3.4])[i] ?? 1.6 + i * 1.8)}>${rich(l)}</div>`).join("")}</div>
+      ${s.credit ? `<div class="vcredit" ${A("fade", .8)}>${esc(s.credit)}</div>` : ""}`;
   },
   week(s) {
     const W = s.days, lo = Math.min(...W.map(w => w.lo)) - 1, hi = Math.max(...W.map(w => w.hi)) + 1;
@@ -304,6 +326,7 @@ flakes.forEach(f => { const e = document.createElement("div"); e.className = "fl
 function tr(e, o, x, y, s, origin) { e.style.opacity = o; e.style.transform = `translate(${x}px,${y}px) scale(${s})`; }
 
 window.render = t => {
+  const wait = [];
   flakes.forEach(f => { f.el.style.transform = `translate(${f.x + Math.sin(t + f.w) * 20}px,${(f.y + t * f.v) % 1960 - 40}px)`; });
   S.forEach((s, si) => {
     const lt = t - s.start, last = si === S.length - 1, first = si === 0;
@@ -332,12 +355,19 @@ window.render = t => {
     s.counts.forEach(c => { c.e.textContent = fmtNum(lerp(c.f, c.n, P(L, c.d, c.d + c.du, easeInOut)), c.dp, !!c.sg); });
     if (s.draw) s.draw(P(L, .5, .5 + (s.drawdur || 2.2), easeInOut));
     if (s.type === "photo") { const im = $(".photo img", s.el); im.style.transform = `scale(${1.04 + .08 * clamp(lt / s.dur)})`; im.style.transformOrigin = `${(s.fx ?? .5) * 100}% ${(s.fy ?? .5) * 100}%`; }
+    if (s.type === "video") {  // 영상이 장면보다 짧으면 앞뒤로 왕복
+      const n = s.nframes, m = Math.floor(Math.max(0, lt) * (s.fps || 30)), per = Math.max(1, 2 * (n - 1));
+      let k = n > 1 ? m % per : 0; if (k > n - 1) k = per - k;
+      const im = $(".vid img", s.el), src = `${s.frames}/f${String(k + 1).padStart(4, "0")}.jpg`;
+      if (im.dataset.k !== String(k)) { im.dataset.k = k; im.src = src; wait.push(im.decode().catch(() => 0)); }
+    }
     if (s.type === "cards" && s.srcs.length > 1) {
       const per = (s.dur - .6) / s.srcs.length; let x = 0;
       for (let j = 1; j < s.srcs.length; j++) x += P(lt, .6 + per * j - .25, .6 + per * j + .2, easeInOut);
       $(".strip", s.el).style.transform = `translateX(${-1000 * x}px)`;
     }
   });
+  if (wait.length) return Promise.all(wait);
 };
 waitImages();
 </script>

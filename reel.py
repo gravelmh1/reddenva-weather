@@ -167,8 +167,34 @@ def news(d, region):
     return theme("cream"), [hook, lst, quote, cards_scene(d["cards"], ko)]
 
 
+def video_frames(path, fx, secs, fps=30):
+    """영상을 1080x1920 세로로 꽉 차게 잘라(동물 얼굴 쪽 기준) JPG 프레임으로 뽑는다. 반환: (폴더, 장 수)"""
+    import glob, shutil, subprocess
+    sys.path.insert(0, os.path.join(ROOT, "reels")); from render import ffmpeg_bin
+    out = os.path.abspath(os.path.join(os.path.dirname(path), "puppy-frames")); shutil.rmtree(out, ignore_errors=True); os.makedirs(out)
+    vf = (f"scale=-2:1920:flags=lanczos,crop=1080:1920:'max(0,min(iw-1080,iw*{fx:.3f}-540))':0,"
+          f"scale=1080:1920,fps={fps},eq=saturation=1.06:contrast=1.03")
+    subprocess.run([ffmpeg_bin(), "-y", "-loglevel", "error", "-i", path, "-t", f"{secs:.2f}", "-vf", vf, "-q:v", "3", f"{out}/f%04d.jpg"], check=True)
+    return out, len(glob.glob(f"{out}/f*.jpg"))
+
+
 def puppy(d, region, acc="#ff8a4c", pose="a00"):
     c = d["c"]; ko = region == "kr"; fx, fy = (c.get("focus") or [.5, .45])
+    if d.get("video") and os.path.exists(d["video"]):
+        # 영상 버전: 이름 → 첫째 줄 → 둘째 줄이 차례로 뜨고, 다 읽을 때까지 영상이 흐른다
+        l1, l2 = (c["lines"] + ["", ""])[:2]
+        t1 = 1.7; t2 = t1 + max(1.6, rd(l1, ko=ko) - .4); dur = max(7.5, t2 + rd(l2, ko=ko) + .6)
+        dur = min(dur, 12.0); frames, n = video_frames(d["video"], fx, min(dur, float(d.get("vdur") or dur)))
+        day = dt.date.fromisoformat(d["day"]) if d.get("day") else dt.date.today()
+        top = (f"{KO_DAY[day.weekday()]}요일 · {c['badge']}" if ko else f"{EN_DAY_FULL[day.weekday()]} · {c['badge']}")
+        vs = dict(type="video", frames="file://" + frames, nframes=n, fps=30, top=top, dband=(f"{day.month}월" if ko else f"{day:%b}".upper()), dnum=str(day.day),
+                  badge=("이번 주 주인공" if ko else "This week's star"), title=c["name"], lines=[l1, l2], lat=[t1, t2],
+                  credit=(c.get("foot") or [""])[0], dur=dur)
+        sc = [vs]
+        if c.get("aside") and len(c["aside"]) >= 2:
+            sc.append(dict(type="quote", kicker="레드덴바 한마디" if ko else "Red Denva says", text=c["aside"], pose=pose, poseh=320, dur=1.5 + rd(c["aside"], ko=ko)))
+        th = theme("photo"); th["vars"]["acc"] = acc
+        return th, sc + [cards_scene(d["cards"], ko)]
     ph = dict(type="photo", src="file://" + d["photo"], fx=fx, fy=fy, top=c.get("top"), badge=c["badge"], title=c["name"], lines=c["lines"][:2],
               credit=(c.get("foot") or [""])[0], dur=2.2 + rd(c["name"], *c["lines"][:2], ko=ko))
     sc = [ph]
@@ -344,7 +370,7 @@ def build(kind, region):
     th, scenes = ADAPT[kind](d, region)
     if kind in SERIES_BG: th["vars"]["bg"] = SERIES_BG[kind]
     if kind in SERIES_ACC: th["vars"]["acc"] = SERIES_ACC[kind]
-    return {"theme": th, "scenes": [open_scene(kind, region, d.get("day") if kind in ("morning", "close") else None)] + scenes}
+    return {"theme": th, "scenes": [open_scene(kind, region, d.get("day") if kind in ("morning", "close", "puppy") else None)] + scenes}
 
 
 # ------------------------------------------------------------------ 업로드 (GitHub Release)

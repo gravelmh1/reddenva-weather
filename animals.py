@@ -55,13 +55,39 @@ def pexels(q, key):
     return [{"id": f"px:{p['id']}", "url": p["src"]["large2x"], "artist": p.get("photographer", "")[:40], "license": "", "src": "Pexels"} for p in r.json().get("photos", [])]
 
 
+def pexels_videos(q, key):
+    """Pexels 무료 영상(상업적 사용 가능, 출처 표기 의무 없음). 세로 영상 우선, 6~40초, 1080p 이상 파일이 있는 것만."""
+    out = []
+    for ori in ("portrait", None):
+        params = {"query": q, "per_page": 20, "size": "medium"}
+        if ori: params["orientation"] = ori
+        r = requests.get("https://api.pexels.com/videos/search", headers={"Authorization": key}, params=params, timeout=25)
+        if not r.ok: print("Pexels 영상 응답", r.status_code); break
+        for v in r.json().get("videos", []):
+            if not (6 <= v.get("duration", 0) <= 40): continue
+            fs = [f for f in v.get("video_files", []) if f.get("file_type") == "video/mp4" and min(f.get("width") or 0, f.get("height") or 0) >= 1080]
+            if not fs: continue
+            f = min(fs, key=lambda f: (f.get("width") or 0) * (f.get("height") or 0))  # 1080p급 중 가장 작은 파일
+            pics = [p["picture"] for p in v.get("video_pictures", [])]
+            out.append({"id": f"pxv:{v['id']}", "url": v["image"], "frames": [pics[len(pics) // 3], pics[2 * len(pics) // 3]] if len(pics) >= 3 else [],
+                        "video": f["link"], "vw": f.get("width"), "vh": f.get("height"), "dur": v["duration"], "portrait": f["height"] > f["width"],
+                        "artist": (v.get("user") or {}).get("name", "")[:40], "license": "", "src": "Pexels"})
+        if len(out) >= 6: break
+    out.sort(key=lambda c: not c["portrait"])  # 세로 영상 먼저
+    return out
+
+
 def judge(cands, en, ko):
-    """Gemini가 후보 사진을 보고 고른다. 쓸 만한 게 없으면 None."""
+    """Gemini가 후보 사진(영상이면 영상의 장면 몇 컷)을 보고 고른다. 쓸 만한 게 없으면 None."""
     key = os.environ["GEMINI_API_KEY"].strip(); parts = []
     for i, c in enumerate(cands):
         im = c["im"].copy(); im.thumbnail((640, 640)); b = io.BytesIO(); im.save(b, "JPEG", quality=80)
         parts += [{"text": f"[photo {i}] caption: {c['id'][:90]}"}, {"inline_data": {"mime_type": "image/jpeg", "data": base64.b64encode(b.getvalue()).decode()}}]
-    prompt = f"""You are picking ONE photo for a weekly Instagram card "Baby animal of the week" (this week: {en} / {ko}).
+        for k, fr in enumerate(c.get("fim", [])):  # 영상 후보: 같은 영상의 다른 장면(움직이는 동안에도 괜찮은지 보라고)
+            fr = fr.copy(); fr.thumbnail((480, 480)); b = io.BytesIO(); fr.save(b, "JPEG", quality=75)
+            parts += [{"text": f"[photo {i}, later moment {k + 1} of the same video]"}, {"inline_data": {"mime_type": "image/jpeg", "data": base64.b64encode(b.getvalue()).decode()}}]
+    vid = any(c.get("video") for c in cands)
+    prompt = (f"""Each candidate is a short VIDEO clip, shown as a few still moments; judge the whole clip (all moments must qualify) and write the text about what the baby does in the clip.\n""" if vid else "") + f"""You are picking ONE photo for a weekly Instagram card "Baby animal of the week" (this week: {en} / {ko}).
 Look at each photo. Be a strict photo editor. A photo qualifies ONLY if ALL are true: it is a real photograph of a real BABY animal of that kind that visibly looks very young
 (round face, small soft body; NOT an adolescent or adult animal, NOT a statue/toy/drawing; for dogs and cats reject if the caption says 6 months or older);
 the baby animal is the clear main subject (an adult parent next to it is fine if the baby is clearly the star), sharp, well lit, with a pleasant background, and is the kind of photo that makes people say "aww" at first glance
@@ -93,15 +119,17 @@ Example of tone — lines_ko: ["코에 눈 묻은 줄 모름.", "알려주는 �
     raise RuntimeError(f"Gemini 실패: {last}")
 
 
-def choose(year, week_no, used):
-    """이번 주 차례의 동물부터 순서대로(최대 5종) 후보를 받아 고른다."""
+def choose(year, week_no, used, video=False):
+    """이번 주 차례의 동물부터 순서대로(최대 5종) 후보를 받아 고른다. video=True면 Pexels 영상 후보."""
     key = os.environ.get("PEXELS_API_KEY", "").strip(); t0 = time.time(); idx = order(year)
     for k in range(5):
         q, en, ko = SUBJECTS[idx[(week_no + k) % len(idx)]]
-        cands = [c for c in (pexels(q, key) if key else commons(q)) if c["id"] not in used][:10]; got = []
+        src = pexels_videos(q, key) if video else pexels(q, key) if key else commons(q)
+        cands = [c for c in src if c["id"] not in used][:8 if video else 10]; got = []
         for c in cands:
             try:
-                r = requests.get(c["url"], headers=UA, timeout=25); r.raise_for_status(); c["im"] = Image.open(io.BytesIO(r.content)).convert("RGB"); got.append(c)
+                get = lambda u: Image.open(io.BytesIO(requests.get(u, headers=UA, timeout=25).content)).convert("RGB")
+                c["im"] = get(c["url"]); c["fim"] = [get(u) for u in c.get("frames", [])]; got.append(c)
             except Exception as e: print("  사진 받기 실패", str(e)[:60])
         print(f"{en}: 후보 {len(got)}장")
         if got:
@@ -109,6 +137,21 @@ def choose(year, week_no, used):
             if j: return got[int(j["best"])], j
         if time.time() - t0 > 80: break
     raise RuntimeError("쓸 만한 아기 동물 사진을 못 찾음 → 이번 주는 올리지 않음")
+
+
+def fetch_video(pick, week):
+    """고른 영상을 받아 둔다(저장소엔 안 올림: reel_in/은 .gitignore). 한 장면을 카드 사진으로 쓴다."""
+    os.makedirs("reel_in", exist_ok=True); path = os.path.abspath(f"reel_in/puppy-video-{week}.mp4")
+    if not os.path.exists(path):
+        r = requests.get(pick["video"], headers=UA, timeout=120); r.raise_for_status(); open(path, "wb").write(r.content)
+    return path
+
+
+def video_frame(path, at, out):
+    import shutil, subprocess
+    ff = shutil.which("ffmpeg")
+    if not ff: import imageio_ffmpeg; ff = imageio_ffmpeg.get_ffmpeg_exe()
+    subprocess.run([ff, "-y", "-loglevel", "error", "-ss", str(at), "-i", path, "-frames:v", "1", "-q:v", "2", out], check=True)
 
 
 def build(region, pick, day, photo):
@@ -126,8 +169,10 @@ def build(region, pick, day, photo):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--region", required=True, choices=["kr", "us"])
     ap.add_argument("--dry-run", action="store_true"); ap.add_argument("--force", action="store_true")
+    ap.add_argument("--video", action="store_true", help="사진 대신 Pexels 아기 동물 영상(릴스용). 못 찾으면 사진으로")
+    ap.add_argument("--day", help="시험용: 이 날짜인 척 (예: 2026-12-02, --force와 함께)")
     a = ap.parse_args(); region = a.region
-    tz = ZoneInfo(weather.REGIONS[region]["tz"]); today = dt.datetime.now(tz).date(); day = today.isoformat()
+    tz = ZoneInfo(weather.REGIONS[region]["tz"]); today = dt.date.fromisoformat(a.day) if a.day else dt.datetime.now(tz).date(); day = today.isoformat()
     os.makedirs("out", exist_ok=True); os.makedirs("state", exist_ok=True)
     if not a.force and today.weekday() != 2:
         print("수요일이 아님 → 건너뜀"); return
@@ -137,17 +182,35 @@ def main():
     iso = today.isocalendar(); week = f"{iso[0]}-W{iso[1]:02d}"; pf = "state/puppy_pick.json"; photo = f"out/puppy-photo-{week}.jpg"
     hist = json.load(open(pf, encoding="utf-8")) if os.path.exists(pf) else {"used": [], "pick": {}}
     pick = hist.get("pick", {})
-    if pick.get("week") == week and os.path.exists(photo):
+    if pick.get("week") == week and os.path.exists(photo) and bool(pick.get("video")) == a.video:
         print("이번 주 사진 재사용:", pick["id"])
     else:
-        c, j = choose(iso[0], iso[1], set(hist.get("used", [])))
+        c = j = None
+        if a.video:
+            if not os.environ.get("PEXELS_API_KEY", "").strip(): print("PEXELS_API_KEY 없음 → 사진으로")
+            else:
+                try: c, j = choose(iso[0], iso[1], set(hist.get("used", [])), video=True)
+                except Exception as e: print("영상 못 찾음 → 사진으로:", e)
+        if not c: c, j = choose(iso[0], iso[1], set(hist.get("used", [])))
         c["im"].save(photo, quality=92)
         pick = {"week": week, "id": c["id"], "artist": c["artist"], "license": c["license"], "src": c["src"], **{k: j[k] for k in ("focus_x", "focus_y", "name_ko", "name_en", "lines_ko", "lines_en", "aside_ko", "aside_en")}}
+        if c.get("video"): pick.update(video=c["video"], vw=c["vw"], vh=c["vh"], dur=c["dur"])
         hist = {"used": (hist.get("used", []) + [c["id"]])[-300:], "pick": pick}
         print("선택:", c["id"], "|", j.get("score"), j.get("why", "")); print(json.dumps(pick, ensure_ascii=False))
+    vpath = None
+    if pick.get("video"):
+        try:
+            vpath = fetch_video(pick, week)
+            if not os.path.exists(photo.replace(".jpg", "-v.jpg")):  # 카드 사진 = 영상의 한 장면(1080p 원본에서)
+                video_frame(vpath, round(min(pick.get("dur", 10), 12) * .4, 2), photo.replace(".jpg", "-v.jpg"))
+            photo = photo.replace(".jpg", "-v.jpg")
+        except Exception as e: print("영상 받기 실패 → 사진 카드만:", e); vpath = None
     card, cap = build(region, pick, day, photo)
+    if vpath: card["foot"][0] = ("영상: " if region == "kr" else "Video: ") + card["foot"][0].split(": ", 1)[1]
     img_rel = f"out/puppy-{region}-{day}.jpg"; animals_render.card(card, img_rel)
-    import reel_data; reel_data.save("puppy", region, {"c": {k: v for k, v in card.items() if k != "photo"}, "cards": [os.path.abspath(img_rel)]}, photos={"photo": photo})
+    import reel_data
+    reel_data.save("puppy", region, {"c": {k: v for k, v in card.items() if k != "photo"}, "cards": [os.path.abspath(img_rel)], "video": vpath,
+                                     "vdur": pick.get("dur"), "day": day}, photos={"photo": photo})
     json.dump(hist, open(pf, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     if a.dry_run: print("(dry-run) 카드 저장:", img_rel); print(cap); return
     git_push(["out", "state"], f"puppy {region} {day} card")
