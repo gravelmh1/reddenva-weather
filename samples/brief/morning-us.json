@@ -1088,18 +1088,18 @@
    "title": "Top headlines",
    "items": [
     {
-     "head": "US Economy Growth Up",
+     "head": "US Economy Grew Faster",
      "line": "The US economy grew faster last quarter than initially reported.",
      "src": "CNN"
     },
     {
-     "head": "Dell Earnings and Buyback",
-     "line": "Dell earnings beat on AI strength and the company authorized a $25 billion buyback.",
-     "src": "CNBC"
+     "head": "World Stocks Tumble",
+     "line": "World stocks tumble as Trump tariffs rattle markets and the AI rally fades.",
+     "src": "Reuters"
     },
     {
-     "head": "Inflation Gauge Accelerates",
-     "line": "The Fed’s preferred inflation gauge accelerated to 3.8% in October.",
+     "head": "Dell Earnings Beat",
+     "line": "Dell earnings beat on AI strength and the company authorized a $25 billion buyback.",
      "src": "CNBC"
     }
    ]
@@ -1445,18 +1445,18 @@
  "comment": "KOSPI down 6.16%. I am going back to sleep.",
  "news": [
   {
-   "head": "US Economy Growth Up",
+   "head": "US Economy Grew Faster",
    "line": "The US economy grew faster last quarter than initially reported.",
    "src": "CNN"
   },
   {
-   "head": "Dell Earnings and Buyback",
-   "line": "Dell earnings beat on AI strength and the company authorized a $25 billion buyback.",
-   "src": "CNBC"
+   "head": "World Stocks Tumble",
+   "line": "World stocks tumble as Trump tariffs rattle markets and the AI rally fades.",
+   "src": "Reuters"
   },
   {
-   "head": "Inflation Gauge Accelerates",
-   "line": "The Fed’s preferred inflation gauge accelerated to 3.8% in October.",
+   "head": "Dell Earnings Beat",
+   "line": "Dell earnings beat on AI strength and the company authorized a $25 billion buyback.",
    "src": "CNBC"
   }
  ],
