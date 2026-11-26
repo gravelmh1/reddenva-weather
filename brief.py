@@ -159,14 +159,15 @@ def gem(prompt, temp=0.4):
     raise RuntimeError(f"Gemini 실패: {last}")
 
 
-NEWS_Q = {("kr", "morning"): "뉴욕증시 OR 미국증시 OR 반도체 OR 엔비디아 OR 연준", ("kr", "close"): "코스피 OR 증시 OR 한국은행 OR 환율 OR 반도체",
+NEWS_Q = {("kr", "morning"): "뉴욕증시 OR 미국증시 OR 나스닥 OR 반도체 OR 엔비디아 OR 연준 OR 국제유가 OR 환율", ("kr", "close"): "코스피 OR 증시 OR 한국은행 OR 환율 OR 반도체",
           ("us", "morning"): "stocks OR futures OR Fed OR earnings OR economy", ("us", "close"): "stocks OR Wall Street OR Fed OR earnings OR Treasury yields"}
 
 
 def news3(region, kind, now, facts):
     ko = region == "kr"; nl = now.astimezone(KST if ko else ET_)
-    items = [it for it in gnews(NEWS_Q[(region, kind)], ko, nl.date() - dt.timedelta(days=1), nl.date()) if now - dt.timedelta(hours=22) <= it["pub"] <= now]
+    items = [it for it in gnews(NEWS_Q[(region, kind)], ko, nl.date() - dt.timedelta(days=1), nl.date()) if now - dt.timedelta(hours=30) <= it["pub"] <= now]
     items = items[:60]
+    print("뉴스 후보", len(items))
     if len(items) < 3: return []
     lst = "\n".join(f"[{i}] {it['title']} ({it['src']}, {it['pub'].astimezone(KST if ko else ET_):%m/%d %H:%M})" for i, it in enumerate(items))
     p = f"""You write the 3-line news section of a {'Korean' if ko else 'US'} {'morning' if kind == 'morning' else 'market close'} market brief.
@@ -188,10 +189,12 @@ def quip(region, kind, facts, mood):
     try:
         p = f"""You are Red Denva, a sleepy, deadpan red panda who posts a daily {'Korean' if ko else 'US'} stock market brief.
 Write ONE short comment about today's numbers below: dry, witty, specific to the numbers (mention one concrete thing), never cheesy, no emojis, no hashtags, no investment advice, no predictions.
+Clean, polished language only: no slang, no profanity or near-profanity (e.g. never 졸라/존나/개-), nothing a brand account would regret.
 {'Korean, casual polite (~요), max 30 characters.' if ko else 'English, max 55 characters.'}
 Mood: {mood}. Numbers: {json.dumps(facts, ensure_ascii=False)}
 Return JSON {{"text":"..."}}"""
         t = gem(p, 0.8)["text"].strip().strip('"“”')
+        if re.search(r"졸라|존나|졸나|ㅈㄴ|씨발|시발|개빡|damn|hell|shit|fuck", t, re.I): raise ValueError(f"말투 걸러냄: {t}")
         if 4 <= len(t) <= (36 if ko else 66): return t
     except Exception as e: print("한마디 Gemini 실패 → 규칙 문장", e)
     return RULE[region][mood]
