@@ -15,7 +15,7 @@ import requests
 import reel_data
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-KINDS = ["books", "news", "puppy", "deriv", "trip", "facts", "netflix"]
+KINDS = ["books", "news", "puppy", "deriv", "trip", "facts", "netflix", "morning", "close"]
 CARD_LAST = {"ko": "한 장으로 보기", "en": "The full card"}
 
 
@@ -212,34 +212,115 @@ def netflix(d, region):
     return theme("screen"), [hook, line, lst, cards_scene(d["cards"], ko)]
 
 
-ADAPT = dict(weather=weather, deriv=deriv, books=books, news=news, puppy=puppy, facts=facts, trip=trip, netflix=netflix)
+# ------------------------------------------------------------------ 모닝·마감 브리프 (brief.py)
+def qval(q):
+    if q.get("kind") == "text": return f"{q['last']:+,.{q.get('dp', 2)}f}"
+    v = f"{q['last']:,.{q.get('dp', 2)}f}"
+    u = q.get("unit", "")
+    return "$" + v if u == "$" else v + "%" if u == "%" else v + ("원" if u == "원" and "/" not in q["name"] else "")
+
+
+def qmove(q):
+    """등락 숫자: % (기본) / bp (금리) / pt (VIX·베이시스)."""
+    k = q.get("kind")
+    if k == "bp": return None, f"{'▲' if q['bp'] > 0 else '▼' if q['bp'] < 0 else '–'} {abs(q['bp']):.1f}bp", q["bp"]
+    if k == "pt": return None, f"{'▲' if q['chg'] > 0 else '▼' if q['chg'] < 0 else '–'} {abs(q['chg']):.2f}", q["chg"]
+    if k == "text": return None, q.get("text", ""), 0
+    return q["pct"], None, q["pct"]
+
+
+def qrow(q, up, dn):
+    p, txt, m = qmove(q)
+    return dict(n=q["name"], v=qval(q), p=p, ptxt=txt, c=up if m > 0 else dn if m < 0 else "#8a94a8", spark=q.get("spark"), base=q.get("prev") if q.get("kind") != "text" else None)
+
+
+def qtile(q, up, dn):
+    p, txt, m = qmove(q)
+    return dict(l=q["name"], v=qval(q), c=(f"{p:+.2f}%" if p is not None else txt or q.get("text", "")), cc=up if m > 0 else dn if m < 0 else "var(--psub)")
+
+
+def heatbg(p, ko):
+    k = min(1, abs(p) / 2.5); up, dn, g = ((232, 52, 58), (31, 111, 229), (96, 104, 122)) if ko else ((20, 160, 90), (229, 72, 77), (96, 104, 122))
+    c = up if p >= 0 else dn; m = .3 + .7 * k
+    return "rgb(" + ",".join(str(round(g[i] + (c[i] - g[i]) * m)) for i in range(3)) + ")"
+
+
+def brief(d, region):
+    ko = region == "kr"; up, dn = ("#ff5a5f", "#4d8dff") if ko else ("#2fd08a", "#ff5a5f")
+    th = theme("terminal"); th["vars"].update(up=up, dn=dn)
+    secs = {s["type"] + str(i): s for i, s in enumerate(d["sections"])}
+    hk = d["hook"]
+    hook = dict(type="hook", kicker=hk["kicker"], lines=hk["lines"], size="s", sub=f"“{d['comment']}”", pose=d.get("pose", "a05"), poseh=300)
+    hook["dur"] = min(5.2, 1.8 + rd(*hk["lines"], d["comment"], ko=ko))
+    sc = [hook]
+    for s in d["sections"]:
+        t = s["type"]
+        if t in ("big", "rows") and s.get("items"):
+            rows = [qrow(q, up, dn) for q in s["items"][:6]]
+            sc.append(dict(type="board", kicker=s["title"], rows=rows, gap=.18, dur=1.6 + 0.55 * len(rows) + 1.2))
+        elif t == "hero":
+            q = s["item"]; c = up if q["pct"] > 0 else dn if q["pct"] < 0 else "#8a94a8"
+            xl = ["09:00", "12:00", "15:30"] if ko else ["9:30", "12:45", "4:00"]
+            sc.append(dict(type="chart", kicker=s["title"], title=f"{qval(q)}  [[{'up' if q['pct'] > 0 else 'dn'}:{q['pct']:+.2f}%]]",
+                           series=[dict(name=q["name"], c=c, v=q["spark"], dp=q.get("dp", 2))], base=q["prev"], baselab="전일" if ko else "prev.",
+                           xlabs=xl, tight=True, symmetric=False, tickdp=0, drawdur=2.0, dur=2.8 + 2.4,
+                           foot=("점선 = 전일 종가" if ko else "Dashed line = previous close")))
+            if s.get("side"):
+                tl = [qtile(x, up, dn) for x in s["side"]]
+                sc.append(dict(type="tiles", kicker="그 밖의 숫자" if ko else "The other indexes", tiles=tl, nsz=80, dur=1.6 + 0.4 * len(tl) + 1.0))
+        elif t == "flows":
+            who = [("frn", "외국인"), ("ins", "기관"), ("ind", "개인")]
+            groups = [dict(title=lab, rows=[dict(n=w, v=r[k], c=up if r[k] > 0 else dn) for k, w in who]) for lab, r in s["rows"]]
+            sc.append(dict(type="flows", kicker="누가 샀나" if ko else "Who bought", title="순매수 · 억원" if ko else None, groups=groups, dur=2.0 + 1.6 * len(groups) + 1.0))
+        elif t == "heat" or (t == "mini" and not ko and "world" in s["title"].lower()):
+            pass  # 아래에서 묶어서 처리
+        elif t == "mini" and s.get("items"):
+            tl = [qtile(q, up, dn) for q in s["items"][:6]]
+            sc.append(dict(type="tiles", kicker=s["title"], tiles=tl, nsz=80, dur=1.6 + 0.4 * len(tl) + 1.0))
+        elif t == "news" and s.get("items"):
+            items = [dict(num=i + 1, h=n["head"], s=n["line"]) for i, n in enumerate(s["items"])]
+            sc.append(dict(type="list", kicker=s["title"], items=items, gap=.4, dur=1.6 + rd(*[n["head"] + n["line"] for n in s["items"]], ko=ko)))
+    heats = [s for s in d["sections"] if s["type"] == "heat" or (s["type"] == "mini" and not ko and "world" in s["title"].lower())]
+    if heats:
+        groups = [dict(title=s["title"], cols=4 if len(s["items"]) > 6 else 3, items=[dict(n=q["name"], p=q["pct"], bg=heatbg(q["pct"], ko)) for q in s["items"]]) for s in heats]
+        at = next((i for i, x in enumerate(sc) if x["type"] == "tiles" and x["kicker"] not in ("그 밖의 숫자", "The other indexes")), len(sc))
+        sc.insert(at, dict(type="heat", groups=groups, top=170, dur=2.2 + 0.12 * sum(len(g["items"]) for g in groups) + 1.4))
+    return th, sc + [cards_scene(d["cards"], ko)]
+
+
+ADAPT = dict(weather=weather, morning=brief, close=brief, deriv=deriv, books=books, news=news, puppy=puppy, facts=facts, trip=trip, netflix=netflix)
 
 
 SERIES = {"kr": {"weather": "[[acc:서울]] 날씨", "books": "이번 주 [[acc:책]]", "news": "[[acc:좋은 뉴스]]", "puppy": "[[acc:아기 동물]]",
-                 "deriv": "[[acc:파생]] 브리핑", "trip": "[[acc:주말 여행]]", "facts": "[[acc:동물 상식]]", "netflix": "[[acc:넷플릭스]]"},
+                 "deriv": "[[acc:파생]] 브리핑", "trip": "[[acc:주말 여행]]", "facts": "[[acc:동물 상식]]", "netflix": "[[acc:넷플릭스]]",
+                 "morning": "[[acc:모닝]] 브리프", "close": "[[acc:마감]] 브리프"},
           "us": {"weather": "[[acc:LA]] weather", "books": "[[acc:Book]] of the week", "news": "[[acc:Good news]]", "puppy": "[[acc:Baby animal]]",
-                 "deriv": "[[acc:Derivatives]]", "trip": "[[acc:Weekend trip]]", "facts": "[[acc:Animal facts]]", "netflix": "[[acc:Netflix]] top 10"}}
+                 "deriv": "[[acc:Derivatives]]", "trip": "[[acc:Weekend trip]]", "facts": "[[acc:Animal facts]]", "netflix": "[[acc:Netflix]] top 10",
+                 "morning": "[[acc:Morning]] Brief", "close": "[[acc:Closing]] Brief"}}
 EN_DAY_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
 # 시리즈마다 단색 배경 (색 계열은 확실히 다르게, 밝기·채도는 비슷하게 눌러서 세련되게)
 SERIES_BG = {"weather": "#1f4e8c", "books": "#6b4a2e", "news": "#f1e4c8", "puppy": "#93475f",
-             "deriv": "#2b313c", "trip": "#1d6461", "facts": "#56632c", "netflix": "#6e1d29"}
+             "deriv": "#2b313c", "trip": "#1d6461", "facts": "#56632c", "netflix": "#6e1d29", "morning": "#2a2550", "close": "#14233d"}
 SERIES_ACC = {"books": "#f3c97a", "netflix": "#ffb0a8", "puppy": "#ffc59e", "facts": "#f6d28a", "trip": "#ffc08a"}  # 배경 위에서 잘 보이게
 
 
-def open_scene(kind, region):
+def open_scene(kind, region, day=None):
     """모든 릴스의 첫 화면(=섬네일). 날짜 아이콘 + '목요일 파생 브리핑' 같은 제목."""
     tz = "Asia/Seoul" if region == "kr" else "America/Los_Angeles"
     from zoneinfo import ZoneInfo
-    day = dt.datetime.now(ZoneInfo(tz)).date(); w = day.weekday()
+    day = dt.date.fromisoformat(day) if day else dt.datetime.now(ZoneInfo(tz)).date(); w = day.weekday()
     if region == "kr":
         band, first = f"{day.month}월 {KO_DAY[w]}", ("오늘의" if kind == "weather" else f"{KO_DAY[w]}요일")
+        if kind in ("morning", "close"): first = None
     else:
         band, first = f"{day:%b} · {EN_DAY[w]}".upper(), ("Today's" if kind == "weather" else EN_DAY_FULL[w])
+        if kind in ("morning", "close"): first = None
     title = SERIES[region][kind]
     size = "s" if len(re.sub(r"\[\[\w+:|\]\]", "", title)) > (7 if region == "kr" else 11) else ""
-    return dict(type="open", band=band, day=str(day.day), lines=[first, title], size=size,
+    if first is None: size = "" if region == "kr" else "s"
+    return dict(type="open", band=band, day=str(day.day), lines=[x for x in (first, title) if x], size=size,
                 handle=f"@reddenva.{region}", pose="a00", poseh=230, dur=2.3)
 
 
@@ -249,7 +330,7 @@ def build(kind, region):
     th, scenes = ADAPT[kind](d, region)
     if kind in SERIES_BG: th["vars"]["bg"] = SERIES_BG[kind]
     if kind in SERIES_ACC: th["vars"]["acc"] = SERIES_ACC[kind]
-    return {"theme": th, "scenes": [open_scene(kind, region)] + scenes}
+    return {"theme": th, "scenes": [open_scene(kind, region, d.get("day") if kind in ("morning", "close") else None)] + scenes}
 
 
 # ------------------------------------------------------------------ 업로드 (GitHub Release)

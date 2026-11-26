@@ -1,0 +1,44 @@
+name: brief-sample
+# 모닝·마감 브리프 시안 만들기 (게시 안 함). 카드·릴스를 samples/brief/ 에 커밋한다.
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/project-thread-2t1pc7]
+    paths: [brief.py, reel.py, reels/**, .github/workflows/brief-sample.yml]
+permissions:
+  contents: write
+concurrency:
+  group: brief-sample
+  cancel-in-progress: true
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 폰트
+        run: sudo apt-get update -y && sudo apt-get install -y fonts-noto-cjk fonts-noto-color-emoji
+      - run: pip install -r requirements.txt playwright imageio-ffmpeg
+      - name: 시안 4개
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          export CHROME_PATH="$(command -v google-chrome || command -v chromium)"
+          mkdir -p samples/brief
+          run() {
+            python brief.py --region $1 --kind $2 --dry-run --asof $3 --out samples/brief/$2-$1.jpg || return 0
+            python reel.py --region $1 --kind $2 --local samples/brief/$2-$1.mp4 || true
+          }
+          run kr morning 2026-11-26T06:05
+          run kr close 2026-11-26T16:00
+          run us morning 2026-11-25T06:05
+          run us close 2026-11-25T13:10
+          ls -la samples/brief
+      - name: 커밋
+        run: |
+          git config user.name "github-actions"; git config user.email "actions@users.noreply.github.com"
+          git add samples/brief
+          git diff --cached --quiet || (git commit -q -m "brief samples" && git pull --rebase -q && git push -q)
