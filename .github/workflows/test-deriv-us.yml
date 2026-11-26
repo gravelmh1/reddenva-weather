@@ -1,0 +1,15 @@
+name: test-deriv-us (임시, 게시 안 함)
+on:
+  push:
+    branches: [claude/project-thread-y60idw]
+    paths: [deriv_us.py, .github/workflows/test-deriv-us.yml]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -q -r requirements.txt pandas lxml matplotlib numpy
+      - run: python -c "import deriv_us as d; [print(s, d.yahoo(s)[-2:]) for s in ('^GSPC','^VIX','^TNX')]"
+      - run: python deriv_us.py --dry-run --force
