@@ -56,7 +56,7 @@
   .wc .bar { position: absolute; left: 50%; width: 30px; margin-left: -15px; border-radius: 15px; transform-origin: 50% 50%; }
   .wc .hi, .wc .lo { position: absolute; width: 100%; font-size: 36px; font-weight: 700; }
   .wc .hi { color: var(--up); } .wc .lo { color: var(--dn); }
-  .chart { width: 960px; height: 760px; position: relative; }
+  .chart { width: 960px; height: 720px; position: relative; }
   .chart .lab { position: absolute; font-size: 30px; color: var(--psub); }
   .chart .endlab { position: absolute; font-weight: 900; font-size: 50px; white-space: nowrap; }
   .legend { position: absolute; top: 30px; left: 40px; right: 40px; font-size: 30px; font-weight: 700; color: var(--psub); display: flex; gap: 30px; flex-wrap: wrap; }
@@ -189,7 +189,7 @@ const T = {
     const id = "ch" + s.i;
     let h = `<div class="col">${head(s)}<div class="panel chart" id="${id}" ${A("rise", .1)} style="margin-top:60px">
       <div class="legend">${s.series.map(x => `<span><i style="background:${x.c}"></i>${esc(x.name)}</span>`).join("")}${s.unit ? `<span style="opacity:.7">${esc(s.unit)}</span>` : ""}</div>
-      <svg width="960" height="760" style="position:absolute;left:0;top:0"></svg></div>`;
+      <svg width="960" height="720" style="position:absolute;left:0;top:0"></svg></div>`;
     if (s.foot) h += `<div class="foot" ${A("fade", .5)} style="margin-top:28px${s.footbig ? ";font-size:44px;font-weight:700;opacity:1;color:var(--fg)" : ""}">${rich(s.foot)}</div>`;
     return h + "</div>";
   },
@@ -254,7 +254,7 @@ S.forEach(s => s.draws.forEach(w => { w.len = w.e.getTotalLength() + 2; w.e.styl
 
 function setupChart(s) {
   const box = $("#ch" + s.i, s.el), svg = $("svg", box), NS = "http://www.w3.org/2000/svg";
-  const X0 = 90, X1 = 800, Y0 = 150, Y1 = 700;
+  const X0 = 90, X1 = 800, Y0 = 140, Y1 = 660;
   const all = s.series.flatMap(x => x.v).concat(s.base != null ? [s.base] : []), mx = Math.max(...all.map(Math.abs)) * 1.15;
   const sym = s.symmetric !== false && Math.min(...all) < 0;
   const rg = Math.max(...all) - Math.min(...all) || 1;

@@ -43,7 +43,7 @@
   .chip svg { display: block; margin-top: 8px; }
   .chip .ax { display: flex; justify-content: space-between; font-size: 18px; color: var(--sub); margin-top: 2px; }
   .chips.one { grid-template-columns: 1fr; }
-  .gl { display: grid; gap: 6px; margin-top: 8px; }
+  .gl { display: grid; gap: 2px; margin-top: 6px; }
   .one .gl { grid-template-columns: repeat(3, 1fr); gap: 12px; }
   .gl > div { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
   .gl i { flex: none; width: 22px; height: 7px; border-radius: 4px; align-self: center; }
@@ -63,7 +63,7 @@
   .big svg { display: block; margin-top: 4px; }
   /* rows */
   .rows { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
-  .row { display: grid; grid-template-columns: 1fr auto 110px; align-items: center; gap: 12px; padding: 10px 18px; height: 80px; }
+  .row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 10px 18px; height: 80px; }
   .row .n { font-size: 28px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .row .r { text-align: right; line-height: 1.1; }
   .row .r .v { font-size: 21px; color: var(--sub); font-weight: 700; }
@@ -76,6 +76,9 @@
   .mini .c { font-size: 24px; font-weight: 900; white-space: nowrap; }
   .mini.c6 .p { padding: 10px 12px; } .mini.c6 .n { font-size: 19px; } .mini.c6 .v { font-size: 27px; } .mini.c6 .c { font-size: 21px; }
   .mini.c4 .v { font-size: 30px; }
+  .mini.big3 .v { font-size: 42px; line-height: 1.05; } .mini.big3 .c { font-size: 24px; line-height: 1.1; } .mini.big3 .n { font-size: 22px; line-height: 1.2; } .mini.big3 .p { padding: 6px 18px; }
+  .c43 { display: flex; justify-content: center; }
+  .row .r .v2 { font-size: 32px; font-weight: 900; } .row .r .c { font-size: 24px !important; }
   .mini.sp .l2 { display: flex; align-items: baseline; gap: 10px; } .mini.sp .p { padding: 10px 16px 8px; }
   /* hero */
   .hero { display: grid; grid-template-columns: 1fr 300px; gap: 14px; }
@@ -175,17 +178,18 @@ if (D.comment) h += `<div class="say"><b>${KO ? "레드덴바" : "RED DENVA"}</b
 const shortDate = iso => { const d = new Date(iso + "T12:00:00"); return `${d.getMonth() + 1}/${d.getDate()}`; };
 const wk = q => [q.w1 != null ? `${KO ? "1주" : "1W"} <b class="${cls(q.w1)}">${fmt(q.w1, 2, true)}%</b>` : "", q.m1 != null ? `${KO ? "1달" : "1M"} <b class="${cls(q.m1)}">${fmt(q.m1, 2, true)}%</b>` : ""].filter(Boolean).join(" · ");
 const chg1 = q => Math.abs(q.pct) < 0.005 ? `<span class="fl">${KO ? "보합" : "unch."}</span>` : `<span class="${cls(q.pct)}">${arrow(q.pct)} ${Math.abs(q.pct).toFixed(2)}%</span>`;
+const CW = 320, CH = 240;  // 카드 안 차트 비율은 무조건 4:3
 function chipPanel(q, lab, sub, others, otherFmt) {
   return `<div class="p chip"><div class="lab">${esc(lab)}<span>${esc(sub)}</span></div>
     <div class="row1"><span class="v num">$${fmt(q.last, q.dp)}${q.per ? `<small>${q.per}</small>` : ""}</span><span class="c num">${chg1(q)}</span></div>
-    <div class="wk">${wk(q)}</div>${spark(q, 444, 96, { sw: 4, dot: true, base: null })}
+    <div class="wk">${wk(q)}</div><div class="c43">${spark(q, CW, CH, { sw: 4, dot: true, base: null })}</div>
     <div class="ax"><span>${shortDate(q.since)}</span><span>${KO ? "3개월" : "3 months"}</span><span>${shortDate(q.date)}</span></div>
     ${others.length ? `<div class="oth">${others.map(otherFmt).join("")}</div>` : ""}</div>`;
 }
 const GPUC = { B200: "#d9822b", H100: "#111a2e", A100: "#2a9d8f" };
 function gpuPanel(gp, wide) {
   gp = gp.slice().sort((a, b) => b.last - a.last);
-  const W = wide ? 920 : 444, H = wide ? 210 : 84, pad = 8, rb = q => q.spark.map(v => (v / q.spark[0] - 1) * 100), all = gp.flatMap(rb).concat([0]);
+  const W = wide ? 600 : CW, H = W * 3 / 4, pad = 8, rb = q => q.spark.map(v => (v / q.spark[0] - 1) * 100), all = gp.flatMap(rb).concat([0]);
   const lo = Math.min(...all), hi = Math.max(...all), Y = y => pad + (H - 2 * pad) * (hi - y) / ((hi - lo) || 1);
   const zero = `<line x1="${pad}" x2="${W - pad}" y1="${Y(0)}" y2="${Y(0)}" stroke="#b9c0cf" stroke-width="1.5" stroke-dasharray="5 6"/>`;
   const lines = zero + gp.map(q => { const v = rb(q), X = i => pad + (W - 2 * pad) * i / (v.length - 1), c = GPUC[q.name] || "#888";
@@ -194,7 +198,7 @@ function gpuPanel(gp, wide) {
   const q0 = gp[0];
   return `<div class="p chip"><div class="lab">${KO ? "GPU 임대료" : "GPU rental"}<span>${KO ? "1시간당 · 하루 변동" : "per hour · daily change"}</span></div>
     <div class="gl">${gp.map(q => `<div><i style="background:${GPUC[q.name]}"></i><span class="n">${esc(q.name)}</span><span class="x num">$${fmt(q.last, 2)}</span><span class="c num">${chg1(q)}</span></div>`).join("")}</div>
-    <svg width="${W}" height="${H}" style="display:block;margin-top:10px;overflow:visible">${lines}</svg>
+    <div class="c43"><svg width="${W}" height="${H}" style="display:block;margin-top:10px;overflow:visible">${lines}</svg></div>
     <div class="ax"><span>${shortDate(q0.since)}</span><span>${KO ? "3개월 등락률 (점선 = 3개월 전)" : "3-month % change (dashed = start)"}</span><span>${shortDate(q0.date)}</span></div></div>`;
 }
 const S = {
@@ -212,19 +216,19 @@ const S = {
   },
   rows(s) {
     return `<div class="rows">` + s.items.map(q => `<div class="p row"><div class="n">${esc(q.name)}${q.note ? `<small>${esc(q.note)}</small>` : ""}</div>
-      <div class="r num"><div class="c">${chg(q, true)}</div><div class="v">${val(q)}</div></div>${spark(q, 110, 50, { pad: 3, sw: 3, bw: 1.2 })}</div>`).join("") + "</div>";
+      <div class="r num"><div class="v2">${val(q)}</div><div class="c">${chg(q, true)}</div></div></div>`).join("") + "</div>";
   },
   mini(s) {
     const c = s.cols || 3;
-    return `<div class="mini ${c >= 6 ? "c6" : c >= 4 ? "c4" : ""}${s.spark ? " sp" : ""}" style="grid-template-columns:repeat(${c},1fr)">` + s.items.map(q => `<div class="p"><div class="n">${esc(q.name)}</div>
-      ${s.spark ? `<div class="l2"><span class="v num">${val(q)}</span><span class="c num">${chg(q, true)}</span></div>${spark(q, Math.floor(968 / c) - 46, 26, { pad: 3, sw: 3, bw: 1.2 })}` : `<div class="v num">${val(q)}</div><div class="c num">${chg(q, c >= 4)}</div>`}</div>`).join("") + "</div>";
+    return `<div class="mini ${c >= 6 ? "c6" : c >= 4 ? "c4" : ""}${s.spark ? " big3" : ""}" style="grid-template-columns:repeat(${c},1fr)">` + s.items.map(q => `<div class="p"><div class="n">${esc(q.name)}</div>
+      <div class="v num">${val(q)}</div><div class="c num">${chg(q, c >= 4)}</div></div>`).join("") + "</div>";
   },
   hero(s) {
     const q = s.item, side = s.side || [];
     const ax = KO ? ["09:00", "12:00", "15:30"] : ["9:30", "12:45", "4:00"];
     return `<div class="hero"><div class="p main"><div class="hv"><span class="v num">${val(q)}</span><span class="c num">${chg(q)}</span></div>
       <div class="pv">${KO ? "전일" : "Prev."} ${fmt(q.prev, q.dp)} · ${q.chg > 0 ? "+" : q.chg < 0 ? "−" : ""}${fmt(Math.abs(q.chg), q.dp)} ${KO ? "· 점선 = 전일 종가" : "· dashed = prev. close"}</div>
-      <div style="margin-top:6px">${spark(q, 610, s.ch || 120, { sw: 4, dot: true })}</div><div class="axis">${ax.map(x => `<span>${x}</span>`).join("")}</div></div>
+      <div style="margin-top:6px">${spark(q, 600, 450, { sw: 4, dot: true })}</div><div class="axis">${ax.map(x => `<span>${x}</span>`).join("")}</div></div>
       <div class="side" style="grid-template-rows:repeat(${side.length},1fr)">` + side.map(x => `<div class="p"><div class="n">${esc(x.name)}</div>
       <div class="l2"><span class="v num">${val(x)}</span><span class="c num">${chg(x, true)}</span></div></div>`).join("") + "</div></div>";
   },

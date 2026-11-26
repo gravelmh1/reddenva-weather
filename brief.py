@@ -352,7 +352,7 @@ def kr_morning(now):
          "sub": (f"미국 {HOL_NAME.get(exp, ('휴장',))[0]} 휴장 · {lab(usd)} 종가 기준" if hol else f"{lab(usd)} 미국 장 마감 기준"),
          "mood": mood, "pose": POSE[mood], "facts": facts,
          "sections": [{"type": "mini", "title": "간밤 미국 증시", "items": [q for q in idx if q["name"] != "필라델피아 반도체"] + [q for q in macro if q["name"] in ("美 국채 10년", "WTI 유가", "VIX", "금")], "cols": 3, "spark": True},
-                      {"type": "rows", "title": "반도체 종목", "items": chips, "card_n": 2}],
+                      {"type": "rows", "title": "반도체 종목", "items": chips, "card": False}],
          "hook": {"kicker": "간밤 미국", "lines": [f"{q['name'].replace('필라델피아 ', '')} {pct_rich(q['pct'])}" for q in idx[1:3]] if not hol else ["미국 증시", "[[acc:휴장]]"]},
          "foot": "자료: Yahoo Finance, 네이버 증권 · 투자 권유 아님"}
     return d
@@ -399,7 +399,7 @@ def us_morning(now):
     return {"region": "us", "kind": "morning", "title": "Morning Brief", "kicker": "MORNING BRIEF",
             "sub": f"Futures {nl:%-I:%M} a.m. ET · closes {usd:%-m/%-d}", "mood": mood, "pose": "a05" if mood == "flat" else POSE[mood], "facts": facts,
             "sections": [{"type": "mini", "title": "Futures right now", "items": fut[:2] + [q for q in macro if q["name"] in ("10-yr Treasury", "WTI crude", "VIX", "Gold")], "cols": 3, "spark": True},
-                         {"type": "rows", "title": f"Chip stocks · {lab(usd, False)} close", "items": chipst, "card_n": 2}],
+                         {"type": "rows", "title": f"Chip stocks · {lab(usd, False)} close", "items": chipst, "card": False}],
             "hook": {"kicker": "Before the bell", "lines": [f"{q['name'].replace(' futures', '')} {pct_rich(q['pct'], us=True)}" for q in fut[:2]], "sub": "Futures vs. yesterday's settle"},
             "foot": "Source: Yahoo Finance · not investment advice"}
 
