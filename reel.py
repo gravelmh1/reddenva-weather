@@ -15,7 +15,7 @@ import requests
 import reel_data
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-KINDS = ["books", "news", "puppy", "deriv", "trip", "facts", "netflix", "morning", "close"]
+KINDS = ["books", "news", "dart", "puppy", "deriv", "trip", "facts", "netflix", "morning", "close"]
 CARD_LAST = {"ko": "한 장으로 보기", "en": "The full card"}
 
 
@@ -167,8 +167,69 @@ def news(d, region):
     return theme("cream"), [hook, lst, quote, cards_scene(d["cards"], ko)]
 
 
+def dart(d, region):
+    """수요일 동전 던지기: 지난주 채점 → 누적 전적 → 레드덴바가 동전 던짐 → 이번 주 방향 → 카드. 종목은 안 나옴."""
+    import random
+    c = d["c"]; ko = region == "kr"; new, last, rec, idx = c["new"], c.get("last"), c["rec"], c["index_name"]
+    pc = lambda x: "0.0%" if abs(x) < 5e-4 else f"{x * 100:+.1f}%"
+    word = lambda u: ("오른다" if u else "내린다") if ko else ("UP" if u else "DOWN")
+    sc = []
+    if last:
+        lu = last["call"] == "up"; hit = last["hit"]; r = last["result"]
+        sc.append(dict(type="hook", kicker=(f"지난주 동전: {word(lu)}" if ko else f"Last week's coin: {word(lu)}"), label=idx,
+                       big=dict(to=round(r * 100, 1), dp=1, sign=True, suf="%"), bigc="var(--up)" if r > 0 else "var(--dn)",
+                       sub=f"{last['entry']:,.2f} → {last['exit']:,.2f}",
+                       pill=(("적중" if hit else "빗나감") if ko else ("HIT" if hit else "MISS")), pillc="#e0482a" if hit else "#5a6478",
+                       pose="a04" if hit else "a06", poseh=260, dur=4.2))
+    if rec["n"]:
+        title = (f"누적 [[acc:{rec['hit']}승]] {rec['miss']}패" if ko else f"Record [[acc:{rec['hit']}-{rec['miss']}]]")
+        tiles = [dict(l="레드덴바 적중률" if ko else "Red Denva's hit rate", n=round(rec["rate"] * 100), dp=0, suf="%", vc="var(--acc)"),
+                 dict(l="원래 확률" if ko else "The odds", v="50%")]
+        good = rec["rate"] > .5
+        cm = (("확률보다 나음. 운이 좋음." if good else "확률보다 못함. 동전 탓.") if ko else ("Beating the odds. Lucky panda." if good else "Below the odds. Blame the coin."))
+        sc.append(dict(type="tiles", kicker="주간 전적" if ko else "Weekly record", title=title, tiles=tiles, nsz=130,
+                       rows=[["한마디" if ko else "Verdict", cm]], pose="a16" if good else "a15", poseh=220, dur=4.4))
+    up = new["call"] == "up"
+    sc.append(dict(type="coin", kicker=(f"{c['week']}주차 · 다음 주 수요일까지" if ko else f"Week {c['week']} · by next Wednesday"),
+                   title=(f"{idx}는…" if ko else f"the {idx} goes…"), up=up, upw=word(True), dnw=word(False), flips=10 if up else 9,
+                   spin0=.5, spin=2.6, top=190, dur=4.8))
+    sc.append(dict(type="hook", kicker=(f"다음 주 수요일까지 {idx}는" if ko else f"By next Wednesday, the {idx} goes"),
+                   lines=[f"[[{'up' if up else 'dn'}:{word(up)}]]"], size="xl", sub=(f"기준 {new['entry']:,.2f} · 동전이 정함" if ko else f"From {new['entry']:,.2f} · a coin decided"),
+                   pill=("맞히면 동전 덕, 틀리면 동전 탓" if ko else "Not a forecast. Just a coin."), pillc="#14284d", pose="a00", poseh=280, dur=4.0))
+    th = theme("terminal")
+    if ko: th["vars"].update(up="#ff5a5f", dn="#4d8dff")
+    else: th["vars"].update(up="#2fd08a", dn="#ff5a5f")
+    return th, sc + [cards_scene(d["cards"], ko)]
+
+
+def video_frames(path, fx, secs, fps=30):
+    """영상을 1080x1920 세로로 꽉 차게 잘라(동물 얼굴 쪽 기준) JPG 프레임으로 뽑는다. 반환: (폴더, 장 수)"""
+    import glob, shutil, subprocess
+    sys.path.insert(0, os.path.join(ROOT, "reels")); from render import ffmpeg_bin
+    out = os.path.abspath(os.path.join(os.path.dirname(path), "puppy-frames")); shutil.rmtree(out, ignore_errors=True); os.makedirs(out)
+    vf = (f"scale=-2:1920:flags=lanczos,crop=1080:1920:'max(0,min(iw-1080,iw*{fx:.3f}-540))':0,"
+          f"scale=1080:1920,fps={fps},eq=saturation=1.06:contrast=1.03")
+    subprocess.run([ffmpeg_bin(), "-y", "-loglevel", "error", "-i", path, "-t", f"{secs:.2f}", "-vf", vf, "-q:v", "3", f"{out}/f%04d.jpg"], check=True)
+    return out, len(glob.glob(f"{out}/f*.jpg"))
+
+
 def puppy(d, region, acc="#ff8a4c", pose="a00"):
     c = d["c"]; ko = region == "kr"; fx, fy = (c.get("focus") or [.5, .45])
+    if d.get("video") and os.path.exists(d["video"]):
+        # 영상 버전: 이름 → 첫째 줄 → 둘째 줄이 차례로 뜨고, 다 읽을 때까지 영상이 흐른다
+        l1, l2 = (c["lines"] + ["", ""])[:2]
+        t1 = 1.7; t2 = t1 + max(1.6, rd(l1, ko=ko) - .4); dur = max(7.5, t2 + rd(l2, ko=ko) + .6)
+        dur = min(dur, 12.0); frames, n = video_frames(d["video"], fx, min(dur, float(d.get("vdur") or dur)))
+        day = dt.date.fromisoformat(d["day"]) if d.get("day") else dt.date.today()
+        top = (f"{KO_DAY[day.weekday()]}요일 · {c['badge']}" if ko else f"{EN_DAY_FULL[day.weekday()]} · {c['badge']}")
+        vs = dict(type="video", frames="file://" + frames, nframes=n, fps=30, top=top, dband=(f"{day.month}월" if ko else f"{day:%b}".upper()), dnum=str(day.day),
+                  badge=("이번 주 주인공" if ko else "This week's star"), title=c["name"], lines=[l1, l2], lat=[t1, t2],
+                  credit=(c.get("foot") or [""])[0], dur=dur)
+        sc = [vs]
+        if c.get("aside") and len(c["aside"]) >= 2:
+            sc.append(dict(type="quote", kicker="레드덴바 한마디" if ko else "Red Denva says", text=c["aside"], pose=pose, poseh=320, dur=1.5 + rd(c["aside"], ko=ko)))
+        th = theme("photo"); th["vars"]["acc"] = acc
+        return th, sc + [cards_scene(d["cards"], ko)]
     ph = dict(type="photo", src="file://" + d["photo"], fx=fx, fy=fy, top=c.get("top"), badge=c["badge"], title=c["name"], lines=c["lines"][:2],
               credit=(c.get("foot") or [""])[0], dur=2.2 + rd(c["name"], *c["lines"][:2], ko=ko))
     sc = [ph]
@@ -302,20 +363,20 @@ def brief(d, region):
     return th, sc + [cards_scene(d["cards"], ko)]
 
 
-ADAPT = dict(weather=weather, morning=brief, close=brief, deriv=deriv, books=books, news=news, puppy=puppy, facts=facts, trip=trip, netflix=netflix)
+ADAPT = dict(dart=dart, weather=weather, morning=brief, close=brief, deriv=deriv, books=books, news=news, puppy=puppy, facts=facts, trip=trip, netflix=netflix)
 
 
-SERIES = {"kr": {"weather": "[[acc:서울]] 날씨", "books": "이번 주 [[acc:책]]", "news": "[[acc:좋은 뉴스]]", "puppy": "[[acc:아기 동물]]",
+SERIES = {"kr": {"weather": "[[acc:서울]] 날씨", "books": "이번 주 [[acc:책]]", "news": "[[acc:좋은 뉴스]]", "puppy": "[[acc:아기 동물]]", "dart": "[[acc:동전]] 던지기",
                  "deriv": "[[acc:파생]] 브리핑", "trip": "[[acc:주말 여행]]", "facts": "[[acc:동물 상식]]", "netflix": "[[acc:넷플릭스]]",
                  "morning": "[[acc:모닝]] 브리프", "close": "[[acc:마감]] 브리프"},
-          "us": {"weather": "[[acc:LA]] weather", "books": "[[acc:Book]] of the week", "news": "[[acc:Good news]]", "puppy": "[[acc:Baby animal]]",
+          "us": {"weather": "[[acc:LA]] weather", "books": "[[acc:Book]] of the week", "news": "[[acc:Good news]]", "puppy": "[[acc:Baby animal]]", "dart": "[[acc:Coin]] flip",
                  "deriv": "[[acc:Derivatives]]", "trip": "[[acc:Weekend trip]]", "facts": "[[acc:Animal facts]]", "netflix": "[[acc:Netflix]] top 10",
                  "morning": "[[acc:Morning]] Brief", "close": "[[acc:Closing]] Brief"}}
 EN_DAY_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
 # 시리즈마다 단색 배경 (색 계열은 확실히 다르게, 밝기·채도는 비슷하게 눌러서 세련되게)
-SERIES_BG = {"weather": "#1f4e8c", "books": "#6b4a2e", "news": "#f1e4c8", "puppy": "#93475f",
+SERIES_BG = {"dart": "#3b2f5c", "weather": "#1f4e8c", "books": "#6b4a2e", "news": "#f1e4c8", "puppy": "#93475f",
              "deriv": "#2b313c", "trip": "#1d6461", "facts": "#56632c", "netflix": "#6e1d29", "morning": "#2a2550", "close": "#14233d"}
 SERIES_ACC = {"books": "#f3c97a", "netflix": "#ffb0a8", "puppy": "#ffc59e", "facts": "#f6d28a", "trip": "#ffc08a"}  # 배경 위에서 잘 보이게
 
@@ -344,7 +405,7 @@ def build(kind, region):
     th, scenes = ADAPT[kind](d, region)
     if kind in SERIES_BG: th["vars"]["bg"] = SERIES_BG[kind]
     if kind in SERIES_ACC: th["vars"]["acc"] = SERIES_ACC[kind]
-    return {"theme": th, "scenes": [open_scene(kind, region, d.get("day") if kind in ("morning", "close") else None)] + scenes}
+    return {"theme": th, "scenes": [open_scene(kind, region, d.get("day") if kind in ("morning", "close", "puppy", "dart") else None)] + scenes}
 
 
 # ------------------------------------------------------------------ 업로드 (GitHub Release)

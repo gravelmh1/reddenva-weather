@@ -67,12 +67,9 @@ jobs:
         run: |
           pip install -q matplotlib numpy
           python deriv_kr.py ${{ inputs.dry_run && '--dry-run --force' || '' }}
-      - name: (주간) 강아지 카드 만들기 (수요일에만 실제 실행)
+      - name: (주간) 레드덴바의 동전 던지기 만들기 (수요일에만 실제 실행)
         if: ${{ steps.slot.outputs.slot == 'weekly' }}
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
-        run: python animals.py --region kr ${{ inputs.dry_run && '--dry-run --force' || '' }}
+        run: python dart.py --region kr ${{ inputs.dry_run && '--dry-run --force' || '' }}
       - name: (주간) 주말 여행 카드 만들기 (금요일에만 실제 실행)
         if: ${{ steps.slot.outputs.slot == 'weekly' }}
         env:
@@ -136,7 +133,7 @@ jobs:
           THREADS_TOKEN_KR: ${{ secrets.THREADS_TOKEN_KR }}
         run: |
           if [ "${{ steps.slot.outputs.slot }}" = "morning" ] || [ "${{ steps.slot.outputs.slot }}" = "close" ]; then python threads_post.py --region kr --kind ${{ steps.slot.outputs.slot }}-;
-          elif [ "${{ steps.slot.outputs.slot }}" = "weather" ]; then python threads_post.py --region kr; else python threads_post.py --region kr --kind books-; python threads_post.py --region kr --kind news-; python threads_post.py --region kr --kind puppy-; python threads_post.py --region kr --kind deriv-; python threads_post.py --region kr --kind trip-; python threads_post.py --region kr --kind facts-; python threads_post.py --region kr --kind netflix-; fi
+          elif [ "${{ steps.slot.outputs.slot }}" = "weather" ]; then python threads_post.py --region kr; else python threads_post.py --region kr --kind books-; python threads_post.py --region kr --kind news-; python threads_post.py --region kr --kind dart-; python threads_post.py --region kr --kind puppy-; python threads_post.py --region kr --kind deriv-; python threads_post.py --region kr --kind trip-; python threads_post.py --region kr --kind facts-; python threads_post.py --region kr --kind netflix-; fi
           git add state
           git diff --cached --quiet || (git commit -q -m "kr threads posted" && git pull --rebase -q && git push -q)
       - name: (릴스) 테스트 영상 만들기 (dry-run일 때, 게시 안 함)

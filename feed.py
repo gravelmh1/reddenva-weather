@@ -17,6 +17,7 @@ SERIES = {
     # 파일 앞부분: (카테고리 키, 한국어 이름, 영어 이름)
     "books": ("books", "이번 주 책", "Book of the week"),
     "news": ("news", "좋은 뉴스", "Good news"),
+    "dart": ("coin", "동전 던지기", "Coin flip"),
     "puppy": ("animal", "아기 동물", "Baby animal"),
     "deriv": ("deriv", "파생 브리핑", "Derivatives brief"),
     "trip": ("trip", "주말 여행", "Weekend trip"),
