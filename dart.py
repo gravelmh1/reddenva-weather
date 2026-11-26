@@ -105,7 +105,7 @@ def main():
                f"#coinflip #reddenva #nasdaq #stocks #notadvice #wednesday")
     import reel_data
     reel_data.save("dart", region, {"c": card, "cards": [os.path.abspath(img_rel)], "day": day})
-    if not a.demo: json.dump(st, open(sf, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    if not a.demo and not a.dry_run: json.dump(st, open(sf, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     if a.dry_run: print("(dry-run) 카드 저장:", img_rel); print(cap); return
     from books import git_push
     git_push(["out", "state"], f"dart {region} {day} card")
