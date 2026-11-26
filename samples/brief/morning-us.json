@@ -1758,18 +1758,18 @@
    "title": "Headlines",
    "items": [
     {
-     "head": "World Stocks Tumble",
-     "line": "World stocks tumble as Trump tariffs rattle markets and the artificial intelligence rally fades.",
+     "head": "World Stocks Tumble on Tariffs and AI",
+     "line": "World stocks tumbled as Trump tariffs rattled markets and the AI rally faded.",
      "src": "Reuters"
     },
     {
-     "head": "US Economy Growth",
-     "line": "The United States economy grew faster last quarter than it was initially reported.",
+     "head": "US Economy Grew Faster Last Quarter",
+     "line": "The US economy grew faster last quarter than initially reported according to CNN.",
      "src": "CNN"
     },
     {
-     "head": "Dell Earnings Beat",
-     "line": "Dell earnings beat expectations on artificial intelligence strength and authorized a buyback.",
+     "head": "Dell Earnings Beat and Buyback",
+     "line": "Dell beat earnings expectations on AI strength and authorized a 25 billion dollar buyback.",
      "src": "CNBC"
     }
    ]
@@ -2108,23 +2108,24 @@
   "hi": 76,
   "lo": 52,
   "rain": 0,
-  "unit": "F"
+  "unit": "F",
+  "pose": "w04"
  },
- "comment": "KOSPI at -6.16%. Yawns.",
+ "comment": "KOSPI down 6.16%. Yawns.",
  "news": [
   {
-   "head": "World Stocks Tumble",
-   "line": "World stocks tumble as Trump tariffs rattle markets and the artificial intelligence rally fades.",
+   "head": "World Stocks Tumble on Tariffs and AI",
+   "line": "World stocks tumbled as Trump tariffs rattled markets and the AI rally faded.",
    "src": "Reuters"
   },
   {
-   "head": "US Economy Growth",
-   "line": "The United States economy grew faster last quarter than it was initially reported.",
+   "head": "US Economy Grew Faster Last Quarter",
+   "line": "The US economy grew faster last quarter than initially reported according to CNN.",
    "src": "CNN"
   },
   {
-   "head": "Dell Earnings Beat",
-   "line": "Dell earnings beat expectations on artificial intelligence strength and authorized a buyback.",
+   "head": "Dell Earnings Beat and Buyback",
+   "line": "Dell beat earnings expectations on AI strength and authorized a 25 billion dollar buyback.",
    "src": "CNBC"
   }
  ],
