@@ -202,11 +202,11 @@ def gpu(now):
     return out
 
 
-def chips(now, ko):
-    dr = safe(drams, now) or []
+def chips(now, ko, kind="morning"):
+    dr = (safe(drams, now) or [])[:1] if kind == "morning" else []  # D램은 DDR5 하나만, 모닝에만
     gp = safe(gpu, now) or []
     if not dr and not gp: return None
-    return {"type": "chips", "title": "반도체 현물가" if ko else "Chip spot prices", "small": "DRAMeXchange · SemiAnalysis GPU Index",
+    return {"type": "chips", "title": "반도체 현물가" if ko else "Chip spot prices", "small": ("DRAMeXchange · " if dr else "") + "SemiAnalysis GPU Index",
             "dram": dr, "gpu": gp}
 
 
@@ -293,7 +293,8 @@ def quip(region, kind, facts, mood):
     try:
         p = f"""You are Red Denva, a sleepy, deadpan red panda who posts a daily {'Korean' if ko else 'US'} stock market brief.
 Write ONE short comment about today's numbers below: dry, witty, specific to the numbers (mention one concrete thing), never cheesy, no emojis, no hashtags, no investment advice, no predictions.
-Write numbers as digits with the % sign (e.g. "-8.8%", "$3.50"), never spelled out in words.
+Write numbers exactly as digits with the % sign (e.g. "-8.75%", "$3.50"), never spelled out in words.
+Sound like a real person who trades, not an AI: plain words, no forced metaphors, no exclamation marks.
 Clean, polished language only: no slang, no profanity or near-profanity (e.g. never 졸라/존나/개-), nothing a brand account would regret.
 {'Korean, casual polite (~요), max 30 characters.' if ko else 'English, max 55 characters.'}
 Mood: {mood}. Numbers: {json.dumps(facts, ensure_ascii=False)}
@@ -474,7 +475,7 @@ def main():
         d = json.load(open(a.from_json, encoding="utf-8"))
     else:
         t = time.time(); d = BUILD[(a.region, a.kind)](now); print(f"시세 {time.time() - t:.0f}초")
-        ch = chips(now, a.region == "kr")
+        ch = chips(now, a.region == "kr", a.kind)
         if ch:
             d["sections"].insert(0, ch); d["chips"] = ch
             for q in ch["dram"][:1] + ch["gpu"][:1]: d["facts"][q["name"] + (" GPU 시간당 임대료" if q in ch["gpu"] else " D램 현물")] = f"${q['last']} ({q['pct']:+.2f}%, 1주 {q['w1']:+.2f}%)" if q.get("w1") is not None else f"${q['last']} ({q['pct']:+.2f}%)"

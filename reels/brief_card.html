@@ -42,6 +42,14 @@
   .chip .wk b { font-weight: 900; }
   .chip svg { display: block; margin-top: 8px; }
   .chip .ax { display: flex; justify-content: space-between; font-size: 18px; color: var(--sub); margin-top: 2px; }
+  .chips.one { grid-template-columns: 1fr; }
+  .gl { display: grid; gap: 6px; margin-top: 8px; }
+  .one .gl { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .gl > div { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+  .gl i { flex: none; width: 22px; height: 7px; border-radius: 4px; align-self: center; }
+  .gl .n { font-size: 24px; font-weight: 900; width: 66px; }
+  .gl .x { font-size: 34px; font-weight: 900; }
+  .gl .c { font-size: 24px; font-weight: 900; margin-left: auto; }
   .chip .oth { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
   .chip .oth div { flex: 1; background: #f3f5f9; border-radius: 12px; padding: 5px 10px; white-space: nowrap; }
   .chip .oth .n { font-size: 18px; color: var(--sub); font-weight: 700; }
@@ -169,18 +177,31 @@ const chg1 = q => Math.abs(q.pct) < 0.005 ? `<span class="fl">${KO ? "보합" : 
 function chipPanel(q, lab, sub, others, otherFmt) {
   return `<div class="p chip"><div class="lab">${esc(lab)}<span>${esc(sub)}</span></div>
     <div class="row1"><span class="v num">$${fmt(q.last, q.dp)}${q.per ? `<small>${q.per}</small>` : ""}</span><span class="c num">${chg1(q)}</span></div>
-    <div class="wk">${wk(q)}</div>${spark(q, 444, 104, { sw: 4, dot: true, base: null })}
+    <div class="wk">${wk(q)}</div>${spark(q, 444, 150, { sw: 4, dot: true, base: null })}
     <div class="ax"><span>${shortDate(q.since)}</span><span>${KO ? "3개월" : "3 months"}</span><span>${shortDate(q.date)}</span></div>
-    <div class="oth">${others.map(otherFmt).join("")}</div></div>`;
+    ${others.length ? `<div class="oth">${others.map(otherFmt).join("")}</div>` : ""}</div>`;
+}
+const GPUC = { B200: "#d9822b", H100: "#111a2e", A100: "#2a9d8f" };
+function gpuPanel(gp, wide) {
+  gp = gp.slice().sort((a, b) => b.last - a.last);
+  const W = wide ? 920 : 444, H = wide ? 210 : 128, pad = 8, rb = q => q.spark.map(v => (v / q.spark[0] - 1) * 100), all = gp.flatMap(rb).concat([0]);
+  const lo = Math.min(...all), hi = Math.max(...all), Y = y => pad + (H - 2 * pad) * (hi - y) / ((hi - lo) || 1);
+  const zero = `<line x1="${pad}" x2="${W - pad}" y1="${Y(0)}" y2="${Y(0)}" stroke="#b9c0cf" stroke-width="1.5" stroke-dasharray="5 6"/>`;
+  const lines = zero + gp.map(q => { const v = rb(q), X = i => pad + (W - 2 * pad) * i / (v.length - 1), c = GPUC[q.name] || "#888";
+    return `<path d="${v.map((y, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(y).toFixed(1)).join("")}" fill="none" stroke="${c}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="${X(v.length - 1)}" cy="${Y(v[v.length - 1])}" r="6" fill="${c}" stroke="#fff" stroke-width="2.5"/>`; }).join("");
+  const q0 = gp[0];
+  return `<div class="p chip"><div class="lab">${KO ? "GPU 임대료" : "GPU rental"}<span>${KO ? "1시간당 · 하루 변동" : "per hour · daily change"}</span></div>
+    <div class="gl">${gp.map(q => `<div><i style="background:${GPUC[q.name]}"></i><span class="n">${esc(q.name)}</span><span class="x num">$${fmt(q.last, 2)}</span><span class="c num">${chg1(q)}</span></div>`).join("")}</div>
+    <svg width="${W}" height="${H}" style="display:block;margin-top:10px;overflow:visible">${lines}</svg>
+    <div class="ax"><span>${shortDate(q0.since)}</span><span>${KO ? "3개월 등락률 (점선 = 3개월 전)" : "3-month % change (dashed = start)"}</span><span>${shortDate(q0.date)}</span></div></div>`;
 }
 const S = {
   chips(s) {
     const dr = s.dram || [], gp = s.gpu || [];
-    let h = `<div class="chips">`;
-    if (dr[0]) h += chipPanel(dr[0], KO ? "D램 현물 · DDR5 16Gb" : "DRAM spot · DDR5 16Gb", KO ? "칩당 평균가" : "avg per chip", dr.slice(1, 4),
-      o => `<div><div class="n">${esc(o.name)}</div><div class="x num">${chg1(o)}</div></div>`);
-    if (gp[0]) h += chipPanel(gp[0], KO ? "GPU 임대료 · H100" : "GPU rental · H100", KO ? "1시간 평균" : "avg per hour", gp.slice(1, 3),
-      o => `<div><div class="n">${esc(o.name)} $${fmt(o.last, 2)}</div><div class="x num">${chg1(o)}</div></div>`);
+    let h = `<div class="chips${dr[0] && gp[0] ? "" : " one"}">`;
+    if (dr[0]) h += chipPanel(dr[0], KO ? "D램 현물 · DDR5 16Gb" : "DRAM spot · DDR5 16Gb", KO ? "칩당 평균가" : "avg per chip", [], x => "");
+    if (gp[0]) h += gpuPanel(gp, !dr[0]);
     return h + "</div>";
   },
   big(s) {

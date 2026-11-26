@@ -256,16 +256,24 @@ def brief(d, region):
     for s in d["sections"]:
         t = s["type"]
         if t == "chips":
-            for q, lab in [(x, "D램 현물가" if ko else "DRAM spot price") for x in s["dram"][:1]] + [(x, "GPU 임대료" if ko else "GPU rental") for x in s["gpu"][:1]]:
+            for q in s["dram"][:1]:  # D램: DDR5 하나만
                 c = up if q["pct"] > 0 else dn if q["pct"] < 0 else "#8a94a8"
                 mv = f"[[{'up' if q['pct'] > 0 else 'dn'}:{q['pct']:+.2f}%]]" if q["pct"] else ("보합" if ko else "unch.")
                 wk = " · ".join(f"{a} {q[k]:+.2f}%" for k, a in (("w1", "1주" if ko else "1W"), ("m1", "1달" if ko else "1M")) if q.get(k) is not None)
                 since = dt.date.fromisoformat(q["since"]); last = dt.date.fromisoformat(q["date"])
-                sc.append(dict(type="chart", kicker=f"{lab} · {q.get('full', q['name']) if q in s['dram'] else q['name']}", title=f"${q['last']:,.{q.get('dp', 2)}f}{q.get('per', '')}  {mv}",
-                               series=[dict(name=q["name"], c=c, v=q["spark"], dp=q.get("dp", 2))], xlabs=[f"{since.month}/{since.day}", "3개월" if ko else "3 months", f"{last.month}/{last.day}"],
-                               tight=True, symmetric=False, tickdp=2 if q in s["gpu"] else 1, drawdur=2.0, dur=2.8 + 2.4, foot=wk, footbig=True))
-            oth = [qtile(x, up, dn) for x in s["dram"][1:]] + [qtile(x, up, dn) for x in s["gpu"][1:]]
-            if oth: sc.append(dict(type="tiles", kicker="다른 메모리 · GPU" if ko else "Other memory & GPUs", tiles=oth, nsz=80, dur=1.6 + 0.4 * len(oth) + 1.0))
+                sc.append(dict(type="chart", kicker=("D램 현물가 · DDR5 16Gb" if ko else "DRAM spot · DDR5 16Gb"), title=f"${q['last']:,.{q.get('dp', 2)}f}  {mv}",
+                               series=[dict(name="DDR5 16Gb", c=c, v=q["spark"], dp=q.get("dp", 2))], xlabs=[f"{since.month}/{since.day}", "3개월" if ko else "3 months", f"{last.month}/{last.day}"],
+                               tight=True, symmetric=False, tickdp=1, drawdur=2.0, dur=2.8 + 2.4, foot=wk, footbig=True))
+            gp = sorted(s["gpu"], key=lambda q: -q["last"])
+            if gp:  # GPU: 세 개를 한 그래프에
+                col = {"B200": "#ffa94d", "H100": "#e9edf5", "A100": "#3ccfb4"}
+                mvs = lambda q: f"[[{'up' if q['pct'] > 0 else 'dn'}:{q['pct']:+.2f}%]]" if q["pct"] else ("보합" if ko else "unch.")
+                since = dt.date.fromisoformat(gp[0]["since"]); last = dt.date.fromisoformat(gp[0]["date"])
+                sc.append(dict(type="chart", kicker=("GPU 임대료 · 1시간당" if ko else "GPU rental · per hour"), title="  ".join(f"{q['name']} {mvs(q)}" for q in gp),
+                               series=[dict(name=f"{q['name']} ${q['last']:.2f}", c=col.get(q["name"], "#aaa"), v=[round((v / q["spark"][0] - 1) * 100, 2) for v in q["spark"]], dp=1, sign=True, nolab=True) for k, q in enumerate(gp)],
+                               xlabs=[f"{since.month}/{since.day}", "3개월" if ko else "3 months", f"{last.month}/{last.day}"],
+                               base=0, baselab=("3개월 전" if ko else "start"), tight=True, symmetric=False, tickdp=0, drawdur=2.0, dur=2.8 + 2.6,
+                               foot=("선 = 3개월 등락률(%) · 제목 = 하루 변동" if ko else "Lines = 3-month % change · title = daily change"), footbig=True))
             w = d.get("wx")
             if w:
                 tl = [dict(l="하늘" if ko else "Sky", v=w["sky"], c=w["city"], cc="var(--psub)"), dict(l="최고" if ko else "High", v=f"{w['hi']}°", c="", cc="var(--psub)"),
@@ -291,7 +299,7 @@ def brief(d, region):
             sc.append(dict(type="flows", kicker="누가 샀나" if ko else "Who bought", title="순매수 · 억원" if ko else None, groups=groups, dur=2.0 + 1.6 * len(groups) + 1.0))
         elif t == "heat" or (t == "mini" and not ko and "world" in s["title"].lower()):
             pass  # 아래에서 묶어서 처리
-        elif t == "mini" and s.get("items"):
+        elif t == "mini" and s.get("items") and s.get("card") is not False:  # 카드에 없는 잡다한 숫자는 릴스에서도 뺌
             tl = [qtile(q, up, dn) for q in s["items"][:6]]
             sc.append(dict(type="tiles", kicker=s["title"], tiles=tl, nsz=80, dur=1.6 + 0.4 * len(tl) + 1.0))
         elif t == "news" and s.get("items"):
