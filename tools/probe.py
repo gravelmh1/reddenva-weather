@@ -1,4 +1,4 @@
-"""데이터 출처 확인용 (시안 단계에서만 씀). 응답 앞부분을 samples/raw/probe2.txt에 저장."""
+"""데이터 출처 확인용 (시안 단계에서만 씀). 응답 앞부분을 samples/raw/probe3.txt에 저장."""
 import requests, os
 H = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36", "Referer": "https://m.stock.naver.com/"}
 os.makedirs("samples/raw", exist_ok=True)
@@ -23,11 +23,12 @@ URLS = [
     f"https://finance.naver.com/sise/programDealTrendTime.naver?bizdate={D}&sosok=01",
     "https://finance.daum.net/api/trend/program_trading?market=KOSPI",
 ]
+URLS = [f"https://finance.naver.com/sise/sise_program.naver", "https://m.stock.naver.com/domestic/index/KOSPI/program", "https://m.stock.naver.com/api/index/KOSPI/integration"]
 out = []
 for u in URLS:
     try:
         r = requests.get(u, headers=H, timeout=25)
         t = r.content.decode("euc-kr", "replace") if "naver.com/sise" in u or "fchart" in u else r.text
-        out.append(f"### {u}\n{r.status_code} {r.headers.get('content-type')} len={len(t)}\n{t[:1500]}\n")
+        out.append(f"### {u}\n{r.status_code} {r.headers.get('content-type')} len={len(t)}\n{t[:400000]}\n")
     except Exception as e: out.append(f"### {u}\nERR {e}\n")
-open("samples/raw/probe2.txt", "w").write("\n".join(out)); print("\n".join(x[:300] for x in out))
+open("samples/raw/probe3.txt", "w").write("\n".join(out)); print("\n".join(x[:300] for x in out))
