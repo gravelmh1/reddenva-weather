@@ -138,7 +138,7 @@ def deriv_kr(d):
     allv = ser[0]["v"] + ser[-1]["v"]
     if min(allv) < 0 < max(allv): chart["symmetric"] = True
     tiles = [dict(l=t, v=v, c=cs, cc=cc) for t, v, cs, sub, cc in d["tiles"]]
-    t3 = dict(type="tiles", kicker="이번 주 숫자", title=f"{d['asof']} 마감 기준", tiles=tiles, nsz=92, foot="자료: 네이버 증권, FRED · 투자 권유 아님", dur=2.0 + 3.6)
+    t3 = dict(type="tiles", kicker="이번 주 숫자", title=f"{d['asof']} 마감 기준", tiles=tiles, nsz=92, foot="자료: 네이버 증권, Yahoo Finance · 투자 권유 아님", dur=2.0 + 3.6)
     th = theme("terminal"); th["vars"].update(up="#ff5a5f", dn="#4d8dff")  # 한국식: 빨강 상승, 파랑 하락
     return th, [hook, chart, t3, cards_scene(d["cards"], True)]
 
@@ -215,11 +215,41 @@ def netflix(d, region):
 ADAPT = dict(weather=weather, deriv=deriv, books=books, news=news, puppy=puppy, facts=facts, trip=trip, netflix=netflix)
 
 
+SERIES = {"kr": {"weather": "[[acc:서울]] 날씨", "books": "이번 주 [[acc:책]]", "news": "[[acc:좋은 뉴스]]", "puppy": "[[acc:아기 동물]]",
+                 "deriv": "[[acc:파생]] 브리핑", "trip": "[[acc:주말 여행]]", "facts": "[[acc:동물 상식]]", "netflix": "[[acc:넷플릭스]]"},
+          "us": {"weather": "[[acc:LA]] weather", "books": "[[acc:Book]] of the week", "news": "[[acc:Good news]]", "puppy": "[[acc:Baby animal]]",
+                 "deriv": "[[acc:Derivatives]]", "trip": "[[acc:Weekend trip]]", "facts": "[[acc:Animal facts]]", "netflix": "[[acc:Netflix]] top 10"}}
+EN_DAY_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+
+# 시리즈마다 단색 배경 (색 계열은 확실히 다르게, 밝기·채도는 비슷하게 눌러서 세련되게)
+SERIES_BG = {"weather": "#1f4e8c", "books": "#6b4a2e", "news": "#f1e4c8", "puppy": "#93475f",
+             "deriv": "#2b313c", "trip": "#1d6461", "facts": "#56632c", "netflix": "#6e1d29"}
+SERIES_ACC = {"books": "#f3c97a", "netflix": "#ffb0a8", "puppy": "#ffc59e", "facts": "#f6d28a", "trip": "#ffc08a"}  # 배경 위에서 잘 보이게
+
+
+def open_scene(kind, region):
+    """모든 릴스의 첫 화면(=섬네일). 날짜 아이콘 + '목요일 파생 브리핑' 같은 제목."""
+    tz = "Asia/Seoul" if region == "kr" else "America/Los_Angeles"
+    from zoneinfo import ZoneInfo
+    day = dt.datetime.now(ZoneInfo(tz)).date(); w = day.weekday()
+    if region == "kr":
+        band, first = f"{day.month}월 {KO_DAY[w]}", ("오늘의" if kind == "weather" else f"{KO_DAY[w]}요일")
+    else:
+        band, first = f"{day:%b} · {EN_DAY[w]}".upper(), ("Today's" if kind == "weather" else EN_DAY_FULL[w])
+    title = SERIES[region][kind]
+    size = "s" if len(re.sub(r"\[\[\w+:|\]\]", "", title)) > (7 if region == "kr" else 11) else ""
+    return dict(type="open", band=band, day=str(day.day), lines=[first, title], size=size,
+                handle=f"@reddenva.{region}", pose="a00", poseh=230, dur=2.3)
+
+
 def build(kind, region):
     d = reel_data.load(kind, region)
     if not d: raise SystemExit(f"reel_in/{kind}-{region}.json 없음 (이번 실행에서 카드를 안 만들었음)")
     th, scenes = ADAPT[kind](d, region)
-    return {"theme": th, "scenes": scenes}
+    if kind in SERIES_BG: th["vars"]["bg"] = SERIES_BG[kind]
+    if kind in SERIES_ACC: th["vars"]["acc"] = SERIES_ACC[kind]
+    return {"theme": th, "scenes": [open_scene(kind, region)] + scenes}
 
 
 # ------------------------------------------------------------------ 업로드 (GitHub Release)

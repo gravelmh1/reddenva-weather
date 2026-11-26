@@ -20,14 +20,35 @@ UA = {"User-Agent": "RedDenvaBot/1.0 (https://github.com/gravelmh1/reddenva-weat
 NYSE_HOL = {dt.date(*d) for d in [(2026, 11, 26), (2026, 12, 25), (2027, 1, 1), (2027, 1, 18), (2027, 2, 15), (2027, 3, 26), (2027, 5, 31), (2027, 6, 18), (2027, 7, 5), (2027, 9, 6), (2027, 11, 25), (2027, 12, 24)]}
 
 
+def fred(sid, start):
+    for i in range(3):
+        try:
+            r = requests.get("https://fred.stlouisfed.org/graph/fredgraph.csv", params={"id": sid, "cosd": start}, headers=UA, timeout=45); r.raise_for_status()
+            rows = [ln.split(",") for ln in r.text.strip().splitlines()[1:]]
+            return [[a, float(b)] for a, b in rows if b not in (".", "")]
+        except Exception:
+            if i == 2: raise
+            time.sleep(5)
+
+
+def yahoo(sym):
+    """FRED와 같은 모양([[YYYY-MM-DD, 값]])으로. 미국 장이 끝난 날만 남긴다."""
+    r = requests.get(f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}", params={"range": "6mo", "interval": "1d"}, headers={"User-Agent": "Mozilla/5.0"}, timeout=40); r.raise_for_status()
+    res = r.json()["chart"]["result"][0]; ny = ZoneInfo("America/New_York"); now = dt.datetime.now(ny)
+    rows = [[dt.datetime.fromtimestamp(t, ny).strftime("%Y-%m-%d"), round(c, 2)] for t, c in zip(res["timestamp"], res["indicators"]["quote"][0]["close"]) if c]
+    return [x for x in rows if x[0] < now.strftime("%Y-%m-%d") or now.hour >= 17]
+
+
 def fetch():
     d = {}
     start = (dt.date.today() - dt.timedelta(days=150)).isoformat()
     d["fred"] = {}
     for sid in ("SP500", "VIXCLS", "DGS10"):
-        r = requests.get("https://fred.stlouisfed.org/graph/fredgraph.csv", params={"id": sid, "cosd": start}, headers=UA, timeout=40); r.raise_for_status()
-        rows = [ln.split(",") for ln in r.text.strip().splitlines()[1:]]
-        d["fred"][sid] = [[a, float(b)] for a, b in rows if b not in (".", "")]
+        try:
+            d["fred"][sid] = fred(sid, start)
+        except Exception as e:  # FRED가 GitHub 러너에서 가끔 응답이 없다 → 같은 지수를 Yahoo에서
+            print(sid, "FRED 실패 → Yahoo", type(e).__name__)
+            d["fred"][sid] = yahoo({"SP500": "^GSPC", "VIXCLS": "^VIX", "DGS10": "^TNX"}[sid])
         print(sid, d["fred"][sid][-2:])
     r = requests.get("https://publicreporting.cftc.gov/resource/gpe5-46if.json", params={"cftc_contract_market_code": "13874A", "$order": "report_date_as_yyyy_mm_dd DESC", "$limit": 20}, headers=UA, timeout=40); r.raise_for_status()
     d["cot"] = r.json(); print("COT", d["cot"][0]["report_date_as_yyyy_mm_dd"])

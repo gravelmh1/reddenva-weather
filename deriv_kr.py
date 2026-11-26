@@ -185,7 +185,7 @@ def render(D, base, out1, out2):
     axb.axhline(0, color=GR, lw=0.8); style(axb); axb.set_xlim(-0.6, len(post) + 3); axb.set_xticks(ticks); axb.set_xticklabels(tl, color=GR)
     T(0.1, y1 + 404, "베이시스 (pt)   빨강 콘탱고 · 파랑 백워데이션", 12, c=GR)
     axb.annotate(f"{last['basis']:+.2f}", (x[-1], last["basis"]), xytext=(4, -16 if last["basis"] < 0 else 4), textcoords="offset points", color=UP if last["basis"] > 0 else DN, fontsize=12, fontweight="bold")
-    T(0.055, Hp - 34, "자료: 네이버 증권(선물·현물·국고채), FRED(VIX)  ·  투자 권유 아님", 11.5, c=GR)
+    T(0.055, Hp - 34, "자료: 네이버 증권(선물·현물·국고채), Yahoo Finance(VIX)  ·  투자 권유 아님", 11.5, c=GR)
     fig.savefig("/tmp/_k1.png", facecolor=BG); plt.close(fig); stamp_png("/tmp/_k1.png", "kr")
     # ---------- 2장
     fig, fy, T = page(); head(fig, fy, T, 2)
