@@ -99,6 +99,7 @@ def weather(d, region):
 
 
 def deriv(d, region):
+    if region == "kr": return deriv_kr(d)
     nd = d["net_d"]; lev, am = nd["lev"], nd["am"]
     verb = lambda v: "[[up:bought]]" if v > 0 else "[[dn:sold]]"
     if (lev > 0) != (am > 0):
@@ -120,6 +121,26 @@ def deriv(d, region):
     tiles = [dict(l=t, v=v, c=cs, cc=cc) for t, v, cs, sub, cc in d["tiles"]]
     t3 = dict(type="tiles", kicker="This week's numbers", title=f"As of {d['asof']}", tiles=tiles, nsz=92, foot="Sources: FRED, Yahoo Finance · not investment advice", dur=2.0 + 3.6)
     return theme("terminal"), [hook, chart, t3, cards_scene(d["cards"], False)]
+
+
+def deriv_kr(d):
+    c = d["cum_last"]; who = {"frn": "외국인", "ins": "기관", "ind": "개인"}
+    buy = max(c, key=c.get); sell = min(c, key=c.get)
+    lines = [f"{who[buy]} [[up:순매수]]", f"{who[sell]} [[dn:순매도]]"]
+    hook = dict(type="hook", kicker=f"목요일 파생 브리핑 · {d['asof']}", lines=lines, size="s",
+                sub=f"{d['xm']} 만기 이후 코스피200 선물 누적", pose="a06", poseh=320, dur=2.2 + 2.0)
+    ser = [dict(name=who[k], c=col, v=d["cum"][k], sign=True) for k, col in (("frn", "#f0a04b"), ("ins", "#3fc7b0"), ("ind", "#a98bff"))]
+    ser.sort(key=lambda x: -x["v"][-1])
+    for i, x in enumerate(ser): x["below"] = i == len(ser) - 1
+    ser[1]["nolab"] = True
+    chart = dict(type="chart", kicker=f"{d['xm']} 만기 이후", title="누가 사고 누가 팔았나", unit="누적 순매수 · 억원", series=ser, tickfmt="k",
+                 symmetric=False, foot="자료: 네이버 증권 · 투자 권유 아님", drawdur=2.2, dur=3.0 + 2.6)
+    allv = ser[0]["v"] + ser[-1]["v"]
+    if min(allv) < 0 < max(allv): chart["symmetric"] = True
+    tiles = [dict(l=t, v=v, c=cs, cc=cc) for t, v, cs, sub, cc in d["tiles"]]
+    t3 = dict(type="tiles", kicker="이번 주 숫자", title=f"{d['asof']} 마감 기준", tiles=tiles, nsz=92, foot="자료: 네이버 증권, FRED · 투자 권유 아님", dur=2.0 + 3.6)
+    th = theme("terminal"); th["vars"].update(up="#ff5a5f", dn="#4d8dff")  # 한국식: 빨강 상승, 파랑 하락
+    return th, [hook, chart, t3, cards_scene(d["cards"], True)]
 
 
 def books(d, region):
