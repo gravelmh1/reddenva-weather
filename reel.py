@@ -133,7 +133,7 @@ def deriv_kr(d):
     ser.sort(key=lambda x: -x["v"][-1])
     for i, x in enumerate(ser): x["below"] = i == len(ser) - 1
     ser[1]["nolab"] = True
-    chart = dict(type="chart", kicker=f"{d['xm']} 만기 이후", title="누가 사고 누가 팔았나", unit="누적 순매수 · 계약", series=ser, tickfmt="k",
+    chart = dict(type="chart", kicker=f"{d['xm']} 만기 이후", title="누가 사고 누가 팔았나", unit="누적 순매수 · 억원", series=ser, tickfmt="k",
                  symmetric=False, foot="자료: 네이버 증권 · 투자 권유 아님", drawdur=2.2, dur=3.0 + 2.6)
     allv = ser[0]["v"] + ser[-1]["v"]
     if min(allv) < 0 < max(allv): chart["symmetric"] = True

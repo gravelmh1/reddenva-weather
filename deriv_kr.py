@@ -192,7 +192,7 @@ def render(D, base, out1, out2):
     xi = list(range(len(inv))); ti = [i for i in xi if (i % 7 == 0 and len(inv) - 1 - i >= 4) or i == len(inv) - 1]
     y2 = 200
     T(0.055, y2, "만기 이후 투자자별 선물 누적 순매수", 21, "black")
-    T(0.055, y2 + 36, f"{lab(inv[0][0])}부터 일별 순매수를 더한 값 · 단위 계약", 13, c=GR)
+    T(0.055, y2 + 36, f"{lab(inv[0][0])}부터 일별 순매수를 더한 값 · 단위 억원", 13, c=GR)
     for i, (k, name) in enumerate((("frn", "외국인"), ("ins", "기관"), ("ind", "개인"))):
         v = cum[k][-1]; T(0.055 + i * 0.3, y2 + 72, name, 15, "bold", GR); T(0.055 + i * 0.3, y2 + 96, f"{v:+,}", 30, "black", UP if v > 0 else DN if v < 0 else WH)
     ax2 = fig.add_axes([0.11, fy(y2 + 500), 0.81, 350 / Hp])
