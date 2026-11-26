@@ -1,0 +1,16 @@
+name: brief-probe
+on:
+  push:
+    branches: [claude/project-thread-2t1pc7]
+    paths: [tools/probe.py]
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests && python tools/probe.py
+      - run: |
+          git config user.name "github-actions"; git config user.email "actions@users.noreply.github.com"
+          git add samples/raw; git diff --cached --quiet || (git commit -q -m "probe raw" && git pull --rebase -q && git push -q)
