@@ -13,7 +13,7 @@ import requests
 import weather
 from books import git_push, models
 
-H = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"}
+H = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36"}
 CFG = {"kr": dict(index="^KS11", index_name="코스피", amount=1_000_000, cur="원", tz="Asia/Seoul"),
        "us": dict(index="^GSPC", index_name="S&P 500", amount=1000, cur="$", tz="America/Los_Angeles")}
 
@@ -38,12 +38,13 @@ US_FALLBACK = [("AAPL", "Apple"), ("MSFT", "Microsoft"), ("NVDA", "Nvidia"), ("A
 
 
 def get(url, **kw):
-    for i in range(3):
+    hd = {**H, **kw.pop("headers", {})}
+    for i in range(4):
         try:
-            r = requests.get(url, headers={**H, **kw.pop("headers", {})}, timeout=25, **kw); r.raise_for_status(); return r
+            r = requests.get(url, headers=hd, timeout=25, **kw); r.raise_for_status(); return r
         except Exception:
-            if i == 2: raise
-            time.sleep(2 + 2 * i)
+            if i == 3: raise
+            time.sleep(3 + 4 * i)
 
 
 # ------------------------------------------------------------------ 종목판
@@ -74,8 +75,15 @@ _cache = {}
 
 
 def series(sym):
-    """(날짜→종가 dict, 현재가). 6개월치 일봉."""
+    """(날짜→종가 dict, 현재가). 6개월치 일봉. 한국 종목·코스피는 네이버(fchart), 미국은 Yahoo."""
     if sym in _cache: return _cache[sym]
+    if sym.endswith(".KS") or sym == "^KS11":
+        code = "KOSPI" if sym == "^KS11" else sym[:-3]
+        t = get("https://fchart.stock.naver.com/sise.nhn", params={"symbol": code, "timeframe": "day", "count": 140, "requestType": 0}).content.decode("euc-kr", "replace")
+        closes = {dt.datetime.strptime(a.split("|")[0], "%Y%m%d").date(): float(a.split("|")[4]) for a in re.findall(r'data="([^"]+)"', t)}
+        if not closes: raise RuntimeError(f"네이버 시세 없음 {code}")
+        _cache[sym] = (closes, closes[max(closes)]); return _cache[sym]
+    time.sleep(.6)
     j = get(f"https://query1.finance.yahoo.com/v8/finance/chart/{requests.utils.quote(sym)}", params={"range": "6mo", "interval": "1d"}).json()["chart"]["result"][0]
     tz = ZoneInfo(j["meta"].get("exchangeTimezoneName", "UTC"))
     closes = {dt.datetime.fromtimestamp(t, tz).date(): c for t, c in zip(j.get("timestamp", []), j["indicators"]["quote"][0]["close"]) if c}
