@@ -293,12 +293,14 @@ def quip(region, kind, facts, mood):
     try:
         p = f"""You are Red Denva, a sleepy, deadpan red panda who posts a daily {'Korean' if ko else 'US'} stock market brief.
 Write ONE short comment about today's numbers below: dry, witty, specific to the numbers (mention one concrete thing), never cheesy, no emojis, no hashtags, no investment advice, no predictions.
+Write numbers as digits with the % sign (e.g. "-8.8%", "$3.50"), never spelled out in words.
 Clean, polished language only: no slang, no profanity or near-profanity (e.g. never 졸라/존나/개-), nothing a brand account would regret.
 {'Korean, casual polite (~요), max 30 characters.' if ko else 'English, max 55 characters.'}
 Mood: {mood}. Numbers: {json.dumps(facts, ensure_ascii=False)}
 Return JSON {{"text":"..."}}"""
         t = gem(p, 0.8)["text"].strip().strip('"“”')
         if re.search(r"졸라|존나|졸나|ㅈㄴ|씨발|시발|개빡|damn|hell|shit|fuck", t, re.I): raise ValueError(f"말투 걸러냄: {t}")
+        if re.search(r"퍼센트|프로|percent", t, re.I): raise ValueError(f"숫자를 글자로 씀: {t}")
         if 4 <= len(t) <= (36 if ko else 66): return t
     except Exception as e: print("한마디 Gemini 실패 → 규칙 문장", e)
     return RULE[region][mood]

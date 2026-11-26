@@ -236,7 +236,7 @@ def qrow(q, up, dn):
 
 def qtile(q, up, dn):
     p, txt, m = qmove(q)
-    return dict(l=q["name"], v=qval(q), c=(f"{p:+.2f}%" if p is not None else txt or q.get("text", "")), cc=up if m > 0 else dn if m < 0 else "var(--psub)")
+    return dict(l=q["name"], v=qval(q), c=(("보합" if "원" in str(q.get("unit")) or any("\uac00" <= ch <= "\ud7a3" for ch in q["name"]) else "unch.") if p == 0 else f"{p:+.2f}%" if p is not None else txt or q.get("text", "")), cc=up if m > 0 else dn if m < 0 else "var(--psub)")
 
 
 def heatbg(p, ko):
