@@ -66,6 +66,10 @@
   .dgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; width: 980px; margin-top: 50px; }
   .dchip { height: 104px; border-radius: 22px; background: var(--chip); color: var(--fg); font-size: 29px; font-weight: 700; display: flex; align-items: center;
            justify-content: center; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+  .dgrid.big .dchip { height: 168px; font-size: 52px; font-weight: 900; border-radius: 30px; }
+  .dchip .up { color: var(--up); } .dchip .dn { color: var(--dn); }
+  .dchip.on .up, .dchip.on .dn, .dchip.hit .up, .dchip.hit .dn { color: inherit; }
+  .hook.xl { font-size: 220px; letter-spacing: -0.06em; }
   .dchip.on { background: var(--acc); color: #2a1a10; transform: scale(1.06); }
   .dchip.hit { background: #e0482a; color: #fff; transform: scale(1.12); box-shadow: 0 16px 40px rgba(0,0,0,.4); }
   .dart { position: absolute; left: 0; top: 0; width: 440px; height: 120px; opacity: 0; transform-origin: 0 50%; filter: drop-shadow(0 10px 14px rgba(0,0,0,.35)); }
@@ -201,7 +205,7 @@ const T = {
       ${s.credit ? `<div class="vcredit" ${A("fade", .8)}>${esc(s.credit)}</div>` : ""}`;
   },
   dart(s) {  // 종목판에서 불빛이 돌다가 멈추고, 그 칸에 다트가 꽂힌다
-    return `<div class="col" style="top:${s.top || 200}px">${head(s)}<div class="dgrid">${s.names.map(n => `<div class="dchip">${esc(n)}</div>`).join("")}</div></div>
+    return `<div class="col" style="top:${s.top || 200}px">${head(s)}<div class="dgrid ${s.big ? "big" : ""}" style="${s.cols ? `grid-template-columns:repeat(${s.cols},1fr)` : ""}">${s.names.map(n => `<div class="dchip">${rich(n)}</div>`).join("")}</div></div>
       <svg class="dart" viewBox="0 0 220 60"><line x1="10" y1="30" x2="170" y2="30" stroke="#ffffff" stroke-width="11" stroke-linecap="round"/>
         <polygon points="0,30 24,21 24,39" fill="#cfd6e4"/><polygon points="150,30 215,4 196,30 215,56" fill="#ff8a4c"/></svg>`;
   },

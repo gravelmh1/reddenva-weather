@@ -168,40 +168,39 @@ def news(d, region):
 
 
 def dart(d, region):
-    """수요일 다트 투자: 지난주 결과 → 주간 전적·누적 성적 → 종목판에 다트 → 이번 주 종목 → 카드."""
+    """수요일 다트 예측: 지난주 채점 → 누적 전적 → 오른다/내린다 판에 다트 → 이번 주 방향 → 카드. 종목은 안 나옴."""
     import random
-    c = d["c"]; ko = region == "kr"; new, last, tot = c["new"], c.get("last"), c.get("tot")
-    up, dn = ("up", "dn")
-    pc = lambda x: f"{x * 100:+.1f}%"
+    c = d["c"]; ko = region == "kr"; new, last, rec, idx = c["new"], c.get("last"), c["rec"], c["index_name"]
+    pc = lambda x: "0.0%" if abs(x) < 5e-4 else f"{x * 100:+.1f}%"
+    word = lambda u: ("오른다" if u else "내린다") if ko else ("UP" if u else "DOWN")
     sc = []
     if last:
-        win = last["win"]
-        sc.append(dict(type="hook", kicker="지난주 다트" if ko else "Last week's dart", label=last["name"],
-                       big=dict(to=round(last["wk_ret"] * 100, 1), dp=1, sign=True, suf="%"),
-                       sub=(f"같은 1주 {c['index_name']} {pc(last['wk_idx'])}" if ko else f"{c['index_name']} {pc(last['wk_idx'])} that week"),
-                       pill=(("무승부" if last.get("draw") else "다트 승" if win else "지수 승") if ko else ("A draw" if last.get("draw") else "Darts win" if win else "Index wins")), pillc="#e0482a" if win else "#5a6478",
-                       pose="a04" if win else "a06", poseh=260, bigc="var(--up)" if last["wk_ret"] >= 0 else "var(--dn)", dur=4.2))
-    if tot:
-        tiles = [dict(l="레드덴바 다트" if ko else "Red Denva's darts", n=round(tot["ret"] * 100, 1), dp=1, sign=True, suf="%", vc="var(--up)" if tot["ret"] >= 0 else "var(--dn)"),
-                 dict(l=c["index_name"] + (" 그냥 사기" if ko else " index"), n=round(tot["ret_idx"] * 100, 1), dp=1, sign=True, suf="%", vc="var(--up)" if tot["ret_idx"] >= 0 else "var(--dn)")]
-        dr = tot.get("draws", 0)
-        rec = (f"다트 [[acc:{tot['wins']}승]] {dr and f'{dr}무 ' or ''}{tot['losses']}패" if ko else f"Darts [[acc:{tot['wins']}-{tot['losses']}]]" + (f"-{dr}" if dr else ""))
-        lead = tot["ret"] - tot["ret_idx"]
-        verdict = ((f"누적은 다트가 {abs(lead) * 100:.1f}%p 앞섬" if lead > 0 else f"누적은 지수가 {abs(lead) * 100:.1f}%p 앞섬") if ko else
-                   (f"Darts lead by {abs(lead) * 100:.1f} pts overall" if lead > 0 else f"Index leads by {abs(lead) * 100:.1f} pts overall"))
-        sc.append(dict(type="tiles", kicker="주간 전적" if ko else "Weekly record", title=rec, tiles=tiles, nsz=120,
-                       rows=[["누적" if ko else "Total", verdict]], pose="a16" if lead > 0 else "a15", poseh=220, dur=4.6))
-    names = [n for _, n in d["board"]]; hit = names.index(new["name"])
-    rng = random.Random(hash(new["sym"]) & 0xffff); seq = []
-    for _ in range(17):
-        seq.append(rng.choice([i for i in range(len(names)) if not seq or i != seq[-1]]))
-    seq.append(hit)
-    sc.append(dict(type="dart", kicker=f"{c['week']}주차" if ko else f"Week {c['week']}", title="이번 주 다트는…" if ko else "This week's dart…",
-                   names=names, hit=hit, seq=seq, spin0=.6, spin=2.4, top=190, dur=4.6))
-    code = new["sym"].replace(".KS", "")
-    sc.append(dict(type="hook", kicker="이번 주 다트" if ko else "This week's dart", lines=[new["name"]], size="s" if len(new["name"]) > (6 if ko else 10) else "",
-                   sub=" · ".join(x for x in (code, new.get("what", "")) if x), pill=new.get("quip") or None, pillc="#14284d", pose="a00", poseh=280,
-                   dur=2.2 + rd(new["name"], new.get("what", ""), new.get("quip", ""), ko=ko)))
+        lu = last["call"] == "up"; hit = last["hit"]; r = last["result"]
+        sc.append(dict(type="hook", kicker=(f"지난주 다트: {word(lu)}" if ko else f"Last week's dart: {word(lu)}"), label=idx,
+                       big=dict(to=round(r * 100, 1), dp=1, sign=True, suf="%"), bigc="var(--up)" if r > 0 else "var(--dn)",
+                       sub=f"{last['entry']:,.2f} → {last['exit']:,.2f}",
+                       pill=(("적중" if hit else "빗나감") if ko else ("HIT" if hit else "MISS")), pillc="#e0482a" if hit else "#5a6478",
+                       pose="a04" if hit else "a06", poseh=260, dur=4.2))
+    if rec["n"]:
+        title = (f"누적 [[acc:{rec['hit']}승]] {rec['miss']}패" if ko else f"Record [[acc:{rec['hit']}-{rec['miss']}]]")
+        tiles = [dict(l="레드덴바 적중률" if ko else "Red Denva's hit rate", n=round(rec["rate"] * 100), dp=0, suf="%", vc="var(--acc)"),
+                 dict(l="동전 던지기" if ko else "A coin flip", v="50%")]
+        good = rec["rate"] > .5
+        cm = (("동전보다 나음. 다트 덕분." if good else "동전한테 짐. 다트 탓.") if ko else ("Beating a coin. Thanks, dart." if good else "Losing to a coin. Blame the dart."))
+        sc.append(dict(type="tiles", kicker="주간 전적" if ko else "Weekly record", title=title, tiles=tiles, nsz=130,
+                       rows=[["한마디" if ko else "Verdict", cm]], pose="a16" if good else "a15", poseh=220, dur=4.4))
+    up = new["call"] == "up"; names, ups = [], []
+    for i in range(12):
+        u = (i // 3 + i % 3) % 2 == 0; ups.append(u); names.append(f"[[{'up' if u else 'dn'}:{word(u)}]]")
+    cand = [i for i, u in enumerate(ups) if u == up]
+    rng = random.Random(new["date"] + region); hitc = rng.choice(cand); seq = []
+    for _ in range(15): seq.append(rng.choice([i for i in range(12) if not seq or i != seq[-1]]))
+    seq.append(hitc)
+    sc.append(dict(type="dart", kicker=(f"{c['week']}주차 · 다음 주 수요일까지" if ko else f"Week {c['week']} · by next Wednesday"),
+                   title=(f"{idx}는…" if ko else f"the {idx} goes…"), names=names, hit=hitc, seq=seq, cols=3, big=True, spin0=.6, spin=2.4, top=190, dur=4.6))
+    sc.append(dict(type="hook", kicker=(f"다음 주 수요일까지 {idx}는" if ko else f"By next Wednesday, the {idx} goes"),
+                   lines=[f"[[{'up' if up else 'dn'}:{word(up)}]]"], size="xl", sub=(f"기준 {new['entry']:,.2f} · 다트가 정함" if ko else f"From {new['entry']:,.2f} · a dart decided"),
+                   pill=("맞히면 다트 덕, 틀리면 다트 탓" if ko else "Not a forecast. Just a dart."), pillc="#14284d", pose="a00", poseh=280, dur=4.0))
     th = theme("terminal")
     if ko: th["vars"].update(up="#ff5a5f", dn="#4d8dff")
     else: th["vars"].update(up="#2fd08a", dn="#ff5a5f")
@@ -372,10 +371,10 @@ def brief(d, region):
 ADAPT = dict(dart=dart, weather=weather, morning=brief, close=brief, deriv=deriv, books=books, news=news, puppy=puppy, facts=facts, trip=trip, netflix=netflix)
 
 
-SERIES = {"kr": {"weather": "[[acc:서울]] 날씨", "books": "이번 주 [[acc:책]]", "news": "[[acc:좋은 뉴스]]", "puppy": "[[acc:아기 동물]]", "dart": "[[acc:다트]] 투자",
+SERIES = {"kr": {"weather": "[[acc:서울]] 날씨", "books": "이번 주 [[acc:책]]", "news": "[[acc:좋은 뉴스]]", "puppy": "[[acc:아기 동물]]", "dart": "[[acc:다트]] 예측",
                  "deriv": "[[acc:파생]] 브리핑", "trip": "[[acc:주말 여행]]", "facts": "[[acc:동물 상식]]", "netflix": "[[acc:넷플릭스]]",
                  "morning": "[[acc:모닝]] 브리프", "close": "[[acc:마감]] 브리프"},
-          "us": {"weather": "[[acc:LA]] weather", "books": "[[acc:Book]] of the week", "news": "[[acc:Good news]]", "puppy": "[[acc:Baby animal]]", "dart": "[[acc:Dart]] portfolio",
+          "us": {"weather": "[[acc:LA]] weather", "books": "[[acc:Book]] of the week", "news": "[[acc:Good news]]", "puppy": "[[acc:Baby animal]]", "dart": "[[acc:Dart]] call",
                  "deriv": "[[acc:Derivatives]]", "trip": "[[acc:Weekend trip]]", "facts": "[[acc:Animal facts]]", "netflix": "[[acc:Netflix]] top 10",
                  "morning": "[[acc:Morning]] Brief", "close": "[[acc:Closing]] Brief"}}
 EN_DAY_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
