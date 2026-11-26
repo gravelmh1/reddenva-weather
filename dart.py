@@ -1,8 +1,8 @@
-"""수요일 시리즈 "레드덴바 다트 예측": 다음 주 수요일까지 지수가 오를지 내릴지 다트로 정한다.
+"""수요일 시리즈 "레드덴바의 동전 던지기": 다음 주 수요일까지 지수가 오를지 내릴지 동전으로 정한다. (앞면 = 오른다, 뒷면 = 내린다)
 
 - 종목은 절대 안 나온다 (리딩질 금지). 한국판 = 코스피, 미국판 = 나스닥 종합지수만.
-- 매주 수요일: ① 지난주 다트(오른다/내린다)가 맞았는지 확인 (지난 수요일 → 오늘, 지수 등락) ② 누적 적중 전적 ③ 새 다트.
-- 다트는 진짜 무작위(반반). 기록은 state/dart_{region}.json. 지수: 코스피 = 네이버 증권, 나스닥 = Yahoo Finance (둘 다 무료).
+- 매주 수요일: ① 지난주 동전(오른다/내린다)이 맞았는지 확인 (지난 수요일 → 오늘, 지수 등락) ② 누적 적중 전적 ③ 새 동전.
+- 동전은 진짜 무작위(반반). 기록은 state/dart_{region}.json. 지수: 코스피 = 네이버 증권, 나스닥 = Yahoo Finance (둘 다 무료).
 
   python dart.py --region kr [--dry-run] [--force] [--day 2026-12-02] [--demo 4]
   --demo N: 시험용. 지난 N주 수요일에 이미 던졌던 것처럼 과거 지수로 채워서 'N+1주차' 모습을 미리 본다 (state 저장 안 함)
@@ -74,7 +74,7 @@ def main():
     if st["picks"] and st["picks"][-1]["date"] == day:  # 오늘 이미 던졌으면 그대로 (재실행)
         new = st["picks"][-1]
     else:
-        # 지난 다트들 채점: 던진 날 → 1주 뒤(오늘) 지수
+        # 지난 동전들 채점: 던진 날 → 1주 뒤(오늘) 지수
         for p in st["picks"]:
             if "result" in p: continue
             d1 = dt.date.fromisoformat(p["date"]) + dt.timedelta(days=7)
@@ -90,19 +90,19 @@ def main():
 
     import dart_render
     card = dict(region=region, day=day, handle=f"@reddenva.{region}", week=new["week"], new=new, last=last, rec=rec, index_name=cfg["index_name"],
-                top=(f"WEDNESDAY DART · {today:%Y.%m.%d} ({'월화수목금토일'[today.weekday()]})" if ko else f"WEDNESDAY DART · {today:%b %d, %Y} ({today:%a})".upper()),
-                foot=(f"다트가 정한 방향 · 리딩질 금지 · 레드덴바는 책임 안 짐 · 지수: {cfg['src']}" if ko else
-                      f"A dart decided it, not a forecast · Red Denva takes no responsibility · Index: {cfg['src']}"))
+                top=(f"WEDNESDAY COIN · {today:%Y.%m.%d} ({'월화수목금토일'[today.weekday()]})" if ko else f"WEDNESDAY COIN · {today:%b %d, %Y} ({today:%a})".upper()),
+                foot=(f"동전이 정한 방향 · 리딩질 금지 · 레드덴바는 책임 안 짐 · 지수: {cfg['src']}" if ko else
+                      f"A coin decided it, not a forecast · Red Denva takes no responsibility · Index: {cfg['src']}"))
     img_rel = f"out/dart-{region}-{day}.jpg"; dart_render.card(card, img_rel)
     up = new["call"] == "up"
     if ko:
-        res = (f"지난주 다트 {'적중' if last['hit'] else '빗나감'} ({cfg['index_name']} {last['result']:+.1%}) · 누적 {rec['hit']}승 {rec['miss']}패\n" if last else "")
-        cap = (f"🎯 다음 주 수요일까지 {cfg['index_name']}는… {'오른다 📈' if up else '내린다 📉'} (다트가 정함)\n{res}\n"
-               f"#다트예측 #레드덴바 #코스피 #주식 #리딩질금지 #수요일")
+        res = (f"지난주 동전 {'적중' if last['hit'] else '빗나감'} ({cfg['index_name']} {last['result']:+.1%}) · 누적 {rec['hit']}승 {rec['miss']}패\n" if last else "")
+        cap = (f"🪙 다음 주 수요일까지 {cfg['index_name']}는… {'오른다 📈' if up else '내린다 📉'} (레드덴바가 동전 던져서 정함)\n{res}\n"
+               f"#동전던지기 #레드덴바 #코스피 #주식 #리딩질금지 #수요일")
     else:
-        res = (f"Last week's dart: {'hit' if last['hit'] else 'miss'} (Nasdaq {last['result']:+.1%}) · record {rec['hit']}-{rec['miss']}\n" if last else "")
-        cap = (f"🎯 By next Wednesday the Nasdaq will go… {'UP 📈' if up else 'DOWN 📉'} (a dart decided)\n{res}\n"
-               f"#dartboard #reddenva #nasdaq #stocks #notadvice #wednesday")
+        res = (f"Last week's coin: {'hit' if last['hit'] else 'miss'} (Nasdaq {last['result']:+.1%}) · record {rec['hit']}-{rec['miss']}\n" if last else "")
+        cap = (f"🪙 By next Wednesday the Nasdaq will go… {'UP 📈' if up else 'DOWN 📉'} (Red Denva flipped a coin)\n{res}\n"
+               f"#coinflip #reddenva #nasdaq #stocks #notadvice #wednesday")
     import reel_data
     reel_data.save("dart", region, {"c": card, "cards": [os.path.abspath(img_rel)], "day": day})
     if not a.demo: json.dump(st, open(sf, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
@@ -114,7 +114,7 @@ def main():
     for _ in range(12):
         if requests.head(url, timeout=15).ok: break
         time.sleep(5)
-    json.dump({"date": day, "image_url": url, "caption": cap, "title": "dart call"}, open(lp, "w", encoding="utf-8"), ensure_ascii=False)
+    json.dump({"date": day, "image_url": url, "caption": cap, "title": "coin flip"}, open(lp, "w", encoding="utf-8"), ensure_ascii=False)
     git_push(["out"], f"dart {region} {day} latest.json"); print("저장 완료:", url)
 
 
