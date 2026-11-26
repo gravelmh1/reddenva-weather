@@ -57,7 +57,8 @@ def universe(region):
                 j = get("https://m.stock.naver.com/api/stocks/marketValue/KOSPI", params={"page": page, "pageSize": 100}).json()
                 for s in j.get("stocks", []):
                     code, name = s.get("itemCode", ""), s.get("stockName", "")
-                    if re.fullmatch(r"\d{6}", code) and not re.search(r"우$|우B$|우\(|스팩|리츠|ETN|KODEX|TIGER", name): out.append((code + ".KS", name))
+                    etf = s.get("stockEndType", "stock") not in ("stock", None) or re.search(r"우$|우B$|우\(|스팩|리츠|ETN|ETF|KODEX|TIGER|RISE|ACE|SOL|PLUS|HANARO|KBSTAR|ARIRANG|KOSEF|채권|레버리지|인버스|선물|\d{3}$", name)
+                    if re.fullmatch(r"\d{6}", code) and not etf: out.append((code + ".KS", name))
             if len(out) >= 120: return out[:200]
             print("네이버 종목판 부족:", len(out))
         else:
@@ -133,11 +134,11 @@ def score(region, picks, day):
         if d1 < day:
             wr = price_on(p["sym"], d1) / p["entry"] - 1; wi = price_on(cfg["index"], d1) / p["entry_idx"] - 1
         else: wr, wi = r, ri
-        rows.append({**p, "now": cur, "ret": r, "idx_ret": ri, "wk_ret": wr, "wk_idx": wi, "win": wr > wi})
+        rows.append({**p, "now": cur, "ret": r, "idx_ret": ri, "wk_ret": wr, "wk_idx": wi, "win": wr > wi + 5e-4, "draw": abs(wr - wi) <= 5e-4})
     inv = sum(p["amount"] for p in rows)
     val = sum(p["amount"] * (1 + p["ret"]) for p in rows); vali = sum(p["amount"] * (1 + p["idx_ret"]) for p in rows)
-    wins = sum(1 for p in rows if p["win"])
-    return rows, {"wins": wins, "losses": len(rows) - wins, "invested": inv, "value": val, "value_idx": vali, "ret": val / inv - 1 if inv else 0, "ret_idx": vali / inv - 1 if inv else 0}
+    wins = sum(1 for p in rows if p["win"]); draws = sum(1 for p in rows if p["draw"])
+    return rows, {"wins": wins, "draws": draws, "losses": len(rows) - wins - draws, "invested": inv, "value": val, "value_idx": vali, "ret": val / inv - 1 if inv else 0, "ret_idx": vali / inv - 1 if inv else 0}
 
 
 def throw(uni, used, rng):
@@ -195,7 +196,7 @@ def main():
     c = dict(region=region, day=day, handle=f"@reddenva.{region}", week=new["week"], new=new, last=last, tot=tot, rows=rows,
              index_name=cfg["index_name"], amount=cfg["amount"],
              top=(f"WEDNESDAY DART · {today:%Y.%m.%d} ({'월화수목금토일'[today.weekday()]})" if ko else f"WEDNESDAY DART · {today:%b %d, %Y} ({today:%a})".upper()),
-             foot=("다트가 고른 종목 · 리딩질 금지 · 레드덴바는 책임 안 짐 (가상 투자) · 시세: Yahoo Finance" if ko else
+             foot=("다트가 고른 종목 · 리딩질 금지 · 레드덴바는 책임 안 짐 (가상 투자) · 시세: 네이버 증권" if ko else
                    "A dart picked it, not a tip · Red Denva takes no responsibility (paper money) · Prices: Yahoo Finance"))
     img_rel = f"out/dart-{region}-{day}.jpg"; dart_render.card(c, img_rel)
     nm = new["name"]

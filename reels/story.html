@@ -64,11 +64,11 @@
   .vtext .vt.s { font-size: 92px; } .vtext .vt.xs { font-size: 76px; }
   .vcredit { position: absolute; left: 64px; right: 64px; top: 1478px; color: rgba(255,255,255,.62); font-size: 24px; text-align: right; text-shadow: 0 1px 6px rgba(0,0,0,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .dgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; width: 980px; margin-top: 50px; }
-  .dchip { height: 104px; border-radius: 22px; background: var(--chip); color: var(--fg); font-size: 32px; font-weight: 700; display: flex; align-items: center;
-           justify-content: center; padding: 0 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+  .dchip { height: 104px; border-radius: 22px; background: var(--chip); color: var(--fg); font-size: 29px; font-weight: 700; display: flex; align-items: center;
+           justify-content: center; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
   .dchip.on { background: var(--acc); color: #2a1a10; transform: scale(1.06); }
   .dchip.hit { background: #e0482a; color: #fff; transform: scale(1.12); box-shadow: 0 16px 40px rgba(0,0,0,.4); }
-  .dart { position: absolute; left: 0; top: 0; width: 360px; height: 98px; opacity: 0; transform-origin: 0 50%; filter: drop-shadow(0 10px 14px rgba(0,0,0,.35)); }
+  .dart { position: absolute; left: 0; top: 0; width: 440px; height: 120px; opacity: 0; transform-origin: 0 50%; filter: drop-shadow(0 10px 14px rgba(0,0,0,.35)); }
   .wk { width: 960px; height: 760px; padding: 40px 18px; display: flex; }
   .wc { flex: 1; position: relative; text-align: center; border-radius: 30px; }
   .wc.today { background: var(--today); }
@@ -202,8 +202,8 @@ const T = {
   },
   dart(s) {  // 종목판에서 불빛이 돌다가 멈추고, 그 칸에 다트가 꽂힌다
     return `<div class="col" style="top:${s.top || 200}px">${head(s)}<div class="dgrid">${s.names.map(n => `<div class="dchip">${esc(n)}</div>`).join("")}</div></div>
-      <svg class="dart" viewBox="0 0 220 60"><line x1="10" y1="30" x2="170" y2="30" stroke="#14284d" stroke-width="10" stroke-linecap="round"/>
-        <polygon points="0,30 22,22 22,38" fill="#5a6478"/><polygon points="150,30 215,4 196,30 215,56" fill="#ff8a4c"/></svg>`;
+      <svg class="dart" viewBox="0 0 220 60"><line x1="10" y1="30" x2="170" y2="30" stroke="#ffffff" stroke-width="11" stroke-linecap="round"/>
+        <polygon points="0,30 24,21 24,39" fill="#cfd6e4"/><polygon points="150,30 215,4 196,30 215,56" fill="#ff8a4c"/></svg>`;
   },
   week(s) {
     const W = s.days, lo = Math.min(...W.map(w => w.lo)) - 1, hi = Math.max(...W.map(w => w.hi)) + 1;

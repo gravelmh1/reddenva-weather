@@ -179,12 +179,13 @@ def dart(d, region):
         sc.append(dict(type="hook", kicker="지난주 다트" if ko else "Last week's dart", label=last["name"],
                        big=dict(to=round(last["wk_ret"] * 100, 1), dp=1, sign=True, suf="%"),
                        sub=(f"같은 1주 {c['index_name']} {pc(last['wk_idx'])}" if ko else f"{c['index_name']} {pc(last['wk_idx'])} that week"),
-                       pill=(("다트 승" if win else "지수 승") if ko else ("Darts win" if win else "Index wins")), pillc="#e0482a" if win else "#5a6478",
+                       pill=(("무승부" if last.get("draw") else "다트 승" if win else "지수 승") if ko else ("A draw" if last.get("draw") else "Darts win" if win else "Index wins")), pillc="#e0482a" if win else "#5a6478",
                        pose="a04" if win else "a06", poseh=260, bigc="var(--up)" if last["wk_ret"] >= 0 else "var(--dn)", dur=4.2))
     if tot:
         tiles = [dict(l="레드덴바 다트" if ko else "Red Denva's darts", n=round(tot["ret"] * 100, 1), dp=1, sign=True, suf="%", vc="var(--up)" if tot["ret"] >= 0 else "var(--dn)"),
                  dict(l=c["index_name"] + (" 그냥 사기" if ko else " index"), n=round(tot["ret_idx"] * 100, 1), dp=1, sign=True, suf="%", vc="var(--up)" if tot["ret_idx"] >= 0 else "var(--dn)")]
-        rec = (f"다트 [[acc:{tot['wins']}승]] {tot['losses']}패" if ko else f"Darts [[acc:{tot['wins']}-{tot['losses']}]]")
+        dr = tot.get("draws", 0)
+        rec = (f"다트 [[acc:{tot['wins']}승]] {dr and f'{dr}무 ' or ''}{tot['losses']}패" if ko else f"Darts [[acc:{tot['wins']}-{tot['losses']}]]" + (f"-{dr}" if dr else ""))
         lead = tot["ret"] - tot["ret_idx"]
         verdict = ((f"누적은 다트가 {abs(lead) * 100:.1f}%p 앞섬" if lead > 0 else f"누적은 지수가 {abs(lead) * 100:.1f}%p 앞섬") if ko else
                    (f"Darts lead by {abs(lead) * 100:.1f} pts overall" if lead > 0 else f"Index leads by {abs(lead) * 100:.1f} pts overall"))

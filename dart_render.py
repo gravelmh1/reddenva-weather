@@ -92,17 +92,18 @@ def card(c: dict, out: str):
         d.text((M, y), l1, font=fit(d, l1, "Black", 40, W - 2 * M - 260, 24), fill=NAVY)
         col = up if last["ret"] >= 0 else dn
         d.text((W - M, y + 22), pct(last["wk_ret"]), font=font("Black", 48), fill=up if last["wk_ret"] >= 0 else dn, anchor="rm")
-        l2 = ((f"같은 1주 {c['index_name']} {pct(last['wk_idx'])} → " + ("다트 승" if last["win"] else "지수 승")) if ko else
-              (f"{c['index_name']} {pct(last['wk_idx'])} that week → " + ("darts win" if last["win"] else "index wins")))
+        l2 = ((f"같은 1주 {c['index_name']} {pct(last['wk_idx'])} → " + ("무승부" if last.get("draw") else "다트 승" if last["win"] else "지수 승")) if ko else
+              (f"{c['index_name']} {pct(last['wk_idx'])} that week → " + ("a draw" if last.get("draw") else "darts win" if last["win"] else "index wins")))
         d.text((M, y + 56), l2, font=font("Bold", 30), fill=GR)
         # 주간 전적: 주차별 승패 칸
         y += 112; t = c["tot"]; rows = c["rows"][-12:]
-        rec = (f"주간 전적  다트 {t['wins']}승 {t['losses']}패" if ko else f"Weekly record  Darts {t['wins']}-{t['losses']}")
+        dr = t.get("draws", 0)
+        rec = (f"주간 전적  다트 {t['wins']}승 {dr and f'{dr}무 ' or ''}{t['losses']}패" if ko else f"Weekly record  Darts {t['wins']}-{t['losses']}" + (f"-{dr}" if dr else ""))
         d.text((M, y + 6), rec, font=font("Black", 34), fill=NAVY)
         x = W - M; cf = font("Black", 26)
         for r in reversed(rows):
-            s = ("승" if r["win"] else "패") if ko else ("W" if r["win"] else "L"); x -= 52
-            d.rounded_rectangle([x, y, x + 44, y + 52], radius=12, fill=OR if r["win"] else (205, 205, 210))
+            s = ("무" if r.get("draw") else "승" if r["win"] else "패") if ko else ("D" if r.get("draw") else "W" if r["win"] else "L"); x -= 52
+            d.rounded_rectangle([x, y, x + 44, y + 52], radius=12, fill=OR if r["win"] else (160, 165, 180) if r.get("draw") else (205, 205, 210))
             d.text((x + 22, y + 26), s, font=cf, fill=WHITE, anchor="mm")
             if x < M + 420: break
     else:
