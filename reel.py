@@ -246,70 +246,59 @@ def heatbg(p, ko):
 
 
 def brief(d, region):
+    """짧게, 핵심만, 캐릭터로. 모닝: 표지 → 날씨 → D램 → GPU → 간밤 시장(한마디) → 카드. 마감: 표지 → 한마디 → 지수 차트 → 수급/섹터 → 카드."""
     ko = region == "kr"; up, dn = ("#ff5a5f", "#4d8dff") if ko else ("#2fd08a", "#ff5a5f")
     th = theme("terminal"); th["vars"].update(up=up, dn=dn)
-    secs = {s["type"] + str(i): s for i, s in enumerate(d["sections"])}
-    hk = d["hook"]
-    hook = dict(type="hook", kicker=hk["kicker"], lines=hk["lines"], size="s", sub=f"“{d['comment']}”", pose=d.get("pose", "a05"), poseh=300)
-    hook["dur"] = min(5.2, 1.8 + rd(*hk["lines"], d["comment"], ko=ko))
-    sc = [hook]
-    for s in d["sections"]:
-        t = s["type"]
-        if t == "chips":
-            for q in s["dram"][:1]:  # D램: DDR5 하나만
-                c = up if q["pct"] > 0 else dn if q["pct"] < 0 else "#8a94a8"
-                mv = f"[[{'up' if q['pct'] > 0 else 'dn'}:{q['pct']:+.2f}%]]" if q["pct"] else ("보합" if ko else "unch.")
-                wk = " · ".join(f"{a} {q[k]:+.2f}%" for k, a in (("w1", "1주" if ko else "1W"), ("m1", "1달" if ko else "1M")) if q.get(k) is not None)
+    sec = lambda t: next((x for x in d["sections"] if x["type"] == t), None)
+    mvs = lambda q: f"[[{'up' if q['pct'] > 0 else 'dn'}:{q['pct']:+.2f}%]]" if q["pct"] else ("보합" if ko else "unch.")
+    sc = []
+    if d["kind"] == "morning":
+        w = d.get("wx")
+        if w:  # 날씨: 표지 바로 다음, 날씨 옷 입은 레드덴바
+            sc.append(dict(type="hook", chip=(f"오늘 {w['city']} 날씨" if ko else f"{w['city']} weather today"), label=w["sky"],
+                           big=dict({"from": w["lo"], "to": w["hi"]}, suf="°"), pill=(f"최저 {w['lo']}° · 비 올 확률 {w['rain']}%" if ko else f"Low {w['lo']}° · Rain {w['rain']}%"),
+                           pillc="#1f6fe5" if w["rain"] >= 40 else "#5b6b8c", pose=w.get("pose", "w00"), poseh=420, top=200, dur=4.0))
+        ch = sec("chips")
+        if ch:
+            for q in ch["dram"][:1]:
                 since = dt.date.fromisoformat(q["since"]); last = dt.date.fromisoformat(q["date"])
-                sc.append(dict(type="chart", kicker=("D램 현물가 · DDR5 16Gb" if ko else "DRAM spot · DDR5 16Gb"), title=f"${q['last']:,.{q.get('dp', 2)}f}  {mv}",
-                               series=[dict(name="DDR5 16Gb", c=c, v=q["spark"], dp=q.get("dp", 2))], xlabs=[f"{since.month}/{since.day}", "3개월" if ko else "3 months", f"{last.month}/{last.day}"],
-                               tight=True, symmetric=False, tickdp=1, drawdur=2.0, dur=2.8 + 2.4, foot=wk, footbig=True))
-            gp = sorted(s["gpu"], key=lambda q: -q["last"])
-            if gp:  # GPU: 세 개를 한 그래프에
+                wk = " · ".join(f"{a} {q[k]:+.2f}%" for k, a in (("w1", "1주" if ko else "1W"), ("m1", "1달" if ko else "1M")) if q.get(k) is not None)
+                sc.append(dict(type="chart", kicker=("D램 현물가 · DDR5 16Gb" if ko else "DRAM spot · DDR5 16Gb"), title=f"${q['last']:,.{q.get('dp', 2)}f}  {mvs(q)}",
+                               series=[dict(name="DDR5 16Gb", c=up if q["pct"] > 0 else dn if q["pct"] < 0 else "#c8cfdb", v=q["spark"], dp=q.get("dp", 2))],
+                               xlabs=[f"{since.month}/{since.day}", "3개월" if ko else "3 months", f"{last.month}/{last.day}"],
+                               tight=True, symmetric=False, tickdp=1, drawdur=1.8, dur=4.6, foot=wk, footbig=True))
+            gp = sorted(ch["gpu"], key=lambda q: -q["last"])
+            if gp:
                 col = {"B200": "#ffa94d", "H100": "#e9edf5", "A100": "#3ccfb4"}
-                mvs = lambda q: f"[[{'up' if q['pct'] > 0 else 'dn'}:{q['pct']:+.2f}%]]" if q["pct"] else ("보합" if ko else "unch.")
                 since = dt.date.fromisoformat(gp[0]["since"]); last = dt.date.fromisoformat(gp[0]["date"])
                 sc.append(dict(type="chart", kicker=("GPU 임대료 · 1시간당" if ko else "GPU rental · per hour"), title="  ".join(f"{q['name']} {mvs(q)}" for q in gp),
-                               series=[dict(name=f"{q['name']} ${q['last']:.2f}", c=col.get(q["name"], "#aaa"), v=[round((v / q["spark"][0] - 1) * 100, 2) for v in q["spark"]], dp=1, sign=True, nolab=True) for k, q in enumerate(gp)],
-                               xlabs=[f"{since.month}/{since.day}", "3개월" if ko else "3 months", f"{last.month}/{last.day}"],
-                               base=0, baselab=("3개월 전" if ko else "start"), tight=True, symmetric=False, tickdp=0, drawdur=2.0, dur=2.8 + 2.6,
-                               foot=("선 = 3개월 등락률(%) · 제목 = 하루 변동" if ko else "Lines = 3-month % change · title = daily change"), footbig=True))
-            w = d.get("wx")
-            if w:
-                tl = [dict(l="하늘" if ko else "Sky", v=w["sky"], c=w["city"], cc="var(--psub)"), dict(l="최고" if ko else "High", v=f"{w['hi']}°", c="", cc="var(--psub)"),
-                      dict(l="최저" if ko else "Low", v=f"{w['lo']}°", c="", cc="var(--psub)"), dict(l="비 올 확률" if ko else "Chance of rain", v=f"{w['rain']}%", c="", cc="var(--psub)")]
-                sc.append(dict(type="tiles", kicker=f"오늘 {w['city']} 날씨" if ko else f"{w['city']} weather today", tiles=tl, nsz=80, dur=3.6))
-            continue
-        if t in ("big", "rows") and s.get("items"):
-            rows = [qrow(q, up, dn) for q in s["items"][:6]]
-            sc.append(dict(type="board", kicker=s["title"], rows=rows, gap=.18, dur=1.6 + 0.55 * len(rows) + 1.2))
-        elif t == "hero":
-            q = s["item"]; c = up if q["pct"] > 0 else dn if q["pct"] < 0 else "#8a94a8"
+                               series=[dict(name=f"{q['name']} ${q['last']:.2f}", c=col.get(q["name"], "#aaa"), v=[round((v / q["spark"][0] - 1) * 100, 2) for v in q["spark"]], dp=1, sign=True, nolab=True) for q in gp],
+                               xlabs=[f"{since.month}/{since.day}", "3개월" if ko else "3 months", f"{last.month}/{last.day}"], base=0, baselab=("3개월 전" if ko else "start"),
+                               tight=True, symmetric=False, tickdp=0, drawdur=1.8, dur=4.8, foot=("선 = 3개월 등락률" if ko else "Lines = 3-month % change"), footbig=True))
+        big = sec("big"); rows = sec("rows")
+        items = (big["items"] if big else []) + ((rows["items"][:2]) if rows and ko else [])
+        if items:
+            rr = [qrow(q, up, dn) for q in items[:5]]
+            sc.append(dict(type="board", kicker=big["title"], rows=rr, gap=.16, foot=f"“{d['comment']}”", pose=d.get("pose", "a05"), poseh=230, dur=1.4 + 0.45 * len(rr) + 2.2))
+    else:
+        hk = d["hook"]
+        sc.append(dict(type="hook", kicker=hk["kicker"], lines=hk["lines"], size="s", sub=f"“{d['comment']}”", pose=d.get("pose", "a05"), poseh=360, dur=min(4.6, 1.8 + rd(*hk["lines"], d["comment"], ko=ko))))
+        h = sec("hero")
+        if h:
+            q = h["item"]; c = up if q["pct"] > 0 else dn if q["pct"] < 0 else "#8a94a8"
             xl = ["09:00", "12:00", "15:30"] if ko else ["9:30", "12:45", "4:00"]
-            sc.append(dict(type="chart", kicker=s["title"], title=f"{qval(q)}  [[{'up' if q['pct'] > 0 else 'dn'}:{q['pct']:+.2f}%]]",
-                           series=[dict(name=q["name"], c=c, v=q["spark"], dp=q.get("dp", 2))], base=q["prev"], baselab="전일" if ko else "prev.",
-                           xlabs=xl, tight=True, symmetric=False, tickdp=0, drawdur=2.0, dur=2.8 + 2.4,
+            sc.append(dict(type="chart", kicker=h["title"], title=f"{qval(q)}  {mvs(q)}", series=[dict(name=q["name"], c=c, v=q["spark"], dp=q.get("dp", 2))],
+                           base=q["prev"], baselab="전일" if ko else "prev.", xlabs=xl, tight=True, symmetric=False, tickdp=0, drawdur=1.8, dur=4.6,
                            foot=("점선 = 전일 종가" if ko else "Dashed line = previous close")))
-            if s.get("side"):
-                tl = [qtile(x, up, dn) for x in s.get("side_all") or s["side"]]
-                sc.append(dict(type="tiles", kicker="그 밖의 숫자" if ko else "The other indexes", tiles=tl, nsz=80, dur=1.6 + 0.4 * len(tl) + 1.0))
-        elif t == "flows":
+        f = sec("flows")
+        if f:
             who = [("frn", "외국인"), ("ins", "기관"), ("ind", "개인")]
-            groups = [dict(title=lab, rows=[dict(n=w, v=r[k], c=up if r[k] > 0 else dn) for k, w in who]) for lab, r in s["rows"]]
-            sc.append(dict(type="flows", kicker="누가 샀나" if ko else "Who bought", title="순매수 · 억원" if ko else None, groups=groups, dur=2.0 + 1.6 * len(groups) + 1.0))
-        elif t == "heat" or (t == "mini" and not ko and "world" in s["title"].lower()):
-            pass  # 아래에서 묶어서 처리
-        elif t == "mini" and s.get("items") and s.get("card") is not False:  # 카드에 없는 잡다한 숫자는 릴스에서도 뺌
-            tl = [qtile(q, up, dn) for q in s["items"][:6]]
-            sc.append(dict(type="tiles", kicker=s["title"], tiles=tl, nsz=80, dur=1.6 + 0.4 * len(tl) + 1.0))
-        elif t == "news" and s.get("items"):
-            items = [dict(num=i + 1, h=n["head"], s=n["line"]) for i, n in enumerate(s["items"])]
-            sc.append(dict(type="list", kicker=s["title"], items=items, gap=.4, dur=1.6 + rd(*[n["head"] + n["line"] for n in s["items"]], ko=ko)))
-    heats = [s for s in d["sections"] if s["type"] == "heat" or (s["type"] == "mini" and not ko and "world" in s["title"].lower())]
-    if heats:
-        groups = [dict(title=s["title"], cols=4 if len(s["items"]) > 6 else 3, items=[dict(n=q["name"], p=q["pct"], bg=heatbg(q["pct"], ko)) for q in s["items"]]) for s in heats]
-        at = next((i for i, x in enumerate(sc) if x["type"] == "tiles" and x["kicker"] not in ("그 밖의 숫자", "The other indexes")), len(sc))
-        sc.insert(at, dict(type="heat", groups=groups, top=170, dur=2.2 + 0.12 * sum(len(g["items"]) for g in groups) + 1.4))
+            groups = [dict(title=lab, rows=[dict(n=w, v=r[k], c=up if r[k] > 0 else dn) for k, w in who]) for lab, r in f["rows"]]
+            sc.append(dict(type="flows", kicker="누가 샀나", title="순매수 · 억원", groups=groups, dur=1.8 + 1.3 * len(groups) + 0.8))
+        hs = sec("heat")
+        if hs:
+            sc.append(dict(type="heat", groups=[dict(title=hs["title"], cols=4 if len(hs["items"]) > 6 else 3, items=[dict(n=q["name"], p=q["pct"], bg=heatbg(q["pct"], ko)) for q in hs["items"]])],
+                           top=230, dur=2.0 + 0.1 * len(hs["items"]) + 1.2))
     return th, sc + [cards_scene(d["cards"], ko)]
 
 

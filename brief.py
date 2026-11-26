@@ -203,7 +203,8 @@ def gpu(now):
 
 
 def chips(now, ko, kind="morning"):
-    dr = (safe(drams, now) or [])[:1] if kind == "morning" else []  # D램은 DDR5 하나만, 모닝에만
+    if kind != "morning": return None  # 반도체 현물가·GPU는 모닝 브리프에만
+    dr = (safe(drams, now) or [])[:1]  # D램은 DDR5 하나만
     gp = safe(gpu, now) or []
     if not dr and not gp: return None
     return {"type": "chips", "title": "반도체 현물가" if ko else "Chip spot prices", "small": ("DRAMeXchange · " if dr else "") + "SemiAnalysis GPU Index",
@@ -227,9 +228,13 @@ def today_wx(region, day):
     j = get("https://api.open-meteo.com/v1/forecast", params={"latitude": r["lat"], "longitude": r["lon"], "timezone": r["tz"],
             "start_date": day.isoformat(), "end_date": day.isoformat(), "temperature_unit": "celsius" if ko else "fahrenheit",
             "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code"}).json()["daily"]
-    txt, ic = sky(int(j["weather_code"][0] or 0), ko)
+    code = int(j["weather_code"][0] or 0); txt, ic = sky(code, ko)
+    hi, lo, rain = j["temperature_2m_max"][0], j["temperature_2m_min"][0], int(j["precipitation_probability_max"][0] or 0)
+    hc, lc = (hi, lo) if ko else ((hi - 32) / 1.8, (lo - 32) / 1.8)
+    pose = ("w08" if code >= 95 else "w10" if code in (71, 73, 75, 77, 85, 86) else "w06" if rain >= 60 else "w05" if rain >= 40 else "w18" if code in (45, 48)
+            else "w16" if hc >= 33 else "w13" if lc <= -5 else "w14" if lc <= 2 else "w15" if hc >= 28 and code <= 1 else {0: "w00", 1: "w01", 2: "w02", 3: "w04"}.get(code, "w03"))
     return {"city": r["city"] if ko else "LA", "sky": txt, "icon": ic, "hi": round(j["temperature_2m_max"][0]), "lo": round(j["temperature_2m_min"][0]),
-            "rain": int(j["precipitation_probability_max"][0] or 0), "unit": r["unit"]}
+            "rain": rain, "unit": r["unit"], "pose": pose}
 
 
 # ------------------------------------------------------------------ 뉴스 3줄 · 레드덴바 한마디 (Gemini, 실패하면 빼거나 규칙 문장)

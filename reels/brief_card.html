@@ -169,7 +169,7 @@ const day = new Date(D.day + "T12:00:00");
 const band = KO ? `${day.getMonth() + 1}월 ${"일월화수목금토"[day.getDay()]}` : day.toLocaleDateString("en-US", { month: "short", weekday: "short" }).toUpperCase().replace(",", "");
 let h = `<header><div class="dtile"><div class="band">${band}</div><div class="day">${day.getDate()}</div></div>
   <div class="ht"><div class="k">${esc(D.kicker)} · ${esc(D.handle)}</div><h1>${esc(D.title)}</h1><div class="s">${esc(D.sub)}</div></div>
-  ${D.wx ? wxBox(D.wx) : ""}<img src="../assets/poses/${D.pose || "a05"}.png"></header>`;
+  ${D.wx ? wxBox(D.wx) : ""}<img src="../assets/poses/${(D.wx && D.wx.pose) || D.pose || "a05"}.png"></header>`;
 if (D.comment) h += `<div class="say"><b>${KO ? "레드덴바" : "RED DENVA"}</b><span>${esc(D.comment)}</span></div>`;
 const shortDate = iso => { const d = new Date(iso + "T12:00:00"); return `${d.getMonth() + 1}/${d.getDate()}`; };
 const wk = q => [q.w1 != null ? `${KO ? "1주" : "1W"} <b class="${cls(q.w1)}">${fmt(q.w1, 2, true)}%</b>` : "", q.m1 != null ? `${KO ? "1달" : "1M"} <b class="${cls(q.m1)}">${fmt(q.m1, 2, true)}%</b>` : ""].filter(Boolean).join(" · ");
