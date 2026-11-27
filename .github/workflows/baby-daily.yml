@@ -5,8 +5,12 @@ name: baby-daily
 on:
   schedule:
     - cron: "40 0 * * *"    # 한국 09:40 KST
+    - cron: "25 1 * * *"    # 한국 10:25 KST (예비: 9:40 실행이 빠졌을 때만 올림)
     - cron: "40 16 * * *"   # 미국 09:40 PDT (서머타임)
     - cron: "40 17 * * *"   # 미국 09:40 PST
+    - cron: "25 17 * * *"   # 미국 10:25 PDT (예비)
+    - cron: "25 18 * * *"   # 미국 10:25 PST (예비)
+# GitHub 예약 실행은 가끔 통째로 빠지는 날이 있어서(11/27 첫날 실제로 빠짐) 10:25에 한 번 더 깨운다. 이미 올렸으면 건너뜀.
   workflow_dispatch:
     inputs:
       region:
@@ -25,10 +29,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
-      REGION: ${{ github.event_name == 'schedule' && (github.event.schedule == '40 0 * * *' && 'kr' || 'us') || inputs.region }}
+      REGION: ${{ github.event_name == 'schedule' && ((github.event.schedule == '40 0 * * *' || github.event.schedule == '25 1 * * *') && 'kr' || 'us') || inputs.region }}
       DRY: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
     concurrency:
-      group: post-${{ github.event_name == 'schedule' && (github.event.schedule == '40 0 * * *' && 'kr' || 'us') || inputs.region }}
+      group: post-${{ github.event_name == 'schedule' && ((github.event.schedule == '40 0 * * *' || github.event.schedule == '25 1 * * *') && 'kr' || 'us') || inputs.region }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
