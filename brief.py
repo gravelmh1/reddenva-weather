@@ -21,7 +21,8 @@ KRX_HOL = {dt.date(*d) for d in [(2026, 12, 25), (2026, 12, 31), (2027, 1, 1), (
                                  (2027, 6, 3), (2027, 8, 16), (2027, 9, 14), (2027, 9, 15), (2027, 9, 16), (2027, 10, 4), (2027, 10, 11), (2027, 12, 31)]}
 NYSE_HOL = {dt.date(*d) for d in [(2026, 11, 26), (2026, 12, 25), (2027, 1, 1), (2027, 1, 18), (2027, 2, 15), (2027, 3, 26), (2027, 5, 31),
                                   (2027, 6, 18), (2027, 7, 5), (2027, 9, 6), (2027, 11, 25), (2027, 12, 24)]}
-HOL_NAME = {dt.date(2026, 11, 26): ("추수감사절", "Thanksgiving"), dt.date(2026, 12, 25): ("크리스마스", "Christmas"), dt.date(2027, 1, 1): ("새해", "New Year's Day")}
+NYSE_HALF = {dt.date(2026, 11, 27), dt.date(2026, 12, 24), dt.date(2027, 11, 26)}  # 오후 1시(ET) 조기 폐장
+HOL_NAME = {dt.date(2026, 11, 26): ("추수감사절", "Thanksgiving"), dt.date(2026, 11, 27): ("추수감사절 다음 날", "Day after Thanksgiving"), dt.date(2026, 12, 24): ("크리스마스 이브", "Christmas Eve"), dt.date(2027, 11, 26): ("추수감사절 다음 날", "Day after Thanksgiving"), dt.date(2026, 12, 25): ("크리스마스", "Christmas"), dt.date(2027, 1, 1): ("새해", "New Year's Day")}
 
 
 def get(url, **kw):
@@ -368,9 +369,11 @@ def kr_morning(now):
                          us("^TNX", "美 국채 10년", unit="%", dp=3, kind="bp"), us("^VIX", "VIX", kind="pt"),
                          us("CL=F", "WTI 유가", unit="$", session=False), us("GC=F", "금", unit="$", dp=1, session=False)) if x]
     usd = dt.date.fromisoformat(idx[0]["date"])
-    exp = (now.astimezone(ET_) - dt.timedelta(days=1)).date()  # 한국 아침 = 미국 전날
+    et = now.astimezone(ET_)  # 한국 07시 = 뉴욕 전날 17시 → 방금 끝난 미국 장은 뉴욕 날짜 그대로
+    exp = (et if et.hour >= 16 else et - dt.timedelta(days=1)).date()
     while exp.weekday() >= 5: exp -= dt.timedelta(days=1)
     hol = exp in NYSE_HOL and usd < exp
+    half = exp in NYSE_HALF and usd == exp
     lead = max(idx, key=lambda q: abs(q["pct"]))
     facts = {q["name"]: f"{q['pct']:+.2f}%" for q in idx + chips[:4]}
     mood = "holiday" if hol else mood_of(idx[1]["pct"] if len(idx) > 1 else idx[0]["pct"])
@@ -381,6 +384,13 @@ def kr_morning(now):
                       {"type": "rows", "title": "반도체 종목", "items": chips, "card": False}],
          "hook": {"kicker": "간밤 미국", "lines": [f"{q['name'].replace('필라델피아 ', '')} {pct_rich(q['pct'])}" for q in idx[1:3]] if not hol else ["미국 증시", "[[acc:휴장]]"]},
          "foot": "자료: Yahoo Finance, 네이버 증권 · 투자 권유 아님"}
+    # 형: 휴장이면 휴장이라고 크게 (헷갈리니까)
+    if hol:
+        d["closed"] = {"big": "간밤 미국 증시 휴장", "small": f"{HOL_NAME.get(exp, ('휴장',))[0]} · 아래 숫자는 {lab(usd)} 종가"}
+        d["sections"][0]["title"] = f"미국 증시 · {lab(usd)} 종가 (간밤 휴장)"; d["facts"]["간밤 미국 증시"] = f"휴장 ({HOL_NAME.get(exp, ('휴일',))[0]}) — 숫자는 {lab(usd)} 종가"
+    elif half:
+        d["closed"] = {"big": "간밤 미국 증시 조기 폐장", "small": f"{HOL_NAME.get(exp, ('',))[0]} · 오후 1시(뉴욕) 마감"}
+        d["facts"]["간밤 미국 증시"] = "조기 폐장 (오후 1시 마감, 거래 한산)"
     return d
 
 
@@ -435,7 +445,8 @@ def us_morning(now):
             "sections": [{"type": "mini", "title": "Futures right now", "items": fut[:2] + [q for q in macro if q["name"] in ("10-yr Treasury", "WTI crude", "VIX", "Gold")], "cols": 3, "spark": True},
                          {"type": "rows", "title": f"Chip stocks · {lab(usd, False)} close", "items": chipst, "card": False}],
             "hook": {"kicker": "Before the bell", "lines": [f"{q['name'].replace(' futures', '')} {pct_rich(q['pct'], us=True)}" for q in fut[:2]], "sub": "Futures vs. yesterday's settle"},
-            "foot": "Source: Yahoo Finance · not investment advice"}
+            "foot": "Source: Yahoo Finance · not investment advice",
+            **({"closed": {"big": "Half day today", "small": f"{HOL_NAME.get(nl.date(), ('',))[1]} · stocks close at 1 p.m. ET"}} if nl.date() in NYSE_HALF else {})}
 
 
 SECTORS = [("XLK", "Tech"), ("XLC", "Comm."), ("XLY", "Discret."), ("XLF", "Financials"), ("XLV", "Health"), ("XLI", "Industrials"),
@@ -456,7 +467,10 @@ def us_close(now):
              "best sector": f"{max(sec, key=lambda q: q['pct'])['name']} {max(q['pct'] for q in sec):+.2f}%" if sec else "",
              "worst sector": f"{min(sec, key=lambda q: q['pct'])['name']} {min(q['pct'] for q in sec):+.2f}%" if sec else ""}
     best = max(sec, key=lambda q: q["pct"]) if sec else None
-    return {"region": "us", "kind": "close", "title": "Closing Brief", "kicker": "CLOSING BRIEF", "sub": f"{lab(day, False)} · U.S. close, 4 p.m. ET",
+    half = day in NYSE_HALF
+    if half: facts["session"] = "half day, closed at 1 p.m. ET (light volume)"
+    return {"region": "us", "kind": "close", "title": "Closing Brief", "kicker": "CLOSING BRIEF", "sub": f"{lab(day, False)} · U.S. close, {'1' if half else '4'} p.m. ET",
+            **({"closed": {"big": "Half day · closed at 1 p.m.", "small": f"{HOL_NAME.get(day, ('',))[1]} · light trading"}} if half else {}),
             "mood": mood, "pose": POSE[mood], "facts": facts, "hero": spx,
             "sections": [{"type": "charts", "title": "Indexes today", "items": [spx] + [q for q in idx if q["name"] in ("Nasdaq", "Semis (SOX)")], "hero": spx},
                          {"type": "heat", "title": "Sectors", "small": "SPDR sector ETFs", "items": sorted(sec, key=lambda q: -q["pct"])}], "sectors": sec, "mag": mag,
