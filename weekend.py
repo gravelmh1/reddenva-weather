@@ -141,7 +141,7 @@ def earn_events(day):
     out = []
     for r in nasdaq("earnings", day):
         sym = (r.get("symbol") or "").strip(); cap = float(re.sub(r"[^\d.]", "", r.get("marketCap") or "") or 0)
-        if sym not in CO and cap < 150e9: continue  # 잘 알려진 회사(이름표에 있는 곳)나 아주 큰 회사만
+        if sym not in CO and cap < 500e9: continue  # 이름표에 있는 회사나 초대형(5천억달러+)만 — 캐나다 은행·BHP 같은 생소한 곳 제외
         tm = r.get("time") or ""
         when = "after" if "after" in tm else "pre" if "pre" in tm else ""
         rank = 4 + (3 if sym in SEMI else 0) + (2 if cap > 300e9 else 1 if cap > 100e9 else 0)
