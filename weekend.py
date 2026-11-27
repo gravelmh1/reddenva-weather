@@ -119,7 +119,8 @@ def nasdaq(path, day):
 
 def econ_events(day, ko):
     out = []
-    for r in nasdaq("economicevents", day):
+    # 나스닥 경제 달력은 date=X 로 물으면 X 전날(뉴욕) 일정을 준다 (고용보고서 12/4가 date=12/5 에 나옴) → 하루 뒤 날짜로 묻는다
+    for r in nasdaq("economicevents", day + dt.timedelta(days=1)):
         c, n, g = (r.get("country") or "").strip(), (r.get("eventName") or "").strip(), (r.get("gmt") or "").strip()
         hit = None
         if c == "United States":
@@ -130,7 +131,8 @@ def econ_events(day, ko):
             hit = next(((rk, k, e) for cc, pat, rk, k, e in OTHER_EV if cc == c and re.search(pat, n, re.I)), None)
         if not hit: continue
         m = re.match(r"^(\d{1,2}):(\d{2})$", g)
-        t = dt.datetime(day.year, day.month, day.day, int(m.group(1)), int(m.group(2)), tzinfo=dt.timezone.utc) if m else None
+        # 나스닥 달력의 'gmt' 칸은 실제로는 뉴욕시간 (ISM 10:00, 고용 8:30 으로 나옴)
+        t = dt.datetime(day.year, day.month, day.day, int(m.group(1)), int(m.group(2)), tzinfo=ET_) if m else None
         out.append({"rank": hit[0], "ko": hit[1], "en": hit[2], "at": t, "day": day, "kind": "kr" if c == "South Korea" else "macro", "raw": n})
     return out
 
@@ -139,11 +141,11 @@ def earn_events(day):
     out = []
     for r in nasdaq("earnings", day):
         sym = (r.get("symbol") or "").strip(); cap = float(re.sub(r"[^\d.]", "", r.get("marketCap") or "") or 0)
-        if cap < 40e9 and sym not in SEMI: continue
+        if sym not in CO and cap < 500e9: continue  # 이름표에 있는 회사나 초대형(5천억달러+)만 — 캐나다 은행·BHP 같은 생소한 곳 제외
         tm = r.get("time") or ""
         when = "after" if "after" in tm else "pre" if "pre" in tm else ""
         rank = 4 + (3 if sym in SEMI else 0) + (2 if cap > 300e9 else 1 if cap > 100e9 else 0)
-        nm = re.sub(r",? (Inc\.?|Corporation|Corp\.?|Incorporated|Company|Co\.|Ltd\.?|plc|N\.V\.|\(The\))$", "", (r.get("name") or sym).strip())
+        nm = re.sub(r",? (Inc\.?|Corporation|Corp\.?|Incorporated|Company|Co\.|Ltd\.?|Limited|Group|plc|N\.V\.|\(The\)|Technology|Technologies)$", "", (r.get("name") or sym).strip())
         out.append({"rank": rank, "ko": f"{CO.get(sym, nm)} 실적", "en": f"{nm} earnings", "at": None, "day": day, "when": when, "kind": "earn", "sym": sym, "cap": cap})
     return sorted(out, key=lambda e: -e["cap"])[:4]
 
