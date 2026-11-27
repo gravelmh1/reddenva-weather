@@ -23,6 +23,8 @@
   .wx .c { font-size: 20px; font-weight: 700; color: var(--sub); white-space: nowrap; }
   .wx .t { font-size: 36px; font-weight: 900; line-height: 1.05; white-space: nowrap; } .wx .t span { color: var(--sub); font-size: 28px; }
   .wx .r { font-size: 20px; font-weight: 700; color: #1f6fe5; white-space: nowrap; }
+  .closed { margin-top: 14px; display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; background: #d6302b; color: #fff; border-radius: 20px; padding: 14px 26px; }
+  .closed b { font-size: 46px; font-weight: 900; letter-spacing: -1px; } .closed span { font-size: 25px; font-weight: 700; opacity: .92; }
   .say { margin-top: 14px; display: flex; align-items: center; gap: 14px; background: var(--ink); color: #fff; border-radius: 20px; padding: 13px 24px; font-size: 29px; font-weight: 700; }
   .say b { flex: none; font-size: 19px; font-weight: 700; color: var(--ink); background: #ffb27a; border-radius: 999px; padding: 4px 14px; }
   section { margin-top: 16px; }
@@ -204,6 +206,7 @@ const band = KO ? `${day.getMonth() + 1}월 ${"일월화수목금토"[day.getDay
 let h = `<header><div class="dtile"><div class="band">${band}</div><div class="day">${day.getDate()}</div></div>
   <div class="ht"><div class="k">${esc(D.kicker)} · ${esc(D.handle)}</div><h1>${esc(D.title)}</h1><div class="s">${esc(D.sub)}</div></div>
   ${D.wx ? wxBox(D.wx) : ""}<img src="../assets/poses/${(D.wx && D.wx.pose) || D.pose || "a05"}.png"></header>`;
+if (D.closed) h += `<div class="closed"><b>${esc(D.closed.big)}</b><span>${esc(D.closed.small || "")}</span></div>`;  // 휴장·조기 폐장은 크게
 if (D.comment) h += `<div class="say"><b>${KO ? "레드덴바" : "RED DENVA"}</b><span>${esc(D.comment)}</span></div>`;
 const shortDate = iso => { const d = new Date(iso + "T12:00:00"); return `${d.getMonth() + 1}/${d.getDate()}`; };
 const wk = q => [q.w1 != null ? `${KO ? "1주" : "1W"} <b class="${cls(q.w1)}">${fmt(q.w1, 2, true)}%</b>` : "", q.m1 != null ? `${KO ? "1달" : "1M"} <b class="${cls(q.m1)}">${fmt(q.m1, 2, true)}%</b>` : ""].filter(Boolean).join(" · ");

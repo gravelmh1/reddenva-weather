@@ -163,6 +163,13 @@ def week_wx(region, d0, d1):
     return out
 
 
+def _us_t(x):  # "8:30 am" → 분. before open 맨 앞, after close·시각 없음 맨 뒤
+    t = x["t"]
+    if t == "before open": return -1
+    m = re.match(r"(\d+)(?::(\d+))? (am|pm)", t)
+    return (int(m[1]) % 12 + (12 if m[3] == "pm" else 0)) * 60 + int(m[2] or 0) if m else 9999
+
+
 def ahead(region, now):
     ko = region == "kr"; tz = KST if ko else ET_
     today = now.astimezone(tz).date()
@@ -197,6 +204,7 @@ def ahead(region, now):
         lst = lst[:3]
         top += [(x["r"], d, x) for x in lst]
         if ko: lst.sort(key=lambda x: (not re.match(r"\d", x["t"]), x["t"]))  # 시각 순, 시각 없는 건 뒤
+        else: lst.sort(key=_us_t)
         out.append({"date": d.isoformat(), "wx": wx.get(d.isoformat()), "ev": lst})
     top = sorted(top, key=lambda x: -x[0])[:4]
     fri = days[-1]  # 일요일까지
