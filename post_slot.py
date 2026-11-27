@@ -4,7 +4,7 @@
 
   python post_slot.py kr              → 'slot=weather/weekly/morning/close/wrap/ahead' (토·일 아침 = 주간 정리·다음 주 일정) 출력 ($GITHUB_OUTPUT 용)
   python post_slot.py kr --clear      → post.json을 '게시할 것 없음'으로 (주간 시각 시작할 때. 실패해도 아침 날씨가 다시 올라가지 않게)
-  python post_slot.py kr --write SLOT → 오늘 게시할 카드 정보를 post.json에 기록
+  python post_slot.py kr --write SLOT → 오늘 게시할 카드 정보를 post.json에 기록 (baby = 매일 10시 아기 동물, baby-daily-*.yml)
 """
 import datetime as dt, json, os, shutil, sys
 from zoneinfo import ZoneInfo
@@ -33,7 +33,7 @@ elif sys.argv[2] == "--clear":
     json.dump(NONE, open(post, "w", encoding="utf-8")); print("post.json 비움")
 elif sys.argv[2] == "--write":
     slot = sys.argv[3]
-    src = [f"out/{region}-latest.json"] if slot == "weather" else [f"out/{slot}-{region}-latest.json"] if slot in ("morning", "close", "wrap", "ahead") else [f"out/books-{region}-latest.json", f"out/news-{region}-latest.json", f"out/dart-{region}-latest.json", f"out/puppy-{region}-latest.json", f"out/deriv-{region}-latest.json", f"out/trip-{region}-latest.json", f"out/facts-{region}-latest.json", f"out/netflix-{region}-latest.json"]
+    src = [f"out/{region}-latest.json"] if slot == "weather" else [f"out/{slot}-{region}-latest.json"] if slot in ("morning", "close", "wrap", "ahead", "baby") else [f"out/books-{region}-latest.json", f"out/news-{region}-latest.json", f"out/dart-{region}-latest.json", f"out/puppy-{region}-latest.json", f"out/deriv-{region}-latest.json", f"out/trip-{region}-latest.json", f"out/facts-{region}-latest.json", f"out/netflix-{region}-latest.json"]
     for p in src:
         if today(p):
             m = json.load(open(p, encoding="utf-8")); m.setdefault("image_url2", ""); m.setdefault("image_url3", "")  # 2·3장이면 Make가 캐러셀로

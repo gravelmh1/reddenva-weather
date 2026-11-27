@@ -1,4 +1,7 @@
-"""수요일 시리즈 "이번 주 아기 동물": 아기 동물(강아지 여러 견종 + 다른 동물) 사진 한 장 + 시큰둥한 두 줄.
+"""아기 동물 카드: 아기 동물(강아지 여러 견종 + 다른 동물) 사진·영상 한 개 + 시큰둥한 두 줄.
+
+- --daily: 매일 아침 10시 "오늘의 아기 동물" 영상 릴스 (baby-daily-*.yml이 부름). 지역별로 날마다 다른 동물, state/baby_{region}.json.
+- (예전 수요일판 "이번 주 아기 동물"은 지금 어느 워크플로에서도 안 불림. 수요일 13시는 동전 던지기)
 
 - 매주 동물을 바꿔 가며(해마다 섞은 순서, ISO 주차 기준) 사진 후보를 받는다. PEXELS_API_KEY가 있으면 Pexels, 없으면 위키미디어 공용(무료·키 불필요).
 - Gemini가 후보 사진을 직접 보고 "진짜 아기 강아지 사진인지, 귀여운지"를 확인해 한 장을 고르고 문구(한국어·영어)를 쓴다.
@@ -198,7 +201,7 @@ def choose(year, week_no, used, video=False):
 
 def fetch_video(pick, week):
     """고른 영상을 받아 둔다(저장소엔 안 올림: reel_in/은 .gitignore). 한 장면을 카드 사진으로 쓴다."""
-    os.makedirs("reel_in", exist_ok=True); path = os.path.abspath(f"reel_in/puppy-video-{week}.mp4")
+    os.makedirs("reel_in", exist_ok=True); path = os.path.abspath(f"reel_in/puppy-video-{week}.mp4")  # week = 주차 또는 지역-날짜
     if not os.path.exists(path):
         r = requests.get(pick["video"], headers=UA, timeout=120); r.raise_for_status(); open(path, "wb").write(r.content)
     return path
@@ -211,9 +214,18 @@ def video_frame(path, at, out):
     subprocess.run([ff, "-y", "-loglevel", "error", "-ss", str(at), "-i", path, "-frames:v", "1", "-q:v", "2", out], check=True)
 
 
-def build(region, pick, day, photo):
+def build(region, pick, day, photo, daily=False):
     ko = region == "kr"; d = dt.date.fromisoformat(day); L = "ko" if ko else "en"
     credit = " · ".join(x for x in (pick["artist"], pick["license"], pick["src"]) if x)
+    if daily:
+        c = dict(top=(f"TODAY'S BABY · {d:%Y.%m.%d} ({'월화수목금토일'[d.weekday()]})" if ko else f"TODAY'S BABY · {d:%b %d, %Y} ({d:%a})".upper()),
+                 handle=f"@reddenva.{region}", photo=photo, focus=(pick["focus_x"], pick["focus_y"]), star="오늘의 주인공" if ko else "Today's star",
+                 badge="오늘의 아기 동물" if ko else "Today's baby animal", name=pick[f"name_{L}"], lines=pick[f"lines_{L}"], aside=pick[f"aside_{L}"],
+                 foot=[("사진: " if ko else "Photo: ") + credit, "레드덴바 · 매일 아침 10시, 귀여운 것만 봅니다" if ko else "Red Denva · Every day at 10 AM, cute things only"])
+        tag = re.sub(r'[^0-9A-Za-z가-힣]' if ko else r'[^0-9A-Za-z]', '', c['name'])
+        cap = (f"🐾 오늘의 아기 동물: {c['name']}\n\n#{tag} #아기동물 #귀여운동물 #오늘의아기동물 #귀여운것만 #레드덴바" if ko else
+               f"🐾 Today's baby animal: {c['name']}\n\n#{tag} #babyanimals #cuteanimals #dailycute #cute #reddenva")
+        return c, cap
     c = dict(top=(f"WEDNESDAY BABY · {d:%Y.%m.%d} ({'월화수목금토일'[d.weekday()]})" if ko else f"WEDNESDAY BABY · {d:%b %d, %Y} ({d:%a})".upper()),
              handle=f"@reddenva.{region}", photo=photo, focus=(pick["focus_x"], pick["focus_y"]),
              badge="이번 주 아기 동물" if ko else "Baby animal of the week", name=pick[f"name_{L}"], lines=pick[f"lines_{L}"], aside=pick[f"aside_{L}"],
@@ -227,16 +239,23 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--region", required=True, choices=["kr", "us"])
     ap.add_argument("--dry-run", action="store_true"); ap.add_argument("--force", action="store_true")
     ap.add_argument("--video", action="store_true", help="사진 대신 아기 동물 영상(Pixabay, 예비 Pexels(릴스용). 못 찾으면 사진으로")
+    ap.add_argument("--daily", action="store_true", help="매일 10시 '오늘의 아기 동물' (영상 우선, 지역별로 날마다 다른 동물)")
     ap.add_argument("--day", help="시험용: 이 날짜인 척 (예: 2026-12-02, --force와 함께)")
     a = ap.parse_args(); region = a.region
     tz = ZoneInfo(weather.REGIONS[region]["tz"]); today = dt.date.fromisoformat(a.day) if a.day else dt.datetime.now(tz).date(); day = today.isoformat()
     os.makedirs("out", exist_ok=True); os.makedirs("state", exist_ok=True)
-    if not a.force and today.weekday() != 2:
+    kind = "baby" if a.daily else "puppy"
+    if a.daily: a.video = True
+    if not a.force and not a.daily and today.weekday() != 2:
         print("수요일이 아님 → 건너뜀"); return
-    lp = f"out/puppy-{region}-latest.json"
+    lp = f"out/{kind}-{region}-latest.json"
     if not a.force and os.path.exists(lp) and json.load(open(lp, encoding="utf-8")).get("date") == day:
         print("오늘 이미 만들었음. 건너뜀"); return
     iso = today.isocalendar(); week = f"{iso[0]}-W{iso[1]:02d}"; pf = "state/puppy_pick.json"; photo = f"out/puppy-photo-{week}.jpg"
+    turn = iso[1]  # 동물 순서표에서 몇 번째 차례인지
+    if a.daily:  # 날마다, 지역마다 다른 동물. 사진은 저장소에 안 올림(reel_in/)
+        week = f"{region}-{day}"; pf = f"state/baby_{region}.json"; os.makedirs("reel_in", exist_ok=True); photo = f"reel_in/baby-photo-{week}.jpg"
+        turn = today.timetuple().tm_yday + (0 if region == "kr" else 26)
     hist = json.load(open(pf, encoding="utf-8")) if os.path.exists(pf) else {"used": [], "pick": {}}
     pick = hist.get("pick", {})
     if pick.get("week") == week and os.path.exists(photo) and bool(pick.get("video")) == a.video:
@@ -245,9 +264,9 @@ def main():
         c = j = None
         if a.video:
             if not (os.environ.get("PIXABAY_API_KEY", "").strip() or os.environ.get("PEXELS_API_KEY", "").strip()): print("PIXABAY·PEXELS 키 없음 → 위키미디어 공용 영상에서 찾음")
-            try: c, j = choose(iso[0], iso[1], set(hist.get("used", [])), video=True)
+            try: c, j = choose(iso[0], turn, set(hist.get("used", [])), video=True)
             except Exception as e: print("영상 못 찾음 → 사진으로:", e)
-        if not c: c, j = choose(iso[0], iso[1], set(hist.get("used", [])))
+        if not c: c, j = choose(iso[0], turn, set(hist.get("used", [])))
         c["im"].save(photo, quality=92)
         pick = {"week": week, "id": c["id"], "artist": c["artist"], "license": c["license"], "src": c["src"], **{k: j[k] for k in ("focus_x", "focus_y", "name_ko", "name_en", "lines_ko", "lines_en", "aside_ko", "aside_en")}}
         if c.get("video"): pick.update(video=c["video"], vw=c["vw"], vh=c["vh"], dur=c["dur"])
@@ -261,15 +280,15 @@ def main():
                 video_frame(vpath, round(min(pick.get("dur", 10), 12) * .4, 2), photo.replace(".jpg", "-v.jpg"))
             photo = photo.replace(".jpg", "-v.jpg")
         except Exception as e: print("영상 받기 실패 → 사진 카드만:", e); vpath = None
-    card, cap = build(region, pick, day, photo)
+    card, cap = build(region, pick, day, photo, daily=a.daily)
     if vpath: card["foot"][0] = ("영상: " if region == "kr" else "Video: ") + card["foot"][0].split(": ", 1)[1]
-    img_rel = f"out/puppy-{region}-{day}.jpg"; animals_render.card(card, img_rel)
+    img_rel = f"out/{kind}-{region}-{day}.jpg"; animals_render.card(card, img_rel)
     import reel_data
-    reel_data.save("puppy", region, {"c": {k: v for k, v in card.items() if k != "photo"}, "cards": [os.path.abspath(img_rel)], "video": vpath,
+    reel_data.save(kind, region, {"c": {k: v for k, v in card.items() if k != "photo"}, "cards": [os.path.abspath(img_rel)], "video": vpath,
                                      "vdur": pick.get("dur"), "day": day}, photos={"photo": photo})
     json.dump(hist, open(pf, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     if a.dry_run: print("(dry-run) 카드 저장:", img_rel); print(cap); return
-    git_push(["out", "state"], f"puppy {region} {day} card")
+    git_push(["out", "state"], f"{kind} {region} {day} card")
     import subprocess
     sha = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
     url = f"https://raw.githubusercontent.com/{os.environ['GITHUB_REPOSITORY']}/{sha}/{img_rel}"
@@ -277,8 +296,8 @@ def main():
         if requests.head(url, timeout=15).ok: break
         time.sleep(5)
     with open(lp, "w", encoding="utf-8") as fh:
-        json.dump({"date": day, "image_url": url, "caption": cap, "title": "puppy of the week"}, fh, ensure_ascii=False)
-    git_push(["out"], f"puppy {region} {day} latest.json"); print("저장 완료:", url)
+        json.dump({"date": day, "image_url": url, "caption": cap, "title": "baby animal of the day" if a.daily else "puppy of the week"}, fh, ensure_ascii=False)
+    git_push(["out"], f"{kind} {region} {day} latest.json"); print("저장 완료:", url)
 
 
 if __name__ == "__main__":
