@@ -1,6 +1,6 @@
 {
  "region": "us",
- "updated": "2026-11-26T21:16:05Z",
+ "updated": "2026-11-27T14:06:06Z",
  "categories": [
   {
    "series": "books",
@@ -9,6 +9,10 @@
   {
    "series": "news",
    "label": "Good news"
+  },
+  {
+   "series": "coin",
+   "label": "Coin flip"
   },
   {
    "series": "animal",
@@ -37,6 +41,14 @@
   {
    "series": "brief",
    "label": "Closing Brief"
+  },
+  {
+   "series": "brief",
+   "label": "Weekly Recap"
+  },
+  {
+   "series": "brief",
+   "label": "Week Ahead"
   }
  ],
  "items": [
