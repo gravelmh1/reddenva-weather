@@ -1,0 +1,46 @@
+name: muse-threads
+# Muse(메타 AI)가 인스타에 올린 시장 카툰을 Threads에도 자동으로 복사 (매시간 확인, 새 글만, 중복 없음)
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "확인만 하기 (체크하면 Threads에 올리지 않음)"
+        type: boolean
+        default: true
+  push:
+    branches: [claude/project-thread-mrai8l]
+    paths: ["muse_threads.py", ".github/workflows/muse-threads.yml"]
+permissions:
+  contents: write
+concurrency:
+  group: muse-threads
+  cancel-in-progress: false
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: Threads로 복사
+        env:
+          IG_TOKEN_KR: ${{ secrets.IG_TOKEN_KR }}
+          IG_TOKEN_US: ${{ secrets.IG_TOKEN_US }}
+          THREADS_TOKEN_KR: ${{ secrets.THREADS_TOKEN_KR }}
+          THREADS_TOKEN_US: ${{ secrets.THREADS_TOKEN_US }}
+          DRY: ${{ github.event_name == 'push' || inputs.dry_run == true }}
+        run: |
+          F=""; if [ "$DRY" = "true" ]; then F="--dry-run"; fi
+          python muse_threads.py --region kr $F || echo "kr 실패"
+          python muse_threads.py --region us $F || echo "us 실패"
+      - name: 복사 기록 저장
+        if: github.event_name != 'push'
+        run: |
+          git config user.name "github-actions"; git config user.email "actions@users.noreply.github.com"
+          git add state/muse_*_threads.json 2>/dev/null || true
+          git diff --cached --quiet || (git commit -qm "muse threads mirror" && for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done)
