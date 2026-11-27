@@ -4578,20 +4578,20 @@
    "title": "이번 주 핵심 뉴스",
    "items": [
     {
-     "head": "한은 기준금리 인상 가능성",
-     "line": "이달 기준금리 0.25%p 인상 가능성이 커졌다.",
+     "head": "기준금리 0.25%p 인상",
+     "line": "한은의 이달 기준금리 인상 가능성이 커졌다.",
      "src": "한겨레",
      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE5BRGR2dWo0VlNOSFlZcTk3ZXN3MmJXZ1MxczRibTFKRWc5WXptQnJBM1NoRmZnYm9Wa1ZkaGRwZFd2Q29YSVVhSVRZM25MelpiWGFIalo1SWxFMEJBY1hOTDZSenJMQV9aenZfNkVldTNUZw?oc=5"
     },
     {
-     "head": "美 반도체 수출 승인 논란",
-     "line": "미국이 중국에 AI반도체 88만개 수출을 승인했다.",
-     "src": "DongA Science",
-     "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE42a1VBRmktbFNzdWx6SVpHTmtXaHdNd0pHXzBMby1qTS0xSmhEQXNCX2NSY2FiQ09IT0ptZ0dhYkw1bWFTZUtUVGR6SmpKQzlPVW5mcg?oc=5"
+     "head": "美 중국 반도체 출하 중단",
+     "line": "미국이 대중국 반도체 압박을 강화하며 삼성과 TSMC도 출하를 중단했다.",
+     "src": "한국경제",
+     "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1ocTRubF95TUZOcFlDZThPOE5VZkMtSGNlUTlBc1BQVVFYb0Ztb3Rnei1oQkpCVjM2cWtrUzRMZEVRcW5JQWtKUXBsVU9LMTZ6YzlmVTAtNzhrQQ?oc=5"
     },
     {
      "head": "美 연준 빅스텝 언급",
-     "line": "연준 인사가 금리 인하 속도 조절을 시사했다.",
+     "line": "연준 인사가 충격을 주기 위한 빅스텝 필요성을 언급했다.",
      "src": "연합뉴스",
      "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE05ZDNIZ25qZlI0ejZGbE1zV0h1TXU2NzBGeGpFbHE1V0xEczdTREpFNWdyTlJHNl9leWNmYWZtZTZMY09rQlhTcm5sTDBfRWZjV0VkbWg3dUpZUkHSAWBBVV95cUxQZ1ZTN1VRbjZ1TGFEZmI4eGF1OWVBVFJMc3cyVldDczFWdnNUMXdTN3B5VVNXZGV1TlJaTTc2Y3MwcmZWRGFHWUNYNVBTenNzY0RKTDZuS1c3SVRvR29qQjE?oc=5"
     }
@@ -4935,23 +4935,23 @@
   "pose": "w14",
   "when": "오늘"
  },
- "comment": "삼성전자 주간 -13.44%네요. 잡생각이 사라져요.",
+ "comment": "삼성전자 주간 -13.44% 빠졌네요.",
  "news": [
   {
-   "head": "한은 기준금리 인상 가능성",
-   "line": "이달 기준금리 0.25%p 인상 가능성이 커졌다.",
+   "head": "기준금리 0.25%p 인상",
+   "line": "한은의 이달 기준금리 인상 가능성이 커졌다.",
    "src": "한겨레",
    "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE5BRGR2dWo0VlNOSFlZcTk3ZXN3MmJXZ1MxczRibTFKRWc5WXptQnJBM1NoRmZnYm9Wa1ZkaGRwZFd2Q29YSVVhSVRZM25MelpiWGFIalo1SWxFMEJBY1hOTDZSenJMQV9aenZfNkVldTNUZw?oc=5"
   },
   {
-   "head": "美 반도체 수출 승인 논란",
-   "line": "미국이 중국에 AI반도체 88만개 수출을 승인했다.",
-   "src": "DongA Science",
-   "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE42a1VBRmktbFNzdWx6SVpHTmtXaHdNd0pHXzBMby1qTS0xSmhEQXNCX2NSY2FiQ09IT0ptZ0dhYkw1bWFTZUtUVGR6SmpKQzlPVW5mcg?oc=5"
+   "head": "美 중국 반도체 출하 중단",
+   "line": "미국이 대중국 반도체 압박을 강화하며 삼성과 TSMC도 출하를 중단했다.",
+   "src": "한국경제",
+   "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1ocTRubF95TUZOcFlDZThPOE5VZkMtSGNlUTlBc1BQVVFYb0Ztb3Rnei1oQkpCVjM2cWtrUzRMZEVRcW5JQWtKUXBsVU9LMTZ6YzlmVTAtNzhrQQ?oc=5"
   },
   {
    "head": "美 연준 빅스텝 언급",
-   "line": "연준 인사가 금리 인하 속도 조절을 시사했다.",
+   "line": "연준 인사가 충격을 주기 위한 빅스텝 필요성을 언급했다.",
    "src": "연합뉴스",
    "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE05ZDNIZ25qZlI0ejZGbE1zV0h1TXU2NzBGeGpFbHE1V0xEczdTREpFNWdyTlJHNl9leWNmYWZtZTZMY09rQlhTcm5sTDBfRWZjV0VkbWg3dUpZUkHSAWBBVV95cUxQZ1ZTN1VRbjZ1TGFEZmI4eGF1OWVBVFJMc3cyVldDczFWdnNUMXdTN3B5VVNXZGV1TlJaTTc2Y3MwcmZWRGFHWUNYNVBTenNzY0RKTDZuS1c3SVRvR29qQjE?oc=5"
   }
@@ -5025,7 +5025,7 @@
    "h": 8.51
   },
   {
-   "t": "한은 기준금리 인상 가능성",
+   "t": "기준금리 0.25%p 인상",
    "s": "news",
    "x": 6.76,
    "y": 85.46,
@@ -5033,7 +5033,7 @@
    "h": 2.81
   },
   {
-   "t": "美 반도체 수출 승인 논란",
+   "t": "美 중국 반도체 출하 중단",
    "s": "news",
    "x": 6.76,
    "y": 88.28,

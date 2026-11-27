@@ -3,7 +3,7 @@
  "kind": "ahead",
  "title": "다음 주 일정",
  "kicker": "WEEK AHEAD",
- "sub": "11/30 – 12/4 · 한국시간",
+ "sub": "11/30 – 12/6 · 한국시간",
  "mood": "flat",
  "pose": "a05",
  "facts": {
@@ -166,6 +166,17 @@
        "r": 5
       }
      ]
+    },
+    {
+     "date": "2026-12-06",
+     "wx": {
+      "sky": "비",
+      "icon": "rain",
+      "hi": 10,
+      "lo": 5,
+      "rain": 56
+     },
+     "ev": []
     }
    ]
   }
@@ -179,7 +190,7 @@
  },
  "foot": "자료: Nasdaq 경제·실적 달력, Open-Meteo · 시각은 한국시간",
  "wx": null,
- "comment": "금 22:30 미국 고용보고서 나와요",
+ "comment": "금요일 미국 고용보고서 나와요",
  "news": [],
  "day": "2026-11-29",
  "handle": "@reddenva.kr",

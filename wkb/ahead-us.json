@@ -3,7 +3,7 @@
  "kind": "ahead",
  "title": "Week Ahead",
  "kicker": "WEEK AHEAD",
- "sub": "Nov 30 – Dec 4 · New York time",
+ "sub": "Nov 30 – Dec 6 · New York time",
  "mood": "flat",
  "pose": "a05",
  "facts": {
@@ -142,6 +142,28 @@
        "r": 5
       }
      ]
+    },
+    {
+     "date": "2026-12-05",
+     "wx": {
+      "sky": "Cloudy",
+      "icon": "cloud",
+      "hi": 72,
+      "lo": 61,
+      "rain": 20
+     },
+     "ev": []
+    },
+    {
+     "date": "2026-12-06",
+     "wx": {
+      "sky": "Sunny",
+      "icon": "sun",
+      "hi": 75,
+      "lo": 60,
+      "rain": 17
+     },
+     "ev": []
     }
    ]
   }
@@ -155,7 +177,7 @@
  },
  "foot": "Source: Nasdaq economic & earnings calendars, Open-Meteo · times ET",
  "wx": null,
- "comment": "Fri 8:30 am jobs report. Wake me if it hits 4.2%.",
+ "comment": "Fri 8:30 am jobs report. Wake me up when it prints.",
  "news": [],
  "day": "2026-11-29",
  "handle": "@reddenva.us",
