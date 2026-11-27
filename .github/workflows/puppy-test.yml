@@ -26,6 +26,7 @@ jobs:
       - env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
         run: |
           D="${{ inputs.day }}"; OPT="--dry-run --force ${D:+--day $D} ${{ inputs.video && '--video' || '' }}"
           python animals.py --region kr $OPT

@@ -55,6 +55,28 @@ def pexels(q, key):
     return [{"id": f"px:{p['id']}", "url": p["src"]["large2x"], "artist": p.get("photographer", "")[:40], "license": "", "src": "Pexels"} for p in r.json().get("photos", [])]
 
 
+def pixabay_videos(q, key):
+    """Pixabay 무료 영상(Pixabay 라이선스: 상업적 사용 가능, 출처 표기 의무 없음). 6~40초, 짧은 변 1080 이상 파일만.
+    세로 영상 필터가 없어서 가로 영상이 대부분 → 릴스에선 가운데를 잘라 씀(focus_x)."""
+    out = []
+    for page in (1, 2):
+        r = requests.get("https://pixabay.com/api/videos/", params={"key": key, "q": q, "per_page": 50, "page": page, "safesearch": "true", "video_type": "film"}, timeout=25)
+        if not r.ok: print("Pixabay 영상 응답", r.status_code); break
+        hits = r.json().get("hits", [])
+        for v in hits:
+            if not (6 <= v.get("duration", 0) <= 40): continue
+            fs = [f for f in (v.get("videos") or {}).values() if f.get("url") and min(f.get("width") or 0, f.get("height") or 0) >= 1080]
+            if not fs: continue
+            f = min(fs, key=lambda f: (f.get("width") or 0) * (f.get("height") or 0))  # 1080p급 중 가장 작은 파일
+            th = next((x.get("thumbnail") for x in (v.get("videos") or {}).values() if x.get("thumbnail")), "")
+            if not th: continue
+            out.append({"id": f"pbv:{v['id']}", "url": th, "frames": [], "video": f["url"], "vw": f["width"], "vh": f["height"], "dur": v["duration"],
+                        "portrait": f["height"] > f["width"], "likes": v.get("likes", 0), "cap": v.get("tags", ""), "artist": (v.get("user") or "")[:40], "license": "", "src": "Pixabay"})
+        if len(out) >= 12 or len(hits) < 50: break
+    out.sort(key=lambda c: (not c["portrait"], -c["likes"]))  # 세로 먼저, 그다음 인기순
+    return out
+
+
 def pexels_videos(q, key):
     """Pexels 무료 영상(상업적 사용 가능, 출처 표기 의무 없음). 세로 영상 우선, 6~40초, 1080p 이상 파일이 있는 것만."""
     out = []
@@ -112,7 +134,7 @@ def judge(cands, en, ko):
     key = os.environ["GEMINI_API_KEY"].strip(); parts = []
     for i, c in enumerate(cands):
         im = c["im"].copy(); im.thumbnail((640, 640)); b = io.BytesIO(); im.save(b, "JPEG", quality=80)
-        parts += [{"text": f"[photo {i}] caption: {c['id'][:90]}"}, {"inline_data": {"mime_type": "image/jpeg", "data": base64.b64encode(b.getvalue()).decode()}}]
+        parts += [{"text": f"[photo {i}] caption: {c.get("cap", c["id"])[:90]}"}, {"inline_data": {"mime_type": "image/jpeg", "data": base64.b64encode(b.getvalue()).decode()}}]
         for k, fr in enumerate(c.get("fim", [])):  # 영상 후보: 같은 영상의 다른 장면(움직이는 동안에도 괜찮은지 보라고)
             fr = fr.copy(); fr.thumbnail((480, 480)); b = io.BytesIO(); fr.save(b, "JPEG", quality=75)
             parts += [{"text": f"[photo {i}, later moment {k + 1} of the same video]"}, {"inline_data": {"mime_type": "image/jpeg", "data": base64.b64encode(b.getvalue()).decode()}}]
@@ -150,11 +172,13 @@ Example of tone — lines_ko: ["코에 눈 묻은 줄 모름.", "알려주는 �
 
 
 def choose(year, week_no, used, video=False):
-    """이번 주 차례의 동물부터 순서대로(최대 5종) 후보를 받아 고른다. video=True면 Pexels 영상 후보."""
-    key = os.environ.get("PEXELS_API_KEY", "").strip(); t0 = time.time(); idx = order(year)
+    """이번 주 차례의 동물부터 순서대로(최대 5종) 후보를 받아 고른다. video=True면 영상 후보(Pixabay 우선)."""
+    key = os.environ.get("PEXELS_API_KEY", "").strip(); pkey = os.environ.get("PIXABAY_API_KEY", "").strip(); t0 = time.time(); idx = order(year)
     for k in range(5):
         q, en, ko = SUBJECTS[idx[(week_no + k) % len(idx)]]
-        src = (pexels_videos(q, key) if key else commons_videos(q)) if video else pexels(q, key) if key else commons(q)
+        if video:  # 영상: Pixabay → (키 있으면) Pexels → 위키미디어 공용
+            src = (pixabay_videos(q, pkey) if pkey else []) or (pexels_videos(q, key) if key else []) or commons_videos(q)
+        else: src = pexels(q, key) if key else commons(q)
         cands = [c for c in src if c["id"] not in used][:8 if video else 10]; got = []
         for c in cands:
             try:
@@ -202,7 +226,7 @@ def build(region, pick, day, photo):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--region", required=True, choices=["kr", "us"])
     ap.add_argument("--dry-run", action="store_true"); ap.add_argument("--force", action="store_true")
-    ap.add_argument("--video", action="store_true", help="사진 대신 Pexels 아기 동물 영상(릴스용). 못 찾으면 사진으로")
+    ap.add_argument("--video", action="store_true", help="사진 대신 아기 동물 영상(Pixabay, 예비 Pexels(릴스용). 못 찾으면 사진으로")
     ap.add_argument("--day", help="시험용: 이 날짜인 척 (예: 2026-12-02, --force와 함께)")
     a = ap.parse_args(); region = a.region
     tz = ZoneInfo(weather.REGIONS[region]["tz"]); today = dt.date.fromisoformat(a.day) if a.day else dt.datetime.now(tz).date(); day = today.isoformat()
@@ -220,7 +244,7 @@ def main():
     else:
         c = j = None
         if a.video:
-            if not os.environ.get("PEXELS_API_KEY", "").strip(): print("PEXELS_API_KEY 없음 → 위키미디어 공용 영상에서 찾음")
+            if not (os.environ.get("PIXABAY_API_KEY", "").strip() or os.environ.get("PEXELS_API_KEY", "").strip()): print("PIXABAY·PEXELS 키 없음 → 위키미디어 공용 영상에서 찾음")
             try: c, j = choose(iso[0], iso[1], set(hist.get("used", [])), video=True)
             except Exception as e: print("영상 못 찾음 → 사진으로:", e)
         if not c: c, j = choose(iso[0], iso[1], set(hist.get("used", [])))
