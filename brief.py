@@ -430,7 +430,7 @@ def us_morning(now):
     y = lambda s, n, **k: safe(yahoo, s, now, n, **k)
     fut = [x for x in (y("ES=F", "S&P 500 futures", session=False), y("NQ=F", "Nasdaq 100 futures", session=False), y("YM=F", "Dow futures", session=False, dp=0)) if x]
     idx = [x for x in (y("^GSPC", "S&P 500"), y("^IXIC", "Nasdaq"), y("^DJI", "Dow", dp=0), y("^SOX", "Chips (SOX)")) if x]
-    world = [x for x in (y("^N225", "Japan Nikkei", dp=0), y("^KS11", "Korea KOSPI"), y("^HSI", "Hang Seng", dp=0),
+    world = [x for x in (y("^N225", "Japan Nikkei", dp=0), y("^HSI", "Hang Seng", dp=0),
                          y("^STOXX50E", "Euro Stoxx 50"), y("^GDAXI", "Germany DAX", dp=0), y("^FTSE", "UK FTSE 100", dp=0)) if x]
     macro = [x for x in (y("^TNX", "10-yr Treasury", unit="%", dp=3, kind="bp"), y("^VIX", "VIX", kind="pt"), y("CL=F", "WTI crude", unit="$", session=False),
                          y("GC=F", "Gold", unit="$", dp=1, session=False), y("BTC-USD", "Bitcoin", unit="$", dp=0, session=False), y("DX-Y.NYB", "Dollar index", session=False)) if x]
@@ -438,7 +438,7 @@ def us_morning(now):
     nl = now.astimezone(ET_); usd = dt.date.fromisoformat(idx[0]["date"])
     lead = fut[0] if fut else idx[0]
     mood = mood_of(lead["pct"] * 2)  # 선물은 변동이 작아서 2배로 본다
-    facts = {q["name"]: f"{q['pct']:+.2f}%" for q in fut + idx[:2] + world[:3]}
+    facts = {q["name"]: f"{q['pct']:+.2f}%" for q in fut + idx[:2]}  # 형: 미국판엔 코스피 같은 해외 지수 빼기 (미국인은 모름)
     return {"region": "us", "kind": "morning", "title": "Morning Brief", "kicker": "MORNING BRIEF",
             "sub": f"Futures {nl:%-I:%M} a.m. ET · closes {usd:%-m/%-d}", "mood": mood, "pose": "a05" if mood == "flat" else POSE[mood], "facts": facts,
             "sections": [{"type": "mini", "title": "Futures right now", "items": fut[:2] + [q for q in macro if q["name"] in ("10-yr Treasury", "WTI crude", "VIX", "Gold")], "cols": 3, "spark": True},
