@@ -25,6 +25,8 @@ SERIES = {
     "netflix": ("netflix", "넷플릭스", "Netflix"),
     "morning": ("brief", "모닝 브리프", "Morning Brief"),
     "close": ("brief", "마감 브리프", "Closing Brief"),
+    "wrap": ("brief", "주간 정리", "Weekly Recap"),
+    "ahead": ("brief", "다음 주 일정", "Week Ahead"),
 }
 KO_DAYS = "월화수목금토일"
 EN_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]

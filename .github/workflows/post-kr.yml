@@ -9,7 +9,7 @@ on:
         type: boolean
         default: true
       slot:
-        description: "auto(현지 시각으로 자동) / weather / weekly / morning(모닝 브리프) / close(마감 브리프)"
+        description: "auto(현지 시각으로 자동) / weather / weekly / morning(모닝 브리프) / close(마감 브리프) / wrap(토 주간 정리) / ahead(일 다음 주 일정)"
         type: string
         default: auto
       ig:
@@ -35,10 +35,10 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@users.noreply.github.com"
-          if [ "${{ inputs.slot }}" = "weather" ] || [ "${{ inputs.slot }}" = "weekly" ] || [ "${{ inputs.slot }}" = "morning" ] || [ "${{ inputs.slot }}" = "close" ]; then echo "slot=${{ inputs.slot }}" >> "$GITHUB_OUTPUT"; else python post_slot.py kr >> "$GITHUB_OUTPUT"; fi
+          if [ "${{ inputs.slot }}" = "weather" ] || [ "${{ inputs.slot }}" = "weekly" ] || [ "${{ inputs.slot }}" = "morning" ] || [ "${{ inputs.slot }}" = "close" ] || [ "${{ inputs.slot }}" = "wrap" ] || [ "${{ inputs.slot }}" = "ahead" ]; then echo "slot=${{ inputs.slot }}" >> "$GITHUB_OUTPUT"; else python post_slot.py kr >> "$GITHUB_OUTPUT"; fi
           cat "$GITHUB_OUTPUT"
       - name: (주간·브리프) 시작할 때 post.json 비우기
-        if: ${{ (steps.slot.outputs.slot == 'weekly' || steps.slot.outputs.slot == 'morning' || steps.slot.outputs.slot == 'close') && !inputs.dry_run }}
+        if: ${{ (steps.slot.outputs.slot == 'weekly' || steps.slot.outputs.slot == 'morning' || steps.slot.outputs.slot == 'close' || steps.slot.outputs.slot == 'wrap' || steps.slot.outputs.slot == 'ahead') && !inputs.dry_run }}
         run: |
           python post_slot.py kr --clear
           git add out
@@ -88,7 +88,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python netflix.py --region kr ${{ inputs.dry_run && '--dry-run --force' || '' }}
       - name: (브리프) 모닝·마감 브리프 카드 만들기 (장 쉬는 날은 건너뜀)
-        if: ${{ steps.slot.outputs.slot == 'morning' || steps.slot.outputs.slot == 'close' }}
+        if: ${{ steps.slot.outputs.slot == 'morning' || steps.slot.outputs.slot == 'close' || steps.slot.outputs.slot == 'wrap' || steps.slot.outputs.slot == 'ahead' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
@@ -132,7 +132,7 @@ jobs:
         env:
           THREADS_TOKEN_KR: ${{ secrets.THREADS_TOKEN_KR }}
         run: |
-          if [ "${{ steps.slot.outputs.slot }}" = "morning" ] || [ "${{ steps.slot.outputs.slot }}" = "close" ]; then python threads_post.py --region kr --kind ${{ steps.slot.outputs.slot }}-;
+          if [ "${{ steps.slot.outputs.slot }}" = "morning" ] || [ "${{ steps.slot.outputs.slot }}" = "close" ] || [ "${{ steps.slot.outputs.slot }}" = "wrap" ] || [ "${{ steps.slot.outputs.slot }}" = "ahead" ]; then python threads_post.py --region kr --kind ${{ steps.slot.outputs.slot }}-;
           elif [ "${{ steps.slot.outputs.slot }}" = "weather" ]; then python threads_post.py --region kr; else python threads_post.py --region kr --kind books-; python threads_post.py --region kr --kind news-; python threads_post.py --region kr --kind dart-; python threads_post.py --region kr --kind puppy-; python threads_post.py --region kr --kind deriv-; python threads_post.py --region kr --kind trip-; python threads_post.py --region kr --kind facts-; python threads_post.py --region kr --kind netflix-; fi
           git add state
           git diff --cached --quiet || (git commit -q -m "kr threads posted" && git pull --rebase -q && git push -q)
