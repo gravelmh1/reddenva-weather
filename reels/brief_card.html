@@ -119,7 +119,9 @@
   .nw + .nw { border-top: 1.5px solid var(--edge); }
   .nw i { flex: none; font-style: normal; width: 34px; height: 34px; border-radius: 50%; background: var(--acc); color: #fff; font-size: 21px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
   .nw .h { font-size: 26px; font-weight: 900; line-height: 1.28; }
-  .nw .l { display: none; }
+  .nw > div { min-width: 0; flex: 1; display: flex; align-items: baseline; gap: 14px; }  /* 제목 · 한 줄 설명 (같은 줄) */
+  .nw .h { flex: none; white-space: nowrap; }
+  .nw .l { flex: 1; min-width: 0; font-size: 22px; color: var(--sub); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* 둘째 장: 주요 뉴스 */
   .np { margin-top: 26px; }
   .np h2 { font-size: 40px; margin-bottom: 18px; }
@@ -282,7 +284,8 @@ const over = () => { const last = card.querySelector("section:last-of-type"); re
 Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; }))).then(() => document.fonts.ready).then(() => {
   if (D.page === "news") { window.READY = true; return; }
   if (over()) card.classList.add("t1");
-  if (over()) card.classList.add("nc");  // 뉴스를 제목만 한 줄씩
+  if (over()) card.classList.add("nc");  // 뉴스 줄 간격 줄이기
+  if (over()) card.querySelectorAll(".nw .l").forEach(x => x.remove());  // 그래도 넘치면 설명 빼고 제목만
   if (over()) { const n = card.querySelector('section[data-t="news"]'); if (n) n.remove(); }  // 그래도 넘치면 뉴스는 캡션·릴스로만
   window.READY = true;
 });

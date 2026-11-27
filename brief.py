@@ -269,7 +269,7 @@ def gnews(q, ko, d0, d1):
         t = it.findtext("title") or ""; src = it.findtext("source") or ""
         try: pub = parsedate_to_datetime(it.findtext("pubDate"))
         except Exception: continue
-        items.append({"title": re.sub(r"\s+-\s+[^-]+$", "", t).strip(), "src": src, "pub": pub})
+        items.append({"title": re.sub(r"\s+-\s+[^-]+$", "", t).strip(), "src": src, "pub": pub, "url": it.findtext("link") or ""})
     return items
 
 
@@ -304,14 +304,14 @@ def news3(region, kind, now, facts):
     p = f"""You write the 3-line news section of a {'Korean' if ko else 'US'} {'morning' if kind == 'morning' else 'market close'} market brief.
 Market numbers for context (already shown elsewhere, do not repeat them as news): {json.dumps(facts, ensure_ascii=False)}
 From the headlines below pick the 3 most market-moving, distinct stories (central bank, macro data, big company news, policy). Skip opinion, ads, stock tips, crypto hype, celebrity, duplicates.
-Write each as: "head" = short headline (max {'18 Korean characters' if ko else '42 characters'}), "line" = 2 short sentences (max {'80 Korean characters' if ko else '170 characters'} total): what happened, then why markets care.
-Use ONLY facts stated in the headline you picked for what happened. Never invent numbers, names or details; the "why" sentence must be general (no new facts). Write in {'Korean (뉴스 문체, ~했다/~한다)' if ko else 'plain English'}.
+Write each as: "head" = short headline (max {'18 Korean characters' if ko else '42 characters'}), "line" = one short plain sentence with the key point (max {'20 Korean characters' if ko else '40 characters'}; it sits next to the headline on one line, so do not repeat the headline).
+Use ONLY facts stated in the headline you picked. Never invent numbers, names or details. Write in {'Korean (뉴스 문체, ~했다/~한다)' if ko else 'plain English'}.
 Return JSON: {{"items":[{{"i":index,"head":"...","line":"..."}}]}}
 Headlines:
 {lst}"""
     out = []
     for x in gem(p, 0.2).get("items", [])[:3]:
-        it = items[int(x["i"])]; out.append({"head": x["head"].strip(), "line": x["line"].strip(), "src": it["src"]})
+        it = items[int(x["i"])]; out.append({"head": x["head"].strip(), "line": x["line"].strip(), "src": it["src"], "url": it.get("url", "")})
     return out
 
 
@@ -484,7 +484,6 @@ def caption(d):
     ko = d["region"] == "kr"; tag = {"kr": {"morning": "#모닝브리프 #미국증시 #반도체 #나스닥 #레드덴바", "close": "#마감브리프 #코스피 #증시 #외국인 #레드덴바"},
                                       "us": {"morning": "#stockmarket #futures #premarket #investing #reddenva", "close": "#stockmarket #SP500 #Nasdaq #investing #reddenva"}}
     lines = [f"{d['title']} · {d['sub']}", "", f"🐾 {d['comment']}"]
-    if d.get("news"): lines += [""] + [f"• {n['head']}: {n['line']}" for n in d["news"]]
     lines += ["", ("투자 권유 아님 · 자료 " if ko else "Not investment advice · Data: ") + d["foot"].split(":", 1)[-1].split("·")[0].strip(), "", tag[d["region"]][d["kind"]]]
     return "\n".join(lines)
 
@@ -521,11 +520,7 @@ def main():
         d.update(day=day.isoformat(), handle=f"@reddenva.{a.region}", made=now.isoformat())
     out = a.out or f"out/{a.kind}-{a.region}-{day.isoformat()}.jpg"
     render_card(d, os.path.abspath(out)); print("카드:", out)
-    out2 = None
-    if len(d.get("news") or []) >= 3:  # 둘째 장: 주요 뉴스 3개를 내용까지 (자고 일어나서 궁금한 것)
-        out2 = out.replace(".jpg", "-2.jpg")
-        try: render_card(dict(d, page="news"), os.path.abspath(out2)); print("뉴스 카드:", out2)
-        except Exception as e: print("뉴스 카드 실패:", e); out2 = None
+    out2 = None  # 뉴스 둘째 장은 안 씀 (형: 같은 카드에 한 줄씩, 자세한 건 블로그)
     cap = caption(d); print(cap)
     import reel_data
     reel_data.save(a.kind, a.region, dict(d, cards=[os.path.abspath(out)] + ([os.path.abspath(out2)] if out2 else [])))
