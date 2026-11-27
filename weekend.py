@@ -119,7 +119,8 @@ def nasdaq(path, day):
 
 def econ_events(day, ko):
     out = []
-    for r in nasdaq("economicevents", day):
+    # 나스닥 경제 달력은 date=X 로 물으면 X 전날(뉴욕) 일정을 준다 (고용보고서 12/4가 date=12/5 에 나옴) → 하루 뒤 날짜로 묻는다
+    for r in nasdaq("economicevents", day + dt.timedelta(days=1)):
         c, n, g = (r.get("country") or "").strip(), (r.get("eventName") or "").strip(), (r.get("gmt") or "").strip()
         hit = None
         if c == "United States":
@@ -128,7 +129,6 @@ def econ_events(day, ko):
             hit = next(((rk, k, n) for pat, rk, k, _ in KR_EV if re.search(pat, n, re.I)), None)
         else:
             hit = next(((rk, k, e) for cc, pat, rk, k, e in OTHER_EV if cc == c and re.search(pat, n, re.I)), None)
-        if c in ("United States", "South Korea"): print("  달력", day, g, c, n, "→", hit[1] if hit else "-")
         if not hit: continue
         m = re.match(r"^(\d{1,2}):(\d{2})$", g)
         # 나스닥 달력의 'gmt' 칸은 실제로는 뉴욕시간 (ISM 10:00, 고용 8:30 으로 나옴)
