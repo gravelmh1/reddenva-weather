@@ -1,0 +1,169 @@
+{
+ "region": "us",
+ "kind": "ahead",
+ "title": "Week Ahead",
+ "kicker": "WEEK AHEAD",
+ "sub": "Nov 30 – Dec 4 · New York time",
+ "mood": "flat",
+ "pose": "a05",
+ "facts": {
+  "Tue after close": "Marvell Technology earnings",
+  "Wed 5 am": "JOLTS job openings",
+  "Fri 5 am": "ISM services"
+ },
+ "sections": [
+  {
+   "type": "week",
+   "title": "Day by day · LA weather",
+   "days": [
+    {
+     "date": "2026-11-30",
+     "wx": {
+      "sky": "Rain",
+      "icon": "rain",
+      "hi": 68,
+      "lo": 63,
+      "rain": 83
+     },
+     "ev": [
+      {
+       "t": "3:30 pm",
+       "n": "China manufacturing PMI",
+       "k": "macro",
+       "r": 4
+      }
+     ]
+    },
+    {
+     "date": "2026-12-01",
+     "wx": {
+      "sky": "Rain",
+      "icon": "rain",
+      "hi": 65,
+      "lo": 57,
+      "rain": 91
+     },
+     "ev": [
+      {
+       "t": "after close",
+       "n": "Marvell Technology earnings",
+       "k": "earn",
+       "r": 8
+      },
+      {
+       "t": "",
+       "n": "BHP Group Limited earnings",
+       "k": "earn",
+       "r": 5
+      },
+      {
+       "t": "3:45 pm",
+       "n": "China manufacturing PMI",
+       "k": "macro",
+       "r": 4
+      }
+     ]
+    },
+    {
+     "date": "2026-12-02",
+     "wx": {
+      "sky": "Rain",
+      "icon": "rain",
+      "hi": 68,
+      "lo": 57,
+      "rain": 53
+     },
+     "ev": [
+      {
+       "t": "5 am",
+       "n": "ISM manufacturing",
+       "k": "macro",
+       "r": 7
+      },
+      {
+       "t": "5 am",
+       "n": "JOLTS job openings",
+       "k": "macro",
+       "r": 6
+      },
+      {
+       "t": "after close",
+       "n": "Salesforce earnings",
+       "k": "earn",
+       "r": 5
+      }
+     ]
+    },
+    {
+     "date": "2026-12-03",
+     "wx": {
+      "sky": "Cloudy",
+      "icon": "cloud",
+      "hi": 68,
+      "lo": 59,
+      "rain": 15
+     },
+     "ev": [
+      {
+       "t": "3:15 am",
+       "n": "ADP jobs",
+       "k": "macro",
+       "r": 6
+      },
+      {
+       "t": "before open",
+       "n": "Royal Bank Of Canada earnings",
+       "k": "earn",
+       "r": 5
+      },
+      {
+       "t": "before open",
+       "n": "Toronto Dominion Bank earnings",
+       "k": "earn",
+       "r": 5
+      }
+     ]
+    },
+    {
+     "date": "2026-12-04",
+     "wx": {
+      "sky": "Cloudy",
+      "icon": "cloud",
+      "hi": 69,
+      "lo": 61,
+      "rain": 18
+     },
+     "ev": [
+      {
+       "t": "5 am",
+       "n": "ISM services",
+       "k": "macro",
+       "r": 7
+      },
+      {
+       "t": "3:30 am",
+       "n": "Jobless claims",
+       "k": "macro",
+       "r": 3
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "hook": {
+  "kicker": "Week ahead",
+  "lines": [
+   "Tue [[acc:Marvell Technology earnings]]",
+   "Wed [[acc:ISM manufacturing]]"
+  ]
+ },
+ "foot": "Source: Nasdaq economic & earnings calendars, Open-Meteo · times ET",
+ "wx": null,
+ "comment": "Tuesday Marvell earnings.",
+ "news": [],
+ "day": "2026-11-29",
+ "handle": "@reddenva.us",
+ "made": "2026-11-29T07:00:00-08:00",
+ "hot": []
+}
