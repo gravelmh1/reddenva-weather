@@ -1,0 +1,30 @@
+name: toon-test
+# 시장 풍자 카툰 그림 시험 (게시 안 함): Gemini 그림 모델 결과를 samples 브랜치 toon/ 폴더에 올린다
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/project-thread-mrai8l]
+    paths: ["tools/toon/**", ".github/workflows/toon-test.yml"]
+permissions:
+  contents: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python tools/toon/gen_test.py samples/toon || true
+      - name: samples 브랜치에 저장
+        run: |
+          mkdir /tmp/s && cp -r samples/toon /tmp/s/
+          git config user.name "github-actions"; git config user.email "actions@users.noreply.github.com"
+          git fetch origin samples || true
+          git checkout -f -B samples origin/samples
+          git rm -rq --cached . 2>/dev/null || true
+          rm -rf toon && cp -r /tmp/s/toon toon && git add toon && git commit -qm "toon samples" && git push -q origin samples
