@@ -1,15 +1,17 @@
 """Muse(메타 AI)가 인스타에 올린 시장 카툰을 Threads에 그대로 복사한다. (형: Muse는 Threads 권한이 없어 매번 허용을 눌러야 해서)
 
 - 인스타 최근 게시물을 읽고, 아래 조건을 모두 만족하는 것만 복사:
-  사진(IMAGE·CAROUSEL) · SINCE 이후 게시 · 우리 자동화가 올린 글이 아님(state/links-*.json 에 없는 링크) · 아직 복사 안 함
+  사진(IMAGE·CAROUSEL) · SINCE 이후 게시 · 캡션 첫 줄이 Muse 카툰 제목(한국증시마감 · / US CLOSING BRIEF · 등) ·
+  우리 자동화가 올린 글이 아님(state/links-*.json 에 없는 링크) · 아직 복사 안 함
 - 복사한 인스타 ID는 state/muse_{region}_threads.json 에 남겨서 두 번 올리지 않는다.
   python muse_threads.py --region kr [--dry-run]
 """
-import argparse, datetime as dt, json, os, time
+import argparse, datetime as dt, json, os, re, time
 import requests
 import publish
 from ig_post import IG_IDS
 
+MUSE = re.compile(r"^\s*(한국증시마감|새벽 미국시황마감|미국시황마감|US [A-Z]+ BRIEF)\s*·")  # Muse 카툰 캡션 첫 줄
 SINCE = dt.datetime.fromisoformat(os.environ.get("MUSE_SINCE", "2026-11-27T07:00:00+00:00"))
 
 
@@ -30,7 +32,7 @@ def main():
     todo = []
     for it in items:
         t = dt.datetime.fromisoformat(it["timestamp"].replace("+0000", "+00:00"))
-        why = ("동영상" if it["media_type"] not in ("IMAGE", "CAROUSEL_ALBUM") else "예전 글" if t < SINCE else "우리 자동화 글" if it.get("permalink") in ours
+        why = ("동영상" if it["media_type"] not in ("IMAGE", "CAROUSEL_ALBUM") else "예전 글" if t < SINCE else "우리 자동화 글" if it.get("permalink") in ours else "Muse 카툰 아님" if not MUSE.match(it.get("caption") or "")
                else "이미 복사함" if it["id"] in done else None)
         print(f"{it['timestamp']} {it['media_type']:<14} {it.get('permalink')} → {why or '복사 대상'} | {(it.get('caption') or '')[:40]!r}")
         if not why: todo.append(it)
