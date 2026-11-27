@@ -148,15 +148,15 @@ Look at each photo. Be a strict photo editor. A photo qualifies ONLY if ALL are 
 the baby animal is the clear main subject (an adult parent next to it is fine if the baby is clearly the star), sharp, well lit, with a pleasant background, and is the kind of photo that makes people say "aww" at first glance
 (soft expression; reject bared teeth, awkward poses, harsh flash, messy or dirty settings); no people's faces, no watermark or big text, nothing sad (no injury, cage, shelter misery); reject newborns whose eyes are still closed or that look hairless/raw, reject photos where the animal is held in or covered by human hands, and reject anything showing hunting, feeding on prey, or blood.
 Rate the best qualifying photo's cuteness 1-10 as "score" honestly (10 = calendar-cover quality). If none qualifies or the best is below 8, return {{"best": -1, "why": "..."}}.
-Then write the card text about what THIS baby animal is visibly doing in the photo. Tone: deadpan, dry, sleek humor, like a bored narrator. Not childish, not gushing, no emoji, no exclamation marks.
+Then write the card text about what THIS baby animal is visibly doing in the photo. Tone: POSITIVE, cute and funny — warm, witty, affectionate humor (the channel concept is "positive, cute, fun"). Dry understatement is fine, but every line must make the baby look adorable or admirable; never negative, mocking, dismissive, sad or sarcastic (no "waste of time", "pointless", "lazy", "failed", "no results", "boring", "no thoughts", "dumb"). Not childish, no emoji, no exclamation marks.
 Return ONLY JSON:
 {{"best": index, "score": 1..10, "why": "short reason",
  "focus_x": 0..1, "focus_y": 0..1,   // where the baby animal's face is in the photo (fraction of width/height)
  "name_ko": "{ko}" (keep as is unless the photo is clearly a different kind; for a dog or cat breed, if it does not clearly look like that breed use "아기 강아지"/"아기 고양이" and "Puppy"/"Kitten"; max 14 chars), "name_en": "{en}" (max 26 chars),
  "lines_ko": ["첫 줄 (max 17 chars, 명사형/~중. ~음. 식의 건조한 말투. 한국 사람이 읽어 자연스럽고 뜻이 바로 통하는 문장. 쉬운 일상어만 쓰고, 그 동물에 맞지 않는 낱말(예: 코알라에게 '등딱지')은 쓰지 말 것)", "둘째 줄 (max 17 chars)"],
  "lines_en": ["line 1 (max 32 chars)", "line 2 (max 32 chars)"],
- "aside_ko": "이 사진을 본 마스코트 레드덴바의 시큰둥한 반응 한마디. 사진·문구와 뜻이 이어져야 함 (max 8 chars, 예: 졌다 / 부럽다 / 나도 말 안 함)", "aside_en": "same idea, max 14 chars (e.g. I lost / Jealous / Not telling)"}}
-Example of tone — lines_ko: ["코에 눈 묻은 줄 모름.", "알려주는 사람도 없음."], aside_ko: "나도 말 안 함"; lines_en: ["Paws up, waiting for a treat.", "Saying no is not an option."], aside_en: "I lost"."""
+ "aside_ko": "이 영상을 본 마스코트 레드덴바의 한마디. 표정은 시큰둥해도 뜻은 꼭 긍정적·귀엽게(감탄·부러움·응원·반함). 부정·비꼼·무시 금지(시간 낭비, 쓸데없음, 멍청 등 X). 사진·문구와 뜻이 이어져야 함 (max 8 chars, 예: 졌다 / 부럽다 / 나도 할래 / 인정 / 심쿵)", "aside_en": "same idea, positive only, max 14 chars (e.g. I lost / Jealous / Me too / Respect / Adorable)"}}
+Example of tone — lines_ko: ["코에 눈 묻은 채로 당당함.", "오늘의 패션 완성."], aside_ko: "인정"; lines_en: ["Paws up, waiting for a treat.", "Saying no is not an option."], aside_en: "I lost"."""
     last = None
     for m in (models(key)[:4] * 2):
         r = requests.post(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent", headers={"x-goog-api-key": key},
