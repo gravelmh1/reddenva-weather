@@ -1,6 +1,6 @@
 {
  "region": "kr",
- "updated": "2026-11-27T21:05:49Z",
+ "updated": "2026-11-27T22:01:26Z",
  "categories": [
   {
    "series": "books",
@@ -52,6 +52,17 @@
   }
  ],
  "items": [
+  {
+   "series": "brief",
+   "label": "주간 정리",
+   "date": "2026-11-28",
+   "date_label": "2026.11.28 (토)",
+   "title": "코스닥이 +9.81% 올랐네요.",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/wrap-kr-2026-11-28.jpg"
+   ]
+  },
   {
    "series": "trip",
    "label": "주말 여행",
