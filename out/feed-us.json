@@ -1,6 +1,6 @@
 {
  "region": "us",
- "updated": "2026-11-27T14:31:47Z",
+ "updated": "2026-11-27T21:02:27Z",
  "categories": [
   {
    "series": "books",
@@ -52,6 +52,19 @@
   }
  ],
  "items": [
+  {
+   "series": "trip",
+   "label": "Weekend trip",
+   "date": "2026-11-27",
+   "date_label": "Fri, Nov 27, 2026",
+   "title": "Weekend pick from LA: Laguna Beach (Laguna Beach, CA)",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/trip-us-2026-11-27-1.jpg",
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/trip-us-2026-11-27-2.jpg",
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/trip-us-2026-11-27-3.jpg"
+   ]
+  },
   {
    "series": "brief",
    "label": "Morning Brief",
