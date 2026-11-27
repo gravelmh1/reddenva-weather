@@ -15,7 +15,7 @@ import requests
 import reel_data
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-KINDS = ["books", "news", "dart", "puppy", "deriv", "trip", "facts", "netflix", "morning", "close", "wrap", "ahead"]
+KINDS = ["baby", "books", "news", "dart", "puppy", "deriv", "trip", "facts", "netflix", "morning", "close", "wrap", "ahead"]
 CARD_LAST = {"ko": "한 장으로 보기", "en": "The full card"}
 
 
@@ -219,11 +219,12 @@ def puppy(d, region, acc="#ff8a4c", pose="a00"):
         # 영상 버전: 이름 → 첫째 줄 → 둘째 줄이 차례로 뜨고, 다 읽을 때까지 영상이 흐른다
         l1, l2 = (c["lines"] + ["", ""])[:2]
         t1 = 1.7; t2 = t1 + max(1.6, rd(l1, ko=ko) - .4); dur = max(7.5, t2 + rd(l2, ko=ko) + .6)
-        dur = min(dur, 12.0); frames, n = video_frames(d["video"], fx, min(dur, float(d.get("vdur") or dur)))
+        # 글을 다 읽은 뒤에도 영상이 끝날 때까지(최대 20초) 흐른다
+        dur = min(max(dur, float(d.get("vdur") or 0)), 20.0); frames, n = video_frames(d["video"], fx, min(dur, float(d.get("vdur") or dur)))
         day = dt.date.fromisoformat(d["day"]) if d.get("day") else dt.date.today()
         top = (f"{KO_DAY[day.weekday()]}요일 · {c['badge']}" if ko else f"{EN_DAY_FULL[day.weekday()]} · {c['badge']}")
         vs = dict(type="video", frames="file://" + frames, nframes=n, fps=30, top=top, dband=(f"{day.month}월" if ko else f"{day:%b}".upper()), dnum=str(day.day),
-                  badge=("이번 주 주인공" if ko else "This week's star"), title=c["name"], lines=[l1, l2], lat=[t1, t2],
+                  badge=c.get("star") or ("이번 주 주인공" if ko else "This week's star"), title=c["name"], lines=[l1, l2], lat=[t1, t2],
                   credit=(c.get("foot") or [""])[0], dur=dur)
         sc = [vs]
         if c.get("aside") and len(c["aside"]) >= 2:
@@ -373,22 +374,22 @@ def ahead(d, region):
     return th, sc + [dict(type="cards", kicker=CARD_LAST["ko" if ko else "en"], srcs=["file://" + d["cards"][0]], dur=8.0)]
 
 
-ADAPT = dict(wrap=brief, ahead=ahead, dart=dart, weather=weather, morning=brief, close=brief, deriv=deriv, books=books, news=news, puppy=puppy, facts=facts, trip=trip, netflix=netflix)
+ADAPT = dict(wrap=brief, ahead=ahead, dart=dart, weather=weather, morning=brief, close=brief, deriv=deriv, books=books, news=news, puppy=puppy, baby=puppy, facts=facts, trip=trip, netflix=netflix)
 
 
-SERIES = {"kr": {"weather": "[[acc:서울]] 날씨", "books": "이번 주 [[acc:책]]", "news": "[[acc:좋은 뉴스]]", "puppy": "[[acc:아기 동물]]", "dart": "[[acc:동전]] 던지기",
+SERIES = {"kr": {"weather": "[[acc:서울]] 날씨", "books": "이번 주 [[acc:책]]", "news": "[[acc:좋은 뉴스]]", "puppy": "[[acc:아기 동물]]", "baby": "[[acc:아기 동물]]", "dart": "[[acc:동전]] 던지기",
                  "deriv": "[[acc:파생]] 브리핑", "trip": "[[acc:주말 여행]]", "facts": "[[acc:동물 상식]]", "netflix": "[[acc:넷플릭스]]",
                  "morning": "[[acc:모닝]] 브리프", "close": "[[acc:마감]] 브리프", "wrap": "[[acc:주간]] 정리", "ahead": "다음 주 [[acc:일정]]"},
-          "us": {"weather": "[[acc:LA]] weather", "books": "[[acc:Book]] of the week", "news": "[[acc:Good news]]", "puppy": "[[acc:Baby animal]]", "dart": "[[acc:Coin]] flip",
+          "us": {"weather": "[[acc:LA]] weather", "books": "[[acc:Book]] of the week", "news": "[[acc:Good news]]", "puppy": "[[acc:Baby animal]]", "baby": "[[acc:Baby animal]]", "dart": "[[acc:Coin]] flip",
                  "deriv": "[[acc:Derivatives]]", "trip": "[[acc:Weekend trip]]", "facts": "[[acc:Animal facts]]", "netflix": "[[acc:Netflix]] top 10",
                  "morning": "[[acc:Morning]] Brief", "close": "[[acc:Closing]] Brief", "wrap": "[[acc:Weekly]] Recap", "ahead": "Week [[acc:Ahead]]"}}
 EN_DAY_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
 # 시리즈마다 단색 배경 (색 계열은 확실히 다르게, 밝기·채도는 비슷하게 눌러서 세련되게)
-SERIES_BG = {"dart": "#3b2f5c", "weather": "#1f4e8c", "books": "#6b4a2e", "news": "#f1e4c8", "puppy": "#93475f",
+SERIES_BG = {"dart": "#3b2f5c", "weather": "#1f4e8c", "books": "#6b4a2e", "news": "#f1e4c8", "puppy": "#93475f", "baby": "#93475f",
              "deriv": "#2b313c", "trip": "#1d6461", "facts": "#56632c", "netflix": "#6e1d29", "morning": "#2a2550", "close": "#14233d"}
-SERIES_ACC = {"books": "#f3c97a", "netflix": "#ffb0a8", "puppy": "#ffc59e", "facts": "#f6d28a", "trip": "#ffc08a"}  # 배경 위에서 잘 보이게
+SERIES_ACC = {"books": "#f3c97a", "netflix": "#ffb0a8", "puppy": "#ffc59e", "baby": "#ffc59e", "facts": "#f6d28a", "trip": "#ffc08a"}  # 배경 위에서 잘 보이게
 
 
 def open_scene(kind, region, day=None):
@@ -397,10 +398,10 @@ def open_scene(kind, region, day=None):
     from zoneinfo import ZoneInfo
     day = dt.date.fromisoformat(day) if day else dt.datetime.now(ZoneInfo(tz)).date(); w = day.weekday()
     if region == "kr":
-        band, first = f"{day.month}월 {KO_DAY[w]}", ("오늘의" if kind == "weather" else f"{KO_DAY[w]}요일")
+        band, first = f"{day.month}월 {KO_DAY[w]}", ("오늘의" if kind in ("weather", "baby") else f"{KO_DAY[w]}요일")
         if kind in ("morning", "close"): first = None
     else:
-        band, first = f"{day:%b} · {EN_DAY[w]}".upper(), ("Today's" if kind == "weather" else EN_DAY_FULL[w])
+        band, first = f"{day:%b} · {EN_DAY[w]}".upper(), ("Today's" if kind in ("weather", "baby") else EN_DAY_FULL[w])
         if kind in ("morning", "close"): first = None
     title = SERIES[region][kind]
     size = "s" if len(re.sub(r"\[\[\w+:|\]\]", "", title)) > (7 if region == "kr" else 11) else ""
@@ -415,7 +416,7 @@ def build(kind, region):
     th, scenes = ADAPT[kind](d, region)
     if kind in SERIES_BG: th["vars"]["bg"] = SERIES_BG[kind]
     if kind in SERIES_ACC: th["vars"]["acc"] = SERIES_ACC[kind]
-    return {"theme": th, "scenes": [open_scene(kind, region, d.get("day") if kind in ("morning", "close", "puppy", "dart") else None)] + scenes}
+    return {"theme": th, "scenes": [open_scene(kind, region, d.get("day") if kind in ("morning", "close", "puppy", "baby", "dart") else None)] + scenes}
 
 
 # ------------------------------------------------------------------ 업로드 (GitHub Release)

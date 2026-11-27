@@ -7,6 +7,10 @@ on:
         description: "영상 버전(Pexels 아기 동물 영상)으로 시험"
         type: boolean
         default: true
+      daily:
+        description: "매일 10시 '오늘의 아기 동물' 버전으로 시험"
+        type: boolean
+        default: false
       day:
         description: "이 날짜인 척 (비우면 오늘)"
         default: ""
@@ -26,8 +30,9 @@ jobs:
       - env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
         run: |
-          D="${{ inputs.day }}"; OPT="--dry-run --force ${D:+--day $D} ${{ inputs.video && '--video' || '' }}"
+          D="${{ inputs.day }}"; OPT="--dry-run --force ${D:+--day $D} ${{ inputs.video && '--video' || '' }} ${{ inputs.daily && '--daily' || '' }}"
           python animals.py --region kr $OPT
           python animals.py --region us $OPT
       - name: 수요일 다트 투자 샘플 (지난 4주를 과거 시세로 채운 데모, 저장·게시 안 함)
@@ -43,11 +48,12 @@ jobs:
           CHROME_PATH: /usr/bin/google-chrome
         run: |
           mkdir -p samples/puppy
-          python reel.py --region kr --kind puppy --local samples/puppy/reel-puppy-kr.mp4
-          python reel.py --region us --kind puppy --local samples/puppy/reel-puppy-us.mp4
+          K=${{ inputs.daily && 'baby' || 'puppy' }}
+          python reel.py --region kr --kind $K --local samples/puppy/reel-$K-kr.mp4
+          python reel.py --region us --kind $K --local samples/puppy/reel-$K-us.mp4
           python reel.py --region kr --kind dart --local samples/puppy/reel-dart-kr.mp4 || true
           python reel.py --region us --kind dart --local samples/puppy/reel-dart-us.mp4 || true
-          cp out/puppy-*.jpg samples/puppy/; cp out/dart-*.jpg samples/puppy/ || true
+          cp out/puppy-*.jpg out/baby-*.jpg samples/puppy/ 2>/dev/null || true; cp out/dart-*.jpg samples/puppy/ || true
       - name: samples 브랜치에 저장
         run: |
           mkdir /tmp/s && cp -r samples/puppy /tmp/s/

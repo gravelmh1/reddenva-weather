@@ -1,0 +1,119 @@
+name: baby-daily
+# 매일 아침 10시(한국 KST · 미국 LA) "오늘의 아기 동물" 영상 릴스. Make를 쓰지 않고 GitHub 예약 실행으로 돈다.
+# 예약 실행은 몇 분~수십 분 늦을 수 있어서 9:40에 깨워 미리 만들고, 10시가 되면 올린다.
+# Instagram = 릴스(실패하면 카드 이미지), Threads = 카드 이미지. 같은 날 두 번 올리지 않음(state/{region}_ig_baby.txt).
+on:
+  schedule:
+    - cron: "40 0 * * *"    # 한국 09:40 KST
+    - cron: "40 16 * * *"   # 미국 09:40 PDT (서머타임)
+    - cron: "40 17 * * *"   # 미국 09:40 PST
+  workflow_dispatch:
+    inputs:
+      region:
+        description: "kr / us"
+        type: choice
+        options: [kr, us]
+        default: kr
+      dry_run:
+        description: "테스트만 하기 (체크하면 영상만 만들고 게시하지 않아요)"
+        type: boolean
+        default: true
+permissions:
+  contents: write
+jobs:
+  baby:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      REGION: ${{ github.event_name == 'schedule' && (github.event.schedule == '40 0 * * *' && 'kr' || 'us') || inputs.region }}
+      DRY: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
+    concurrency:
+      group: post-${{ github.event_name == 'schedule' && (github.event.schedule == '40 0 * * *' && 'kr' || 'us') || inputs.region }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: 지금 올릴 차례인지 (현지 9~11시, 오늘 아직 안 올렸을 때만)
+        id: go
+        run: |
+          python3 - <<'EOF' >> "$GITHUB_OUTPUT"
+          import datetime as dt, os
+          from zoneinfo import ZoneInfo
+          r = os.environ["REGION"]; now = dt.datetime.now(ZoneInfo("Asia/Seoul" if r == "kr" else "America/Los_Angeles"))
+          sf = f"state/{r}_ig_baby.txt"; done = os.path.exists(sf) and open(sf).read().strip() == now.date().isoformat()
+          ok = bool(os.environ.get("DRY")) or (9 <= now.hour <= 11 and not done) or ("${{ github.event_name }}" == "workflow_dispatch" and not done)
+          print("run=" + ("true" if ok else "false"))
+          import sys; print(r, now.isoformat(), "이미 올림" if done else "", "→ 실행" if ok else "→ 건너뜀", file=sys.stderr)
+          EOF
+          cat "$GITHUB_OUTPUT"
+      - uses: actions/setup-python@v5
+        if: steps.go.outputs.run == 'true'
+        with:
+          python-version: "3.12"
+      - name: 준비
+        if: steps.go.outputs.run == 'true'
+        run: |
+          git config user.name "github-actions"; git config user.email "actions@users.noreply.github.com"
+          sudo apt-get update -y && sudo apt-get install -y fonts-noto-cjk fonts-noto-color-emoji
+          pip install -r requirements.txt playwright imageio-ffmpeg
+      - name: 오늘의 아기 동물 고르고 카드 만들기 (Pixabay 영상)
+        if: steps.go.outputs.run == 'true'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: python animals.py --region $REGION --daily ${DRY:+--dry-run --force}
+      - name: (테스트) 영상만 만들어 보관
+        if: steps.go.outputs.run == 'true' && env.DRY == '1'
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: mkdir -p reel_out && python reel.py --region $REGION --kind baby --local reel_out/baby-$REGION.mp4 && cp out/baby-*.jpg reel_out/
+      - uses: actions/upload-artifact@v4
+        if: steps.go.outputs.run == 'true' && env.DRY == '1'
+        with:
+          name: baby-${{ env.REGION }}
+          path: reel_out/*
+      - name: 게시할 카드 정하기 (post.json)
+        if: steps.go.outputs.run == 'true' && env.DRY != '1'
+        run: |
+          git pull --rebase -q || true
+          python post_slot.py $REGION --write baby
+          git add out
+          git diff --cached --quiet || (git commit -q -m "$REGION baby post.json" && git pull --rebase -q && git push -q)
+      - name: 릴스 영상 만들기 (실패하면 카드 이미지로 게시)
+        if: steps.go.outputs.run == 'true' && env.DRY != '1'
+        continue-on-error: true
+        timeout-minutes: 12
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHROME_PATH: /usr/bin/google-chrome
+        run: python reel.py --region $REGION
+      - name: 10시까지 기다리기
+        if: steps.go.outputs.run == 'true' && env.DRY != '1'
+        run: |
+          python3 - <<'EOF'
+          import datetime as dt, os, time
+          from zoneinfo import ZoneInfo
+          tz = ZoneInfo("Asia/Seoul" if os.environ["REGION"] == "kr" else "America/Los_Angeles"); now = dt.datetime.now(tz)
+          wait = (now.replace(hour=10, minute=0, second=0, microsecond=0) - now).total_seconds()
+          print(f"{now:%H:%M:%S} → {max(0, wait):.0f}초 기다림"); time.sleep(max(0, min(wait, 1800)))
+          EOF
+      - name: Instagram 게시
+        if: steps.go.outputs.run == 'true' && env.DRY != '1'
+        env:
+          IG_TOKEN_KR: ${{ secrets.IG_TOKEN_KR }}
+          IG_TOKEN_US: ${{ secrets.IG_TOKEN_US }}
+        run: |
+          git pull --rebase -q || true
+          python ig_post.py --region $REGION --slot baby
+          git add state
+          git diff --cached --quiet || (git commit -q -m "$REGION baby instagram posted" && git pull --rebase -q && git push -q)
+      - name: Threads 게시
+        if: always() && steps.go.outputs.run == 'true' && env.DRY != '1'
+        env:
+          THREADS_TOKEN_KR: ${{ secrets.THREADS_TOKEN_KR }}
+          THREADS_TOKEN_US: ${{ secrets.THREADS_TOKEN_US }}
+        run: |
+          git pull --rebase -q || true
+          python threads_post.py --region $REGION --kind baby-
+          git add state
+          git diff --cached --quiet || (git commit -q -m "$REGION baby threads posted" && git pull --rebase -q && git push -q)
