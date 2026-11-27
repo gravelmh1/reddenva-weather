@@ -39,12 +39,18 @@ def main():
     if not todo: print("복사할 Muse 글 없음"); return
     me = requests.get(f"{publish.TH}/me", params={"fields": "id,username"}, headers={"Authorization": f"Bearer {th_tok}"}, timeout=30); me.raise_for_status()
     os.environ[f"THREADS_USER_ID_{R}"] = me.json()["id"]
+    # 형이 Muse 승인 카드를 눌러서 이미 Threads에 올라간 글이면 건너뛴다 (캡션 첫 줄 비교)
+    th = requests.get(f"{publish.TH}/me/threads", params={"fields": "id,text,timestamp", "limit": 25}, headers={"Authorization": f"Bearer {th_tok}"}, timeout=30)
+    heads = {(x.get("text") or "").strip().splitlines()[0].strip() for x in (th.json().get("data", []) if th.ok else []) if (x.get("text") or "").strip()}
     for it in sorted(todo, key=lambda x: x["timestamp"]):  # 오래된 것부터
         cap = (it.get("caption") or "").strip()
         if it["media_type"] == "CAROUSEL_ALBUM":
             urls = [c["media_url"] for c in it.get("children", {}).get("data", []) if c.get("media_type") == "IMAGE"][:10]
         else:
             urls = [it["media_url"]]
+        if cap.splitlines() and cap.splitlines()[0].strip() in heads:
+            print("Threads에 이미 있음(Muse가 올림) → 건너뜀:", it["permalink"]); done[it["id"]] = {"ig": it["permalink"], "threads": "already"}
+            os.makedirs("state", exist_ok=True); json.dump(done, open(sp, "w", encoding="utf-8"), ensure_ascii=False, indent=1); continue
         if a.dry_run: print("(dry-run) Threads에 올릴 것:", it["permalink"], len(urls), "장"); continue
         pid = publish.threads(a.region, urls[0], cap) if len(urls) == 1 else publish.threads_carousel(a.region, urls, cap)
         print("Threads 게시 완료:", it["permalink"], "→", pid)
