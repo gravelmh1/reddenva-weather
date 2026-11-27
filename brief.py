@@ -509,9 +509,8 @@ def caption(d):
                                              "wrap": "#주간정리 #코스피 #나스닥 #반도체 #레드덴바", "ahead": "#다음주일정 #경제지표 #실적발표 #증시 #레드덴바"},
                                       "us": {"morning": "#stockmarket #futures #premarket #investing #reddenva", "close": "#stockmarket #SP500 #Nasdaq #investing #reddenva",
                                              "wrap": "#weeklyrecap #stockmarket #SP500 #Nasdaq #reddenva", "ahead": "#weekahead #economy #earnings #stockmarket #reddenva"}}
-    lines = [f"{d['title']} · {d['sub']}", "", f"🐾 {d['comment']}"]
-    lines += ["", ("투자 권유 아님 · 자료 " if ko else "Not investment advice · Data: ") + d["foot"].split(":", 1)[-1].split("·")[0].strip(), "", tag[d["region"]][d["kind"]]]
-    return "\n".join(lines)
+    # 형: 캡션은 짧게 — 핵심 한 줄 + 해시태그 (정보는 그림에 다 있음, "투자 권유 아님"도 뺌)
+    return f"🐾 {d['comment']}\n\n{tag[d['region']][d['kind']]}"
 
 
 def main():

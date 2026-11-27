@@ -102,7 +102,7 @@ def main():
     else:
         res = (f"Last week's coin: {'hit' if last['hit'] else 'miss'} (Nasdaq {last['result']:+.1%}) · record {rec['hit']}-{rec['miss']}\n" if last else "")
         cap = (f"🪙 By next Wednesday the Nasdaq will go… {'UP 📈' if up else 'DOWN 📉'} (Red Denva flipped a coin)\n{res}\n"
-               f"#coinflip #reddenva #nasdaq #stocks #notadvice #wednesday")
+               f"#coinflip #reddenva #nasdaq #stocks #wednesday")
     import reel_data
     reel_data.save("dart", region, {"c": card, "cards": [os.path.abspath(img_rel)], "day": day})
     if not a.demo and not a.dry_run: json.dump(st, open(sf, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
