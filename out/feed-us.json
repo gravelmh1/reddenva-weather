@@ -1,6 +1,6 @@
 {
  "region": "us",
- "updated": "2026-11-27T14:06:06Z",
+ "updated": "2026-11-27T14:31:47Z",
  "categories": [
   {
    "series": "books",
@@ -52,6 +52,17 @@
   }
  ],
  "items": [
+  {
+   "series": "brief",
+   "label": "Morning Brief",
+   "date": "2026-11-27",
+   "date_label": "Fri, Nov 27, 2026",
+   "title": "KOSPI jumped 4.34% and I am still exhausted.",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/morning-us-2026-11-27.jpg"
+   ]
+  },
   {
    "series": "deriv",
    "label": "Derivatives brief",
