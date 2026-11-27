@@ -1,6 +1,6 @@
 {
  "region": "kr",
- "updated": "2026-11-27T04:01:46Z",
+ "updated": "2026-11-27T07:01:14Z",
  "categories": [
   {
    "series": "books",
@@ -74,6 +74,17 @@
    "text": "🐾 엔비디아 -3.91%네요. 잡니다. • 엔비디아, 동남아 서버 출하 중단: 엔비디아가 동남아 서버 출하를 중단하며 중국 AI 우회로를 봉쇄했다. • 미국 새 관세 시행 시 평균 13.9%: 미국의 새 관세가 시행되면 평균 관세율이 13.9%로 높아진다. • 트럼프, TSMC 공장 기공식 참석: 트럼프는 내달 4일 애리조나 TSMC 반도체공장 기공식에 참석한다. 투자 권유 아님 · 자료 Yahoo Finance, 네이버 증권",
    "images": [
     "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/morning-kr-2026-11-27.jpg"
+   ]
+  },
+  {
+   "series": "brief",
+   "label": "마감 브리프",
+   "date": "2026-11-27",
+   "date_label": "2026.11.27 (금)",
+   "title": "마감 브리프 · 11/27 (금) 한국 장 마감 15:30 기준",
+   "text": "🐾 코스피 4,915.68 올랐네요 투자 권유 아님 · 자료 네이버 증권, Yahoo Finance",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/close-kr-2026-11-27.jpg"
    ]
   },
   {
