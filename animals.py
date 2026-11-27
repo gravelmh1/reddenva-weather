@@ -149,7 +149,7 @@ Then write the card text about what THIS baby animal is visibly doing in the pho
 Return ONLY JSON:
 {{"best": index, "score": 1..10, "why": "short reason",
  "focus_x": 0..1, "focus_y": 0..1,   // where the baby animal's face is in the photo (fraction of width/height)
- "name_ko": "{ko}" (keep as is unless the photo is clearly a different kind; max 14 chars), "name_en": "{en}" (max 26 chars),
+ "name_ko": "{ko}" (keep as is unless the photo is clearly a different kind; for a dog or cat breed, if it does not clearly look like that breed use "아기 강아지"/"아기 고양이" and "Puppy"/"Kitten"; max 14 chars), "name_en": "{en}" (max 26 chars),
  "lines_ko": ["첫 줄 (max 17 chars, 명사형/~중. ~음. 식의 건조한 말투. 한국 사람이 읽어 자연스럽고 뜻이 바로 통하는 문장. 쉬운 일상어만 쓰고, 그 동물에 맞지 않는 낱말(예: 코알라에게 '등딱지')은 쓰지 말 것)", "둘째 줄 (max 17 chars)"],
  "lines_en": ["line 1 (max 32 chars)", "line 2 (max 32 chars)"],
  "aside_ko": "이 사진을 본 마스코트 레드덴바의 시큰둥한 반응 한마디. 사진·문구와 뜻이 이어져야 함 (max 8 chars, 예: 졌다 / 부럽다 / 나도 말 안 함)", "aside_en": "same idea, max 14 chars (e.g. I lost / Jealous / Not telling)"}}
