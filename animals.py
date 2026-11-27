@@ -174,11 +174,12 @@ Example of tone — lines_ko: ["코에 눈 묻은 채로 당당함.", "오늘의
     raise RuntimeError(f"Gemini 실패: {last}")
 
 
-def choose(year, week_no, used, video=False):
+def choose(year, week_no, used, video=False, avoid=()):
     """이번 주 차례의 동물부터 순서대로(최대 5종) 후보를 받아 고른다. video=True면 영상 후보(Pixabay 우선)."""
     key = os.environ.get("PEXELS_API_KEY", "").strip(); pkey = os.environ.get("PIXABAY_API_KEY", "").strip(); t0 = time.time(); idx = order(year)
-    for k in range(5):
+    for k in range(8):
         q, en, ko = SUBJECTS[idx[(week_no + k) % len(idx)]]
+        if q in avoid: continue  # 최근 며칠 안에 나온 동물은 건너뜀
         if video:  # 영상: Pixabay → (키 있으면) Pexels → 위키미디어 공용
             src = (pixabay_videos(q, pkey) if pkey else []) or (pexels_videos(q, key) if key else []) or commons_videos(q)
         else: src = pexels(q, key) if key else commons(q)
@@ -194,7 +195,7 @@ def choose(year, week_no, used, video=False):
             if j:
                 c = got[int(j["best"])]
                 if c.get("broad") == "puppy" and j["name_ko"] == ko: j.update(name_ko="아기 강아지", name_en="Puppy")  # 넓혀 찾은 영상은 견종을 모름
-                return c, j
+                c["q"] = q; return c, j
         if time.time() - t0 > 80: break
     raise RuntimeError("쓸 만한 아기 동물 사진을 못 찾음 → 이번 주는 올리지 않음")
 
@@ -268,13 +269,13 @@ def main():
         c = j = None
         if a.video:
             if not (os.environ.get("PIXABAY_API_KEY", "").strip() or os.environ.get("PEXELS_API_KEY", "").strip()): print("PIXABAY·PEXELS 키 없음 → 위키미디어 공용 영상에서 찾음")
-            try: c, j = choose(iso[0], turn, set(hist.get("used", [])) | other, video=True)
+            try: c, j = choose(iso[0], turn, set(hist.get("used", [])) | other, video=True, avoid=set(hist.get("recent", [])))
             except Exception as e: print("영상 못 찾음 → 사진으로:", e)
-        if not c: c, j = choose(iso[0], turn, set(hist.get("used", [])) | other)
+        if not c: c, j = choose(iso[0], turn, set(hist.get("used", [])) | other, avoid=set(hist.get("recent", [])))
         c["im"].save(photo, quality=92)
         pick = {"week": week, "id": c["id"], "artist": c["artist"], "license": c["license"], "src": c["src"], **{k: j[k] for k in ("focus_x", "focus_y", "name_ko", "name_en", "lines_ko", "lines_en", "aside_ko", "aside_en")}}
         if c.get("video"): pick.update(video=c["video"], vw=c["vw"], vh=c["vh"], dur=c["dur"])
-        hist = {"used": (hist.get("used", []) + [c["id"]])[-300:], "pick": pick}
+        hist = {"used": (hist.get("used", []) + [c["id"]])[-300:], "recent": (hist.get("recent", []) + [c.get("q", "")])[-5:], "pick": pick}
         if a.daily and c.get("src") == "Pixabay" and re.search(r"(puppy|kitten)$", pick["name_en"], re.I) and pick["name_en"].lower() not in ("puppy", "kitten"):
             # Pixabay는 태그 검색이라 견종이 자주 틀림 → 견종 이름 대신 그냥 강아지·고양이
             cat = "kitten" in pick["name_en"].lower(); pick.update(name_ko="아기 고양이" if cat else "아기 강아지", name_en="Kitten" if cat else "Puppy")
