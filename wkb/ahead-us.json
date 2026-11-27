@@ -112,16 +112,10 @@
        "r": 7
       },
       {
-       "t": "before open",
-       "n": "Royal Bank Of Canada earnings",
-       "k": "earn",
-       "r": 5
-      },
-      {
-       "t": "before open",
-       "n": "Toronto Dominion Bank earnings",
-       "k": "earn",
-       "r": 5
+       "t": "8:30 am",
+       "n": "Jobless claims",
+       "k": "macro",
+       "r": 3
       }
      ]
     },
@@ -161,7 +155,7 @@
  },
  "foot": "Source: Nasdaq economic & earnings calendars, Open-Meteo · times ET",
  "wx": null,
- "comment": "Fri jobs report at 8:30 am. Wake me when it prints.",
+ "comment": "Fri 8:30 am jobs report. Wake me if it hits 4.2%.",
  "news": [],
  "day": "2026-11-29",
  "handle": "@reddenva.us",
