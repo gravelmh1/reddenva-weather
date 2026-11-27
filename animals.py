@@ -134,7 +134,7 @@ def judge(cands, en, ko):
     key = os.environ["GEMINI_API_KEY"].strip(); parts = []
     for i, c in enumerate(cands):
         im = c["im"].copy(); im.thumbnail((640, 640)); b = io.BytesIO(); im.save(b, "JPEG", quality=80)
-        parts += [{"text": f"[photo {i}] caption: {c.get("cap", c["id"])[:90]}"}, {"inline_data": {"mime_type": "image/jpeg", "data": base64.b64encode(b.getvalue()).decode()}}]
+        parts += [{"text": f"[photo {i}] caption: {c.get('cap', c['id'])[:90]}"}, {"inline_data": {"mime_type": "image/jpeg", "data": base64.b64encode(b.getvalue()).decode()}}]
         for k, fr in enumerate(c.get("fim", [])):  # 영상 후보: 같은 영상의 다른 장면(움직이는 동안에도 괜찮은지 보라고)
             fr = fr.copy(); fr.thumbnail((480, 480)); b = io.BytesIO(); fr.save(b, "JPEG", quality=75)
             parts += [{"text": f"[photo {i}, later moment {k + 1} of the same video]"}, {"inline_data": {"mime_type": "image/jpeg", "data": base64.b64encode(b.getvalue()).decode()}}]
