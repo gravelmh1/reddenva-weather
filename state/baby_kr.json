@@ -1,0 +1,30 @@
+{
+ "used": [
+  "pbv:222837"
+ ],
+ "pick": {
+  "week": "kr-2026-11-27",
+  "id": "pbv:222837",
+  "artist": "goutamdasg6",
+  "license": "",
+  "src": "Pixabay",
+  "focus_x": 0.45,
+  "focus_y": 0.52,
+  "name_ko": "아기 강아지",
+  "name_en": "Puppy",
+  "lines_ko": [
+   "그냥 가만히 앉아 있음.",
+   "별다른 뜻은 없음."
+  ],
+  "lines_en": [
+   "Sitting completely still.",
+   "No hidden meaning."
+  ],
+  "aside_ko": "뜻이 없네",
+  "aside_en": "No meaning",
+  "video": "https://cdn.pixabay.com/video/2024/07/24/222837_large.mp4",
+  "vw": 1920,
+  "vh": 1080,
+  "dur": 14
+ }
+}
