@@ -115,9 +115,9 @@
   .heat .cell .c { font-size: 30px; font-weight: 900; }
   /* week ahead */
   .wk7 { display: grid; gap: 10px; }
-  .wd { display: grid; grid-template-columns: 96px 150px 1fr; align-items: center; gap: 14px; padding: 12px 20px; min-height: 118px; }
+  .wd { display: grid; grid-template-columns: 96px 150px 1fr; align-items: center; gap: 14px; padding: 8px 20px; min-height: 100px; }
   .wd .dd { text-align: center; } .wd .dd b { display: block; font-size: 40px; font-weight: 900; line-height: 1; } .wd .dd span { font-size: 22px; color: var(--sub); font-weight: 700; }
-  .wd.sat .dd b { color: #1f6fe5; }
+  .wd.sat .dd b { color: #1f6fe5; } .wd.sun .dd b { color: #d6302b; }
   .wd .ww { display: flex; align-items: center; gap: 6px; } .wd .ww svg { width: 62px; height: 62px; flex: none; }
   .wd .tt { font-size: 30px; font-weight: 900; white-space: nowrap; } .wd .tt span { font-size: 22px; color: var(--sub); }
   .wd .rest { display: flex; align-items: center; gap: 16px; font-size: 25px; font-weight: 800; color: var(--sub); } .wd .rest img { height: 92px; width: auto; margin: -8px 0; }
@@ -290,7 +290,7 @@ const S = {
     const tag = { macro: "", kr: "kr", earn: "earn", hol: "hol" };
     const REST = ["w15", "a22", "a23", "a18"]; let ri = 0;  // 일정 없는 날: 쉬는 레드덴바 (선글라스·낮잠·뒹굴·담요)
     return `<div class="wk7">` + s.days.map(d => { const t = new Date(d.date + "T12:00:00"), w = d.wx;
-      return `<div class="p wd${t.getDay() === 6 ? " sat" : ""}"><div class="dd"><b>${KO ? WDK[t.getDay()] : WDE[t.getDay()]}</b><span>${t.getMonth() + 1}/${t.getDate()}</span></div>
+      return `<div class="p wd${t.getDay() === 6 ? " sat" : t.getDay() === 0 ? " sun" : ""}"><div class="dd"><b>${KO ? WDK[t.getDay()] : WDE[t.getDay()]}</b><span>${t.getMonth() + 1}/${t.getDate()}</span></div>
         <div class="ww">${w ? `${wxIcon(w.icon)}<div class="tt num">${w.hi}°<span>/${w.lo}°</span></div>` : ""}</div>
         <div class="ee">${d.ev.length ? d.ev.map(e => `<div class="e ${tag[e.k] || ""}"><span class="t num">${esc(e.t || "")}</span><span class="n">${esc(e.n)}</span></div>`).join("") : `<div class="rest"><img src="../assets/poses/${REST[(ri++) % REST.length]}.png"><span>${KO ? "큰 일정 없음 · 레드덴바는 휴양 중" : "Nothing big · Red Denva is off"}</span></div>`}</div></div>`; }).join("") + "</div>";
   },

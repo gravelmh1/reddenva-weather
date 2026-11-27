@@ -167,7 +167,7 @@ def ahead(region, now):
     ko = region == "kr"; tz = KST if ko else ET_
     today = now.astimezone(tz).date()
     mon = today + dt.timedelta(days=(7 - today.weekday()) % 7 or 7)  # 다음 월요일
-    days = [mon + dt.timedelta(days=i) for i in range(6 if ko else 5)]  # 한국판은 토요일 새벽(미국 금요일 밤)까지
+    days = [mon + dt.timedelta(days=i) for i in range(7)]  # 월~일 7일 전부 (빈 날은 카드에서 쉬는 레드덴바)
     us_days = [mon - dt.timedelta(days=1) + dt.timedelta(days=i) for i in range(7)] if ko else days
     ev = []
     for d in us_days:
@@ -197,9 +197,9 @@ def ahead(region, now):
         lst = lst[:3]
         top += [(x["r"], d, x) for x in lst]
         if ko: lst.sort(key=lambda x: (not re.match(r"\d", x["t"]), x["t"]))  # 시각 순, 시각 없는 건 뒤
-        if lst or d.weekday() < 5: out.append({"date": d.isoformat(), "wx": wx.get(d.isoformat()), "ev": lst})
+        out.append({"date": d.isoformat(), "wx": wx.get(d.isoformat()), "ev": lst})
     top = sorted(top, key=lambda x: -x[0])[:4]
-    fri = days[4]
+    fri = days[-1]  # 일요일까지
     if ko:
         facts = {f"{WD[d.weekday()]} {x['t']}".strip(): x["n"] for _, d, x in top}
         hl = [f"{WD[d.weekday()]} [[acc:{x['n'].replace('미국 ', '')}]]" for _, d, x in top[:2]]
