@@ -4578,22 +4578,22 @@
    "title": "이번 주 핵심 뉴스",
    "items": [
     {
-     "head": "한은 기준금리 인상 가능성",
+     "head": "한은, 기준금리 인상 가능성",
      "line": "이달 기준금리 0.25%p 인상 가능성이 커졌다.",
      "src": "한겨레",
      "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE5BRGR2dWo0VlNOSFlZcTk3ZXN3MmJXZ1MxczRibTFKRWc5WXptQnJBM1NoRmZnYm9Wa1ZkaGRwZFd2Q29YSVVhSVRZM25MelpiWGFIalo1SWxFMEJBY1hOTDZSenJMQV9aenZfNkVldTNUZw?oc=5"
+    },
+    {
+     "head": "美, 삼성·TSMC 출하 중단",
+     "line": "중국 반도체 숨통을 조이며 출하가 중단됐다.",
+     "src": "한국경제",
+     "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1ocTRubF95TUZOcFlDZThPOE5VZkMtSGNlUTlBc1BQVVFYb0Ztb3Rnei1oQkpCVjM2cWtrUzRMZEVRcW5JQWtKUXBsVU9LMTZ6YzlmVTAtNzhrQQ?oc=5"
     },
     {
      "head": "수출 1조 달러 달성",
      "line": "반도체 호황에 힘입어 세계 4번째로 기록했다.",
      "src": "MBC 뉴스",
      "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTFBEdXE5UDNFRzRCelZLQVRVR1dHanJ5b3BNWEoxR1V4ektxd3Y3ZTg4eXc4enE2TzU1eTVxRm13a2F0ejg5NndsaWtxM2VTdXNiZzlRejRZOGY5WTFhaWQ5bzN2YS1CdkpEbzBWVHR2R2JCMmpZ0gF0QVVfeXFMTjEyUDdhOGJaY1hCaVpPekZOcmxIb3p5M2FmZ191LXl6LWFlNXFDb0VnX05YVjJicE5scDBCTW45dWM5d3JTeGtiVGZ6Tm9nX1k3U2twTkVNN3AwS2RBWjRwbHFNQVF4d281cWRvOTd6NVpXSm4?oc=5"
-    },
-    {
-     "head": "코스피·코스닥 사이드카",
-     "line": "급락장에 대표 주가 지수가 나란히 발동됐다.",
-     "src": "조선일보",
-     "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxQLVZkUGo0UXhlLThsVzRacWVVYXZPSFYwVjUtMkJEaDBIUDNqQ2FtV3hMS3NDSFg5T0JwTUhhSzNtbHFsRlZJWHFSWVRqZVBHazd5VjVaZk5nbGRXZTBrVWQzd2FCU1hjRWk1YjA2V3JKdk43WWJMejcxQ1NtTzM2VA?oc=5"
     }
    ]
   }
@@ -4938,22 +4938,22 @@
  "comment": "삼성전자 주간 -13.44% 빠졌네요.",
  "news": [
   {
-   "head": "한은 기준금리 인상 가능성",
+   "head": "한은, 기준금리 인상 가능성",
    "line": "이달 기준금리 0.25%p 인상 가능성이 커졌다.",
    "src": "한겨레",
    "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE5BRGR2dWo0VlNOSFlZcTk3ZXN3MmJXZ1MxczRibTFKRWc5WXptQnJBM1NoRmZnYm9Wa1ZkaGRwZFd2Q29YSVVhSVRZM25MelpiWGFIalo1SWxFMEJBY1hOTDZSenJMQV9aenZfNkVldTNUZw?oc=5"
+  },
+  {
+   "head": "美, 삼성·TSMC 출하 중단",
+   "line": "중국 반도체 숨통을 조이며 출하가 중단됐다.",
+   "src": "한국경제",
+   "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1ocTRubF95TUZOcFlDZThPOE5VZkMtSGNlUTlBc1BQVVFYb0Ztb3Rnei1oQkpCVjM2cWtrUzRMZEVRcW5JQWtKUXBsVU9LMTZ6YzlmVTAtNzhrQQ?oc=5"
   },
   {
    "head": "수출 1조 달러 달성",
    "line": "반도체 호황에 힘입어 세계 4번째로 기록했다.",
    "src": "MBC 뉴스",
    "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTFBEdXE5UDNFRzRCelZLQVRVR1dHanJ5b3BNWEoxR1V4ektxd3Y3ZTg4eXc4enE2TzU1eTVxRm13a2F0ejg5NndsaWtxM2VTdXNiZzlRejRZOGY5WTFhaWQ5bzN2YS1CdkpEbzBWVHR2R2JCMmpZ0gF0QVVfeXFMTjEyUDdhOGJaY1hCaVpPekZOcmxIb3p5M2FmZ191LXl6LWFlNXFDb0VnX05YVjJicE5scDBCTW45dWM5d3JTeGtiVGZ6Tm9nX1k3U2twTkVNN3AwS2RBWjRwbHFNQVF4d281cWRvOTd6NVpXSm4?oc=5"
-  },
-  {
-   "head": "코스피·코스닥 사이드카",
-   "line": "급락장에 대표 주가 지수가 나란히 발동됐다.",
-   "src": "조선일보",
-   "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxQLVZkUGo0UXhlLThsVzRacWVVYXZPSFYwVjUtMkJEaDBIUDNqQ2FtV3hMS3NDSFg5T0JwTUhhSzNtbHFsRlZJWHFSWVRqZVBHazd5VjVaZk5nbGRXZTBrVWQzd2FCU1hjRWk1YjA2V3JKdk43WWJMejcxQ1NtTzM2VA?oc=5"
   }
  ],
  "day": "2026-11-21",
@@ -5025,7 +5025,7 @@
    "h": 8.51
   },
   {
-   "t": "한은 기준금리 인상 가능성",
+   "t": "한은, 기준금리 인상 가능성",
    "s": "news",
    "x": 6.76,
    "y": 85.46,
@@ -5033,7 +5033,7 @@
    "h": 2.81
   },
   {
-   "t": "수출 1조 달러 달성",
+   "t": "美, 삼성·TSMC 출하 중단",
    "s": "news",
    "x": 6.76,
    "y": 88.28,
@@ -5041,7 +5041,7 @@
    "h": 2.89
   },
   {
-   "t": "코스피·코스닥 사이드카",
+   "t": "수출 1조 달러 달성",
    "s": "news",
    "x": 6.76,
    "y": 91.17,

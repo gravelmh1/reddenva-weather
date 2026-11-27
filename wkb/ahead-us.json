@@ -8,8 +8,8 @@
  "pose": "a05",
  "facts": {
   "Tue after close": "Marvell Technology earnings",
-  "Wed 5 am": "JOLTS job openings",
-  "Fri 5 am": "ISM services"
+  "Wed 10 am": "JOLTS job openings",
+  "Fri 10 am": "ISM services"
  },
  "sections": [
   {
@@ -27,7 +27,7 @@
      },
      "ev": [
       {
-       "t": "3:30 pm",
+       "t": "8:30 pm",
        "n": "China manufacturing PMI",
        "k": "macro",
        "r": 4
@@ -52,12 +52,12 @@
       },
       {
        "t": "",
-       "n": "BHP Group Limited earnings",
+       "n": "BHP Group earnings",
        "k": "earn",
        "r": 5
       },
       {
-       "t": "3:45 pm",
+       "t": "8:45 pm",
        "n": "China manufacturing PMI",
        "k": "macro",
        "r": 4
@@ -75,13 +75,13 @@
      },
      "ev": [
       {
-       "t": "5 am",
+       "t": "10 am",
        "n": "ISM manufacturing",
        "k": "macro",
        "r": 7
       },
       {
-       "t": "5 am",
+       "t": "10 am",
        "n": "JOLTS job openings",
        "k": "macro",
        "r": 6
@@ -105,7 +105,7 @@
      },
      "ev": [
       {
-       "t": "3:15 am",
+       "t": "8:15 am",
        "n": "ADP jobs",
        "k": "macro",
        "r": 6
@@ -135,13 +135,13 @@
      },
      "ev": [
       {
-       "t": "5 am",
+       "t": "10 am",
        "n": "ISM services",
        "k": "macro",
        "r": 7
       },
       {
-       "t": "3:30 am",
+       "t": "8:30 am",
        "n": "Jobless claims",
        "k": "macro",
        "r": 3
@@ -160,7 +160,7 @@
  },
  "foot": "Source: Nasdaq economic & earnings calendars, Open-Meteo · times ET",
  "wx": null,
- "comment": "Tuesday Marvell earnings.",
+ "comment": "Tue brings Marvell earnings. Wake me if it clears 15%.",
  "news": [],
  "day": "2026-11-29",
  "handle": "@reddenva.us",
