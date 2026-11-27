@@ -257,6 +257,10 @@ def main():
         week = f"{region}-{day}"; pf = f"state/baby_{region}.json"; os.makedirs("reel_in", exist_ok=True); photo = f"reel_in/baby-photo-{week}.jpg"
         turn = today.timetuple().tm_yday + (0 if region == "kr" else 26)
     hist = json.load(open(pf, encoding="utf-8")) if os.path.exists(pf) else {"used": [], "pick": {}}
+    other = set()
+    if a.daily:  # 한국판·미국판이 같은 영상을 쓰지 않게 상대 지역에서 쓴 것도 뺀다
+        of = f"state/baby_{'us' if region == 'kr' else 'kr'}.json"
+        if os.path.exists(of): other = set(json.load(open(of, encoding="utf-8")).get("used", []))
     pick = hist.get("pick", {})
     if pick.get("week") == week and os.path.exists(photo) and bool(pick.get("video")) == a.video:
         print("이번 주 사진 재사용:", pick["id"])
@@ -264,13 +268,16 @@ def main():
         c = j = None
         if a.video:
             if not (os.environ.get("PIXABAY_API_KEY", "").strip() or os.environ.get("PEXELS_API_KEY", "").strip()): print("PIXABAY·PEXELS 키 없음 → 위키미디어 공용 영상에서 찾음")
-            try: c, j = choose(iso[0], turn, set(hist.get("used", [])), video=True)
+            try: c, j = choose(iso[0], turn, set(hist.get("used", [])) | other, video=True)
             except Exception as e: print("영상 못 찾음 → 사진으로:", e)
-        if not c: c, j = choose(iso[0], turn, set(hist.get("used", [])))
+        if not c: c, j = choose(iso[0], turn, set(hist.get("used", [])) | other)
         c["im"].save(photo, quality=92)
         pick = {"week": week, "id": c["id"], "artist": c["artist"], "license": c["license"], "src": c["src"], **{k: j[k] for k in ("focus_x", "focus_y", "name_ko", "name_en", "lines_ko", "lines_en", "aside_ko", "aside_en")}}
         if c.get("video"): pick.update(video=c["video"], vw=c["vw"], vh=c["vh"], dur=c["dur"])
         hist = {"used": (hist.get("used", []) + [c["id"]])[-300:], "pick": pick}
+        if a.daily and c.get("src") == "Pixabay" and re.search(r"(puppy|kitten)$", pick["name_en"], re.I) and pick["name_en"].lower() not in ("puppy", "kitten"):
+            # Pixabay는 태그 검색이라 견종이 자주 틀림 → 견종 이름 대신 그냥 강아지·고양이
+            cat = "kitten" in pick["name_en"].lower(); pick.update(name_ko="아기 고양이" if cat else "아기 강아지", name_en="Kitten" if cat else "Puppy")
         print("선택:", c["id"], "|", j.get("score"), j.get("why", "")); print(json.dumps(pick, ensure_ascii=False))
     vpath = None
     if pick.get("video"):
