@@ -41,7 +41,7 @@ def lab(d, ko=True): return f"{d.month}/{d.day} ({WD[d.weekday()]})" if ko else 
 def yahoo(sym, now, name, unit="", dp=2, kind="pct", session=True):
     """session=True: 마지막으로 '끝난' 정규장 종가와 그날 5분 차트. False(선물·환율·코인): now 시점 값 vs 전일 정산/종가, 최근 24시간 차트."""
     q = urllib.parse.quote(sym)
-    j = get(f"https://query1.finance.yahoo.com/v8/finance/chart/{q}", params={"range": "1mo", "interval": "1d"}).json()["chart"]["result"][0]
+    j = get(f"https://query1.finance.yahoo.com/v8/finance/chart/{q}", params={"range": "3mo", "interval": "1d"}).json()["chart"]["result"][0]
     meta = j["meta"]; tz = ZoneInfo(meta["exchangeTimezoneName"]); nl = now.astimezone(tz)
     end = meta.get("currentTradingPeriod", {}).get("regular", {}).get("end")
     close_t = dt.datetime.fromtimestamp(end, tz).time() if end else dt.time(16, 0)
@@ -60,7 +60,9 @@ def yahoo(sym, now, name, unit="", dp=2, kind="pct", session=True):
         if daily and daily[-1][0] == nl.date() and len(daily) > 1: prev = daily[-2][1]
         cut = nl - dt.timedelta(hours=20); spark = [c for t, c in pts if t >= cut]
         d = nl.date()
-    return mk(name, last, prev, d, spark, unit, dp, kind)
+    q = mk(name, last, prev, d, spark, unit, dp, kind)
+    q["hist"] = [[k.isoformat(), round(c, 4)] for k, c in daily[-66:]]  # 블로그 상세 차트용 (3개월 일봉)
+    return q
 
 
 def mk(name, last, prev, d, spark, unit="", dp=2, kind="pct"):
@@ -86,7 +88,7 @@ def fchart(sym, tf="day", n=40):
 def naver(sym, now, name, unit="", dp=2):
     """마지막으로 끝난 한국 정규장(15:30) 종가 + 그날 분봉."""
     nl = now.astimezone(KST)
-    daily = [(dt.date(int(a[0][:4]), int(a[0][4:6]), int(a[0][6:8])), float(a[4])) for a in fchart(sym)]
+    daily = [(dt.date(int(a[0][:4]), int(a[0][4:6]), int(a[0][6:8])), float(a[4])) for a in fchart(sym, n=70)]
     daily = [x for x in daily if x[0] < nl.date() or (x[0] == nl.date() and nl.time() >= dt.time(15, 45))]
     d, last = daily[-1]; prev = daily[-2][1]
     spark = []
@@ -99,7 +101,9 @@ def naver(sym, now, name, unit="", dp=2):
             ysp = [c for c in ysp if abs(c / last - 1) < .15]  # 엉뚱한 값 걸러내기
             if len(ysp) >= 10: spark = ysp + [last]
         except Exception as e: print("Yahoo 분봉 실패", sym, e)
-    return mk(name, last, prev, d, spark or [c for _, c in daily[-20:]], unit, dp)
+    q = mk(name, last, prev, d, spark or [c for _, c in daily[-20:]], unit, dp)
+    q["hist"] = [[k.isoformat(), c] for k, c in daily[-66:]]
+    return q
 
 
 def naver_flows(day):
@@ -474,6 +478,11 @@ def render_card(d, out):
         pg.add_init_script(f"window.DATA = {json.dumps(d, ensure_ascii=False)};")
         pg.goto(f"file://{ROOT}/reels/brief_card.html")
         pg.wait_for_function("window.READY === true", timeout=60000)
+        # 블로그에서 누를 칸 위치 (% 단위): 이름과 자리
+        d["hot"] = pg.evaluate("""[...document.querySelectorAll('.chip,.mini .p,.big .p,.ct,.cs .p,.hero .main,.side .p,.row,.fr,.nw,.heat .cell')].map(e => {
+          const r = e.getBoundingClientRect(), n = e.querySelector('.n,.lab,.h'), sec = e.closest('section');
+          return {t: (n ? n.childNodes[0].textContent : '').trim(), s: sec ? sec.dataset.t : '', x: +(r.left / 10.8).toFixed(2), y: +(r.top / 13.5).toFixed(2), w: +(r.width / 10.8).toFixed(2), h: +(r.height / 13.5).toFixed(2)};
+        }).filter(o => o.y + o.h <= 100 && o.h > 0)""")
         h = pg.evaluate("document.querySelector('#card').scrollHeight")
         if h > 1350: print(f"⚠ 카드 내용이 넘침: {h}px")
         pg.screenshot(path=out, type="jpeg", quality=93, clip={"x": 0, "y": 0, "width": 1080, "height": 1350})
