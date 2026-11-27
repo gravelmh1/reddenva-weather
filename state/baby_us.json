@@ -1,0 +1,30 @@
+{
+ "used": [
+  "pbv:215062"
+ ],
+ "pick": {
+  "week": "us-2026-11-26",
+  "id": "pbv:215062",
+  "artist": "DavidClode",
+  "license": "",
+  "src": "Pixabay",
+  "focus_x": 0.42,
+  "focus_y": 0.62,
+  "name_ko": "아기 코알라",
+  "name_en": "Koala joey",
+  "lines_ko": [
+   "잎사귀 씹는 법 연구 중.",
+   "아직 결과는 없음."
+  ],
+  "lines_en": [
+   "Studying how to chew leaves.",
+   "No results yet."
+  ],
+  "aside_ko": "시간 낭비",
+  "aside_en": "Waste of time",
+  "video": "https://cdn.pixabay.com/video/2024/06/03/215062_large.mp4",
+  "vw": 1920,
+  "vh": 1080,
+  "dur": 13
+ }
+}
