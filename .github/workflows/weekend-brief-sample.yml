@@ -1,0 +1,39 @@
+name: weekend-brief-sample
+# 주말 브리프 시안: 토 주간 정리(wrap) · 일 다음 주 일정(ahead), 한국·미국. 게시 안 함. samples 브랜치 wkb/ 에 저장
+on:
+  workflow_dispatch:
+    inputs:
+      wrap_asof: { description: "주간 정리 기준 (토요일 아침)", default: "2026-11-21T07:00" }
+      ahead_asof: { description: "다음 주 일정 기준 (일요일 아침)", default: "2026-11-29T07:00" }
+permissions:
+  contents: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: sudo apt-get update -y && sudo apt-get install -y fonts-noto-cjk fonts-noto-color-emoji
+      - run: pip install -r requirements.txt playwright imageio-ffmpeg
+      - env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          mkdir -p samples/wkb
+          for r in kr us; do
+            python brief.py --region $r --kind wrap --dry-run --force --asof ${{ inputs.wrap_asof }} --out samples/wkb/wrap-$r.jpg || true
+            python reel.py --region $r --kind wrap --local samples/wkb/reel-wrap-$r.mp4 || true
+            python brief.py --region $r --kind ahead --dry-run --force --asof ${{ inputs.ahead_asof }} --out samples/wkb/ahead-$r.jpg || true
+            python reel.py --region $r --kind ahead --local samples/wkb/reel-ahead-$r.mp4 || true
+          done
+          ls -la samples/wkb
+      - name: samples 브랜치에 저장
+        run: |
+          mkdir /tmp/s && cp -r samples/wkb /tmp/s/
+          git config user.name "github-actions"; git config user.email "actions@users.noreply.github.com"
+          git fetch origin samples || true
+          git checkout -f -B samples origin/samples
+          git rm -rq --cached . 2>/dev/null || true
+          rm -rf wkb && cp -r /tmp/s/wkb wkb && git add wkb && git commit -qm "weekend brief samples" && git push -q origin samples

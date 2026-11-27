@@ -295,17 +295,19 @@ def gem(prompt, temp=0.4):
 
 
 NEWS_Q = {("kr", "morning"): "뉴욕증시 OR 미국증시 OR 연준 OR 파월 OR 미국 국채 OR 엔비디아 OR 국제유가 OR 트럼프", ("kr", "close"): "코스피 OR 증시 OR 한국은행 OR 환율 OR 반도체",
-          ("us", "morning"): "stocks OR futures OR Fed OR earnings OR economy", ("us", "close"): "stocks OR Wall Street OR Fed OR earnings OR Treasury yields"}
+          ("us", "morning"): "stocks OR futures OR Fed OR earnings OR economy",
+          ("kr", "wrap"): "코스피 OR 뉴욕증시 OR 연준 OR 한국은행 OR 반도체 OR 환율", ("us", "wrap"): "Wall Street week OR stocks OR Fed OR earnings OR Treasury yields", ("us", "close"): "stocks OR Wall Street OR Fed OR earnings OR Treasury yields"}
 
 
 def news3(region, kind, now, facts):
     ko = region == "kr"; nl = now.astimezone(KST if ko else ET_)
-    items = [it for it in gnews(NEWS_Q[(region, kind)], ko, nl.date() - dt.timedelta(days=1), nl.date()) if now - dt.timedelta(hours=30) <= it["pub"] <= now]
+    hrs = 7 * 24 if kind == "wrap" else 30
+    items = [it for it in gnews(NEWS_Q[(region, kind)], ko, nl.date() - dt.timedelta(days=7 if kind == "wrap" else 1), nl.date()) if now - dt.timedelta(hours=hrs) <= it["pub"] <= now]
     items = items[:60]
     print("뉴스 후보", len(items))
     if len(items) < 3: return []
     lst = "\n".join(f"[{i}] {it['title']} ({it['src']}, {it['pub'].astimezone(KST if ko else ET_):%m/%d %H:%M})" for i, it in enumerate(items))
-    p = f"""You write the 3-line news section of a {'Korean' if ko else 'US'} {'morning' if kind == 'morning' else 'market close'} market brief.
+    p = f"""You write the 3-line news section of a {'Korean' if ko else 'US'} {'weekly recap (the 3 biggest market stories of the past week)' if kind == 'wrap' else 'morning' if kind == 'morning' else 'market close'} market brief.
 Market numbers for context (already shown elsewhere, do not repeat them as news): {json.dumps(facts, ensure_ascii=False)}
 From the headlines below pick the 3 most market-moving, distinct stories (central bank, macro data, big company news, policy). Skip opinion, ads, stock tips, crypto hype, celebrity, duplicates.
 Write each as: "head" = short headline (max {'18 Korean characters' if ko else '42 characters'}), "line" = one short plain sentence with the key point (max {'20 Korean characters' if ko else '40 characters'}; it sits next to the headline on one line, so do not repeat the headline).
@@ -323,7 +325,7 @@ def quip(region, kind, facts, mood):
     ko = region == "kr"
     try:
         p = f"""You are Red Denva, a sleepy, deadpan red panda who posts a daily {'Korean' if ko else 'US'} stock market brief.
-Write ONE short comment about today's numbers below: dry, witty, specific to the numbers (mention one concrete thing), never cheesy, no emojis, no hashtags, no investment advice, no predictions.
+Write ONE short comment about {"this week's numbers" if kind == "wrap" else "next week's schedule (pick the one event that matters most)" if kind == "ahead" else "today's numbers"} below: dry, witty, specific to the numbers (mention one concrete thing), never cheesy, no emojis, no hashtags, no investment advice, no predictions.
 Write numbers exactly as digits with the % sign (e.g. "-8.75%", "$3.50"), never spelled out in words.
 Sound like a real person who trades, not an AI: plain words, no forced metaphors, no exclamation marks.
 Clean, polished language only: no slang, no profanity or near-profanity (e.g. never 졸라/존나/개-), nothing a brand account would regret.
@@ -490,15 +492,17 @@ def render_card(d, out):
 
 
 def caption(d):
-    ko = d["region"] == "kr"; tag = {"kr": {"morning": "#모닝브리프 #미국증시 #반도체 #나스닥 #레드덴바", "close": "#마감브리프 #코스피 #증시 #외국인 #레드덴바"},
-                                      "us": {"morning": "#stockmarket #futures #premarket #investing #reddenva", "close": "#stockmarket #SP500 #Nasdaq #investing #reddenva"}}
+    ko = d["region"] == "kr"; tag = {"kr": {"morning": "#모닝브리프 #미국증시 #반도체 #나스닥 #레드덴바", "close": "#마감브리프 #코스피 #증시 #외국인 #레드덴바",
+                                             "wrap": "#주간정리 #코스피 #나스닥 #반도체 #레드덴바", "ahead": "#다음주일정 #경제지표 #실적발표 #증시 #레드덴바"},
+                                      "us": {"morning": "#stockmarket #futures #premarket #investing #reddenva", "close": "#stockmarket #SP500 #Nasdaq #investing #reddenva",
+                                             "wrap": "#weeklyrecap #stockmarket #SP500 #Nasdaq #reddenva", "ahead": "#weekahead #economy #earnings #stockmarket #reddenva"}}
     lines = [f"{d['title']} · {d['sub']}", "", f"🐾 {d['comment']}"]
     lines += ["", ("투자 권유 아님 · 자료 " if ko else "Not investment advice · Data: ") + d["foot"].split(":", 1)[-1].split("·")[0].strip(), "", tag[d["region"]][d["kind"]]]
     return "\n".join(lines)
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--region", required=True, choices=["kr", "us"]); ap.add_argument("--kind", required=True, choices=["morning", "close"])
+    ap = argparse.ArgumentParser(); ap.add_argument("--region", required=True, choices=["kr", "us"]); ap.add_argument("--kind", required=True, choices=["morning", "close", "wrap", "ahead"])
     ap.add_argument("--dry-run", action="store_true"); ap.add_argument("--force", action="store_true"); ap.add_argument("--asof", help="이 시각 기준으로 만들기 (현지 시각, 시안용)")
     ap.add_argument("--from-json", help="저장해둔 데이터로 카드만 다시 그리기"); ap.add_argument("--out")
     a = ap.parse_args()
@@ -506,26 +510,35 @@ def main():
     now = dt.datetime.fromisoformat(a.asof).replace(tzinfo=tz) if a.asof else dt.datetime.now(tz)
     day = now.date(); os.makedirs("out", exist_ok=True)
     lp = f"out/{a.kind}-{a.region}-latest.json"
+    weekend = a.kind in ("wrap", "ahead")  # 토요일 주간 정리 · 일요일 다음 주 일정
     if not a.force and not a.from_json:
         hol, mkt = (KRX_HOL, "KRX") if a.region == "kr" else (NYSE_HOL, "NYSE")
-        if day.weekday() >= 5 or day in hol: print(f"{mkt} 휴장일 → 건너뜀"); return
+        if weekend:
+            if day.weekday() != (5 if a.kind == "wrap" else 6): print("주말 브리프는 토(정리)·일(일정)만 → 건너뜀"); return
+        elif day.weekday() >= 5 or day in hol: print(f"{mkt} 휴장일 → 건너뜀"); return
         if os.path.exists(lp) and json.load(open(lp, encoding="utf-8")).get("date") == day.isoformat(): print("오늘 이미 만들었음"); return
     if a.from_json:
         d = json.load(open(a.from_json, encoding="utf-8"))
     else:
-        t = time.time(); d = BUILD[(a.region, a.kind)](now); print(f"시세 {time.time() - t:.0f}초")
-        ch = chips(now, a.region == "kr", a.kind)
+        import weekend as wk
+        t = time.time(); d = {**BUILD, **wk.BUILD}[(a.region, a.kind)](now); print(f"시세 {time.time() - t:.0f}초")
+        ch = chips(now, a.region == "kr", "morning" if a.kind == "wrap" else a.kind)
+        if ch and a.kind == "wrap":  # 주간 정리: 1주 변동을 앞에
+            for q in ch["dram"] + ch["gpu"]:
+                if q.get("w1") is not None: q["pct"] = q["w1"]
+            ch["week"] = True
         if ch:
             d["sections"].insert(0, ch); d["chips"] = ch
             for q in ch["dram"][:1] + ch["gpu"][:1]: d["facts"][q["name"] + (" GPU 시간당 임대료" if q in ch["gpu"] else " D램 현물")] = f"${q['last']} ({q['pct']:+.2f}%, 1주 {q['w1']:+.2f}%)" if q.get("w1") is not None else f"${q['last']} ({q['pct']:+.2f}%)"
             print("반도체", [(q["name"], q["last"], q["pct"], q["date"]) for q in ch["dram"] + ch["gpu"]])
-        wd = day if a.kind == "morning" else day + dt.timedelta(days=1)  # 마감 브리프는 내일 날씨
-        d["wx"] = safe(today_wx, a.region, wd, "today" if a.kind == "morning" else "tomorrow"); print("날씨", d["wx"])
+        wd = day + dt.timedelta(days=1) if a.kind == "close" else day  # 마감 브리프는 내일 날씨
+        d["wx"] = None if a.kind == "ahead" else safe(today_wx, a.region, wd, "tomorrow" if a.kind == "close" else "today"); print("날씨", d["wx"])
         if d["wx"]: w = d["wx"]; d["facts"][f"{w['when']} {w['city']} 날씨" if a.region == "kr" else f"{w['city']} weather {w['when'].lower()}"] = f"{w['sky']} {w['hi']}°/{w['lo']}° 강수 {w['rain']}%"
         d["comment"] = quip(a.region, a.kind, d["facts"], d["mood"])
-        try: d["news"] = news3(a.region, a.kind, now, d["facts"])
+        try: d["news"] = [] if a.kind == "ahead" else news3(a.region, a.kind, now, d["facts"])
         except Exception as e: print("뉴스 건너뜀:", type(e).__name__, e); d["news"] = []
-        if d["news"]: d["sections"].append({"type": "news", "title": ("간밤 미국 주요 뉴스" if a.kind == "morning" else "오늘 장중 핵심 뉴스") if a.region == "kr" else "Top headlines", "items": d["news"]})
+        NT = {"morning": ("간밤 미국 주요 뉴스", "Top headlines"), "close": ("오늘 장중 핵심 뉴스", "Top headlines"), "wrap": ("이번 주 핵심 뉴스", "This week's big stories")}
+        if d["news"]: d["sections"].append({"type": "news", "title": NT[a.kind][0 if a.region == "kr" else 1], "items": d["news"]})
         d.update(day=day.isoformat(), handle=f"@reddenva.{a.region}", made=now.isoformat())
     out = a.out or f"out/{a.kind}-{a.region}-{day.isoformat()}.jpg"
     render_card(d, os.path.abspath(out)); print("카드:", out)

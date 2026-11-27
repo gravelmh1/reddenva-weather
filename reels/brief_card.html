@@ -113,6 +113,19 @@
   .heat .cell { border-radius: 16px; padding: 10px 8px; text-align: center; color: #fff; }
   .heat .cell .n { font-size: 22px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .heat .cell .c { font-size: 30px; font-weight: 900; }
+  /* week ahead */
+  .wk7 { display: grid; gap: 10px; }
+  .wd { display: grid; grid-template-columns: 96px 150px 1fr; align-items: center; gap: 14px; padding: 12px 20px; min-height: 118px; }
+  .wd .dd { text-align: center; } .wd .dd b { display: block; font-size: 40px; font-weight: 900; line-height: 1; } .wd .dd span { font-size: 22px; color: var(--sub); font-weight: 700; }
+  .wd.sat .dd b { color: #1f6fe5; }
+  .wd .ww { display: flex; align-items: center; gap: 6px; } .wd .ww svg { width: 62px; height: 62px; flex: none; }
+  .wd .tt { font-size: 30px; font-weight: 900; white-space: nowrap; } .wd .tt span { font-size: 22px; color: var(--sub); }
+  .wd .ee { display: grid; gap: 4px; min-width: 0; }
+  .wd .e { display: flex; gap: 12px; align-items: baseline; font-size: 27px; font-weight: 800; white-space: nowrap; overflow: hidden; }
+  .wd .e .t { flex: none; min-width: 84px; font-size: 23px; color: var(--acc); font-weight: 900; }
+  .wd .e .n { overflow: hidden; text-overflow: ellipsis; }
+  .wd .e.earn .n { color: #2a4a7a; } .wd .e.kr .n { color: #b5361b; } .wd .e.hol .n { color: var(--sub); }
+  .wd .e.none { color: var(--sub); font-weight: 600; font-size: 24px; }
   /* news */
   .news { padding: 4px 24px; }
   .nw { display: flex; gap: 14px; align-items: center; padding: 8px 0; }
@@ -212,7 +225,8 @@ function gpuPanel(gp, wide) {
     return `<path d="${v.map((y, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(y).toFixed(1)).join("")}" fill="none" stroke="${c}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
       <circle cx="${X(v.length - 1)}" cy="${Y(v[v.length - 1])}" r="6" fill="${c}" stroke="#fff" stroke-width="2.5"/>`; }).join("");
   const q0 = gp[0];
-  return `<div class="p chip"><div class="lab">${KO ? "GPU 임대료" : "GPU rental"}<span>${KO ? "1시간당 · 하루 변동" : "per hour · daily change"}</span></div>
+  const per = D.kind === "wrap" ? (KO ? "1시간당 · 1주 변동" : "per hour · 1-week change") : (KO ? "1시간당 · 하루 변동" : "per hour · daily change");
+  return `<div class="p chip"><div class="lab">${KO ? "GPU 임대료" : "GPU rental"}<span>${per}</span></div>
     <div class="gl">${gp.map(q => `<div><i style="background:${GPUC[q.name]}"></i><span class="n">${esc(q.name)}</span><span class="x num">$${fmt(q.last, 2)}</span><span class="c num">${chg1(q)}</span></div>`).join("")}</div>
     <div class="c43"><svg width="${W}" height="${H}" style="display:block;margin-top:10px;overflow:visible">${lines}</svg></div>
     <div class="ax"><span>${shortDate(q0.since)}</span><span>${KO ? "3개월 등락률 (점선 = 3개월 전)" : "3-month % change (dashed = start)"}</span><span>${shortDate(q0.date)}</span></div></div>`;
@@ -269,6 +283,14 @@ const S = {
     const c = s.cols || Math.min(6, s.items.length);
     return `<div class="heat" style="grid-template-columns:repeat(${c},1fr)">` + s.items.map(q => `<div class="cell" style="background:${heatColor(q.pct)}">
       <div class="n">${esc(q.name)}</div><div class="c num">${fmt(q.pct, 2, true)}%</div></div>`).join("") + "</div>";
+  },
+  week(s) {  // 다음 주 일정: 요일 · 날씨 · 일정 3개까지
+    const WDK = KO ? "일월화수목금토" : null, WDE = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const tag = { macro: "", kr: "kr", earn: "earn", hol: "hol" };
+    return `<div class="wk7">` + s.days.map(d => { const t = new Date(d.date + "T12:00:00"), w = d.wx;
+      return `<div class="p wd${t.getDay() === 6 ? " sat" : ""}"><div class="dd"><b>${KO ? WDK[t.getDay()] : WDE[t.getDay()]}</b><span>${t.getMonth() + 1}/${t.getDate()}</span></div>
+        <div class="ww">${w ? `${wxIcon(w.icon)}<div class="tt num">${w.hi}°<span>/${w.lo}°</span></div>` : ""}</div>
+        <div class="ee">${d.ev.length ? d.ev.map(e => `<div class="e ${tag[e.k] || ""}"><span class="t num">${esc(e.t || "")}</span><span class="n">${esc(e.n)}</span></div>`).join("") : `<div class="e none">${KO ? "큰 일정 없음" : "No major events"}</div>`}</div></div>`; }).join("") + "</div>";
   },
   news(s) {
     return `<div class="p news">` + s.items.map((n, i) => `<div class="nw"><i>${i + 1}</i><div><div class="h">${esc(n.head)}</div><div class="l">${esc(n.line)}</div></div></div>`).join("") + "</div>";

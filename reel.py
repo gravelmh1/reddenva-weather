@@ -15,7 +15,7 @@ import requests
 import reel_data
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-KINDS = ["books", "news", "dart", "puppy", "deriv", "trip", "facts", "netflix", "morning", "close"]
+KINDS = ["books", "news", "dart", "puppy", "deriv", "trip", "facts", "netflix", "morning", "close", "wrap", "ahead"]
 CARD_LAST = {"ko": "한 장으로 보기", "en": "The full card"}
 
 
@@ -318,7 +318,7 @@ def brief(d, region):
         sc.append(dict(type="hook", chip=(f"{w.get('when', '오늘')} {w['city']} 날씨" if ko else f"{w['city']} weather {w.get('when', 'today').lower()}"), label=w["sky"],
                            big=dict({"from": w["lo"], "to": w["hi"]}, suf="°"), pill=(f"최저 {w['lo']}° · 비 올 확률 {w['rain']}%" if ko else f"Low {w['lo']}° · Rain {w['rain']}%"),
                            pillc="#1f6fe5" if w["rain"] >= 40 else "#5b6b8c", pose=w.get("pose", "w00"), poseh=420, top=200, dur=4.0))
-    if d["kind"] == "morning":
+    if d["kind"] in ("morning", "wrap"):  # 주간 정리도 모닝과 같은 흐름 (등락 = 1주)
         ch = sec("chips")
         if ch:
             for q in ch["dram"][:1]:
@@ -366,15 +366,22 @@ def brief(d, region):
     return th, sc + [cards_scene(cards[:1], ko)]
 
 
-ADAPT = dict(dart=dart, weather=weather, morning=brief, close=brief, deriv=deriv, books=books, news=news, puppy=puppy, facts=facts, trip=trip, netflix=netflix)
+def ahead(d, region):
+    """다음 주 일정: 표지 → 이번 주 가장 큰 일정 2개(한마디) → 카드(오래)."""
+    ko = region == "kr"; th = theme("terminal"); hk = d["hook"]
+    sc = [dict(type="hook", kicker=hk["kicker"], lines=hk["lines"], size="s", sub=f"“{d['comment']}”", pose="a05", poseh=360, dur=min(4.8, 2.0 + rd(*hk["lines"], d["comment"], ko=ko)))]
+    return th, sc + [dict(type="cards", kicker=CARD_LAST["ko" if ko else "en"], srcs=["file://" + d["cards"][0]], dur=8.0)]
+
+
+ADAPT = dict(wrap=brief, ahead=ahead, dart=dart, weather=weather, morning=brief, close=brief, deriv=deriv, books=books, news=news, puppy=puppy, facts=facts, trip=trip, netflix=netflix)
 
 
 SERIES = {"kr": {"weather": "[[acc:서울]] 날씨", "books": "이번 주 [[acc:책]]", "news": "[[acc:좋은 뉴스]]", "puppy": "[[acc:아기 동물]]", "dart": "[[acc:동전]] 던지기",
                  "deriv": "[[acc:파생]] 브리핑", "trip": "[[acc:주말 여행]]", "facts": "[[acc:동물 상식]]", "netflix": "[[acc:넷플릭스]]",
-                 "morning": "[[acc:모닝]] 브리프", "close": "[[acc:마감]] 브리프"},
+                 "morning": "[[acc:모닝]] 브리프", "close": "[[acc:마감]] 브리프", "wrap": "[[acc:주간]] 정리", "ahead": "다음 주 [[acc:일정]]"},
           "us": {"weather": "[[acc:LA]] weather", "books": "[[acc:Book]] of the week", "news": "[[acc:Good news]]", "puppy": "[[acc:Baby animal]]", "dart": "[[acc:Coin]] flip",
                  "deriv": "[[acc:Derivatives]]", "trip": "[[acc:Weekend trip]]", "facts": "[[acc:Animal facts]]", "netflix": "[[acc:Netflix]] top 10",
-                 "morning": "[[acc:Morning]] Brief", "close": "[[acc:Closing]] Brief"}}
+                 "morning": "[[acc:Morning]] Brief", "close": "[[acc:Closing]] Brief", "wrap": "[[acc:Weekly]] Recap", "ahead": "Week [[acc:Ahead]]"}}
 EN_DAY_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
