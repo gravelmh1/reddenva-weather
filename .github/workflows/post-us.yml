@@ -118,6 +118,18 @@ jobs:
             if [ -n "$CHROME_PATH" ] && CHROME_PATH="$CHROME_PATH" python reel.py --region us; then exit 0; fi
             python -m playwright install --with-deps chromium && python reel.py --region us
           else echo "릴스 꺼짐 → 카드 이미지로 게시"; fi
+      - name: (브리프) 블로그에 글이 뜰 때까지 기다리기 — 프로필 링크 눌렀을 때 바로 보이게 (최대 8분, 안 뜨면 그냥 게시)
+        if: ${{ !inputs.dry_run && (steps.slot.outputs.slot == 'morning' || steps.slot.outputs.slot == 'close' || steps.slot.outputs.slot == 'wrap' || steps.slot.outputs.slot == 'ahead') }}
+        run: |
+          D=$(TZ=America/New_York date +%F)
+          case "${{ steps.slot.outputs.slot }}" in close) SUB=closing/ ;; wrap|ahead) SUB=weekend/ ;; *) SUB= ;; esac
+          [ -f out/${{ steps.slot.outputs.slot }}-us-latest.json ] && grep -q "\"$D\"" out/${{ steps.slot.outputs.slot }}-us-latest.json || { echo "오늘 카드 없음 → 안 기다림"; exit 0; }
+          URL="https://red-denva-market-brief.vercel.app/us/briefs/$D/$SUB"
+          for i in $(seq 1 32); do
+            if curl -fsSL "$URL?t=$(date +%s)" 2>/dev/null | grep -q 'reddenva-weather brief'; then echo "블로그 확인: $URL"; exit 0; fi
+            sleep 15
+          done
+          echo "::warning::블로그에 아직 없음 ($URL) → 그냥 게시"
       - name: Instagram 게시 (ig=true일 때)
         if: ${{ always() && inputs.ig && !inputs.dry_run && steps.slot.outputs.slot != '' }}
         env:
