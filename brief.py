@@ -417,10 +417,9 @@ def kr_close(now):
     if fl.get("fut"): rows.append(["코스피200 선물", fl["fut"]])
     if prg: rows.append(["프로그램 매매", prg])
     if rows: secs.append({"type": "flows", "title": "수급", "small": "순매수 · 억원", "rows": rows})
-    who = {"frn": "외국인", "ins": "기관", "ind": "개인"}
     if fl.get("fut"):
-        f = fl["fut"]; b = max(f, key=lambda k: abs(f[k]))
-        hl = [f"코스피 {pct_rich(kospi['pct'])}", f"선물 {who[b]} [[{'up' if f[b] > 0 else 'dn'}:{f[b]:+,}억]]"]
+        f = fl["fut"]; b = "frn"  # 형: 선물은 외국인만 중요 → 항상 외국인
+        hl = [f"코스피 {pct_rich(kospi['pct'])}", f"선물 외인 [[{'up' if f[b] > 0 else 'dn'}:{f[b]:+,}억]]"]
     else: hl = [f"코스피 {pct_rich(kospi['pct'])}"]
     return {"region": "kr", "kind": "close", "title": "마감 브리프", "kicker": "CLOSING BRIEF", "sub": f"{lab(day)} 한국 장 마감 15:30 기준",
             "mood": mood, "pose": POSE[mood], "facts": facts, "sections": secs, "hero": kospi, "flows": fl,
