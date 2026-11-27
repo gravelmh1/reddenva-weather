@@ -219,7 +219,7 @@ def puppy(d, region, acc="#ff8a4c", pose="a00"):
         # 영상 버전: 이름 → 첫째 줄 → 둘째 줄이 차례로 뜨고, 다 읽을 때까지 영상이 흐른다
         l1, l2 = (c["lines"] + ["", ""])[:2]
         t1 = 1.7; t2 = t1 + max(1.6, rd(l1, ko=ko) - .4); dur = max(7.5, t2 + rd(l2, ko=ko) + .6)
-        dur = min(dur, 12.0); frames, n = video_frames(d["video"], fx, min(dur, float(d.get("vdur") or dur)))
+        dur = min(max(dur, float(d.get("vdur") or 0)), 20.0); frames  # 글을 다 읽은 뒤에도 영상이 끝날 때까지(최대 20초) 흐름, n = video_frames(d["video"], fx, min(dur, float(d.get("vdur") or dur)))
         day = dt.date.fromisoformat(d["day"]) if d.get("day") else dt.date.today()
         top = (f"{KO_DAY[day.weekday()]}요일 · {c['badge']}" if ko else f"{EN_DAY_FULL[day.weekday()]} · {c['badge']}")
         vs = dict(type="video", frames="file://" + frames, nframes=n, fps=30, top=top, dband=(f"{day.month}월" if ko else f"{day:%b}".upper()), dnum=str(day.day),

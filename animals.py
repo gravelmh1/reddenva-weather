@@ -73,7 +73,7 @@ def pixabay_videos(q, key):
             out.append({"id": f"pbv:{v['id']}", "url": th, "frames": [], "video": f["url"], "vw": f["width"], "vh": f["height"], "dur": v["duration"],
                         "portrait": f["height"] > f["width"], "likes": v.get("likes", 0), "cap": v.get("tags", ""), "artist": (v.get("user") or "")[:40], "license": "", "src": "Pixabay"})
         if len(out) >= 12 or len(hits) < 50: break
-    out.sort(key=lambda c: (not c["portrait"], -c["likes"]))  # 세로 먼저, 그다음 인기순
+    out.sort(key=lambda c: (c["dur"] < 12, not c["portrait"], -c["likes"]))  # 12초 이상 먼저, 세로, 그다음 인기순
     return out
 
 
