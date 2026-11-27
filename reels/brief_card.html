@@ -120,6 +120,7 @@
   .wd.sat .dd b { color: #1f6fe5; }
   .wd .ww { display: flex; align-items: center; gap: 6px; } .wd .ww svg { width: 62px; height: 62px; flex: none; }
   .wd .tt { font-size: 30px; font-weight: 900; white-space: nowrap; } .wd .tt span { font-size: 22px; color: var(--sub); }
+  .wd .rest { display: flex; align-items: center; gap: 16px; font-size: 25px; font-weight: 800; color: var(--sub); } .wd .rest img { height: 92px; width: auto; margin: -8px 0; }
   .wd .ee { display: grid; gap: 4px; min-width: 0; }
   .wd .e { display: flex; gap: 12px; align-items: baseline; font-size: 27px; font-weight: 800; white-space: nowrap; overflow: hidden; }
   .wd .e .t { flex: none; min-width: 84px; font-size: 23px; color: var(--acc); font-weight: 900; }
@@ -287,10 +288,11 @@ const S = {
   week(s) {  // 다음 주 일정: 요일 · 날씨 · 일정 3개까지
     const WDK = KO ? "일월화수목금토" : null, WDE = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const tag = { macro: "", kr: "kr", earn: "earn", hol: "hol" };
+    const REST = ["w15", "a22", "a23", "a18"]; let ri = 0;  // 일정 없는 날: 쉬는 레드덴바 (선글라스·낮잠·뒹굴·담요)
     return `<div class="wk7">` + s.days.map(d => { const t = new Date(d.date + "T12:00:00"), w = d.wx;
       return `<div class="p wd${t.getDay() === 6 ? " sat" : ""}"><div class="dd"><b>${KO ? WDK[t.getDay()] : WDE[t.getDay()]}</b><span>${t.getMonth() + 1}/${t.getDate()}</span></div>
         <div class="ww">${w ? `${wxIcon(w.icon)}<div class="tt num">${w.hi}°<span>/${w.lo}°</span></div>` : ""}</div>
-        <div class="ee">${d.ev.length ? d.ev.map(e => `<div class="e ${tag[e.k] || ""}"><span class="t num">${esc(e.t || "")}</span><span class="n">${esc(e.n)}</span></div>`).join("") : `<div class="e none">${KO ? "큰 일정 없음" : "No major events"}</div>`}</div></div>`; }).join("") + "</div>";
+        <div class="ee">${d.ev.length ? d.ev.map(e => `<div class="e ${tag[e.k] || ""}"><span class="t num">${esc(e.t || "")}</span><span class="n">${esc(e.n)}</span></div>`).join("") : `<div class="rest"><img src="../assets/poses/${REST[(ri++) % REST.length]}.png"><span>${KO ? "큰 일정 없음 · 레드덴바는 휴양 중" : "Nothing big · Red Denva is off"}</span></div>`}</div></div>`; }).join("") + "</div>";
   },
   news(s) {
     return `<div class="p news">` + s.items.map((n, i) => `<div class="nw"><i>${i + 1}</i><div><div class="h">${esc(n.head)}</div><div class="l">${esc(n.line)}</div></div></div>`).join("") + "</div>";
