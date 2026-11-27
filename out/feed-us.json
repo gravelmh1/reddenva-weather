@@ -1,6 +1,6 @@
 {
  "region": "us",
- "updated": "2026-11-27T21:02:27Z",
+ "updated": "2026-11-27T21:16:23Z",
  "categories": [
   {
    "series": "books",
@@ -63,6 +63,17 @@
     "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/trip-us-2026-11-27-1.jpg",
     "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/trip-us-2026-11-27-2.jpg",
     "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/trip-us-2026-11-27-3.jpg"
+   ]
+  },
+  {
+   "series": "brief",
+   "label": "Closing Brief",
+   "date": "2026-11-27",
+   "date_label": "Fri, Nov 27, 2026",
+   "title": "Tech added 2.80% in a short session.",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/close-us-2026-11-27.jpg"
    ]
   },
   {
