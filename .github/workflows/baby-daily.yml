@@ -86,6 +86,7 @@ jobs:
         run: |
           git pull --rebase -q || true
           python post_slot.py $REGION --write baby
+          python feed.py $REGION || true   # 블로그 목록에도 올림
           git add out
           git diff --cached --quiet || (git commit -q -m "$REGION baby post.json" && git pull --rebase -q && git push -q)
       - name: 릴스 영상 만들기 (실패하면 카드 이미지로 게시)
