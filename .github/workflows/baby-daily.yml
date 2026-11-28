@@ -29,10 +29,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
-      REGION: ${{ github.event_name == 'schedule' && ((github.event.schedule == '40 0 * * *' || github.event.schedule == '25 1 * * *') && 'kr' || 'us') || inputs.region }}
+      # 예약 실행은 늦게 깨어날 때가 많아서(몇 시간까지) 어느 cron인지가 아니라 '지금 현지 9~11시인 지역'으로 정한다 (아래 단계)
+      REGION_IN: ${{ github.event_name == 'schedule' && 'auto' || inputs.region }}
       DRY: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}
     concurrency:
-      group: post-${{ github.event_name == 'schedule' && ((github.event.schedule == '40 0 * * *' || github.event.schedule == '25 1 * * *') && 'kr' || 'us') || inputs.region }}
+      group: baby-daily
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
@@ -42,7 +43,11 @@ jobs:
           python3 - <<'EOF' >> "$GITHUB_OUTPUT"
           import datetime as dt, os
           from zoneinfo import ZoneInfo
-          r = os.environ["REGION"]; now = dt.datetime.now(ZoneInfo("Asia/Seoul" if r == "kr" else "America/Los_Angeles"))
+          r = os.environ["REGION_IN"]
+          if r == "auto":  # 한국 09~11시 = UTC 00~02시, 미국 09~11시 = UTC 16~19시 → 겹치지 않음
+              r = "kr" if 9 <= dt.datetime.now(ZoneInfo("Asia/Seoul")).hour <= 11 else "us"
+          open(os.environ["GITHUB_ENV"], "a").write(f"REGION={r}\n")
+          now = dt.datetime.now(ZoneInfo("Asia/Seoul" if r == "kr" else "America/Los_Angeles"))
           sf = f"state/{r}_ig_baby.txt"; done = os.path.exists(sf) and open(sf).read().strip() == now.date().isoformat()
           ok = bool(os.environ.get("DRY")) or (9 <= now.hour <= 11 and not done) or ("${{ github.event_name }}" == "workflow_dispatch" and not done)
           print("run=" + ("true" if ok else "false"))
