@@ -1,0 +1,46 @@
+name: comments
+# 우리 게시물(@reddenva.kr, @reddenva.us)에 달린 새 댓글에 레드덴바 말투로 답글을 단다 (Instagram + Threads).
+# Make와 무관하게 GitHub 예약 실행으로 돈다 (공개 저장소라 무료). 예약 실행은 늦어질 수 있지만 댓글 답장엔 충분.
+on:
+  schedule:
+    - cron: "7,37 * * * *"   # 30분마다
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "테스트만 하기 (체크하면 어떤 답글을 달지 로그로만 보여줘요)"
+        type: boolean
+        default: true
+permissions:
+  contents: write
+concurrency:
+  group: comments
+  cancel-in-progress: false
+jobs:
+  reply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: 댓글 답글 달기
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          IG_TOKEN_KR: ${{ secrets.IG_TOKEN_KR }}
+          IG_TOKEN_US: ${{ secrets.IG_TOKEN_US }}
+          THREADS_TOKEN_KR: ${{ secrets.THREADS_TOKEN_KR }}
+          THREADS_TOKEN_US: ${{ secrets.THREADS_TOKEN_US }}
+        run: |
+          fail=0
+          python comments.py --region kr ${{ inputs.dry_run && '--dry-run' || '' }} || fail=1
+          python comments.py --region us ${{ inputs.dry_run && '--dry-run' || '' }} || fail=1
+          exit $fail
+      - name: 답한 댓글 기록 저장
+        if: ${{ always() && !inputs.dry_run }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add state/comments_replied.txt 2>/dev/null || true
+          git diff --cached --quiet || (git commit -q -m "comments replied" && git pull --rebase -q && git push -q)

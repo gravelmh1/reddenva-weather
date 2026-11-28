@@ -10,6 +10,7 @@
 > - 토큰(GitHub Secrets): `IG_TOKEN_KR`·`IG_TOKEN_US` = Meta 시스템 사용자 토큰(EAA…, **만료 없음**, 앱 "Red Denva Weather"·비즈니스 포트폴리오 마켓브리프). `THREADS_TOKEN_*` = 60일 토큰, `refresh-threads.yml`이 매주 월요일 자동 연장.
 > - GitHub 예약 실행(cron)은 몇 시간씩 늦어서 게시에 쓰지 않아요. `weather-*.yml` cron은 새벽 예비 카드만 만들어요.
 > - 서머타임: Make 일정이 뉴욕 시각 기준이라 미국 서머타임 기간(3~11월)엔 한국판이 한 시간 일찍(05:05, 12:00) 나가요. `post_slot.py`가 12시도 주간 시각으로 처리해서 카드는 정상으로 나가요.
+> - **댓글 자동 답글:** `comments.yml`이 30분마다 `comments.py`를 돌려 우리 게시물(최근 7일)에 새로 달린 댓글(최근 3일)에 레드덴바 말투로 한 번씩 답해요 (Instagram + Threads, Gemini 무료). 스팸·광고·우리 댓글·답글의 답글은 건너뛰고, 답한 댓글은 `state/comments_replied.txt`에 적어 두 번 안 달아요. 다른 사람 글에는 달지 않아요.
 > - 블로그 red-denva-market-brief(Vercel)가 `out/feed-*.json`을 읽어 시리즈 카드를 보여줘요.
 
 매일 아침 06:00에 캐릭터 날씨 카드를 만들어 Instagram과 Threads에 올려요. 사람도 Claude도 필요 없고, GitHub가 알아서 실행해요.
