@@ -1,6 +1,6 @@
 {
  "region": "us",
- "updated": "2026-11-28T06:57:35Z",
+ "updated": "2026-11-28T06:57:46Z",
  "categories": [
   {
    "series": "books",
@@ -57,17 +57,6 @@
  ],
  "items": [
   {
-   "series": "animal",
-   "label": "Today's baby animal",
-   "date": "2026-11-27",
-   "date_label": "Fri, Nov 27, 2026",
-   "title": "Today's baby animal: Koala joey",
-   "text": "",
-   "images": [
-    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/baby-us-2026-11-27.jpg"
-   ]
-  },
-  {
    "series": "trip",
    "label": "Weekend trip",
    "date": "2026-11-27",
@@ -107,7 +96,7 @@
    "label": "Today's baby animal",
    "date": "2026-11-26",
    "date_label": "Thu, Nov 26, 2026",
-   "title": "Today's baby animal",
+   "title": "Today's baby animal: Koala joey",
    "text": "",
    "images": [
     "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/baby-us-2026-11-26.jpg"
