@@ -6,6 +6,7 @@
 - 한국판은 위키백과 한국어 제목이 있으면 그 제목으로 보여 준다.
 """
 import argparse, csv, datetime as dt, io, json, os, re, subprocess, time
+import tags
 from zoneinfo import ZoneInfo
 import requests
 import netflix_render, weather
@@ -128,8 +129,8 @@ def build(region, week, tv, film, day):
                    "레드덴바 · 매주 일요일, 이번 주 뭐 볼까" if ko else "Red Denva · Every Sunday, what to watch"])
     s_txt = f" {seas}" if seas else ""
     tag = re.sub(r"[^0-9A-Za-z가-힣]", "", title)[:24]
-    cap = (f"🍿 지난주 한국 넷플릭스 시리즈 1위: 《{title}》{s_txt}\n\n#{tag} #넷플릭스 #넷플릭스추천 #드라마추천 #주말뭐보지 #레드덴바" if ko else
-           f"🍿 Last week's #1 series on Netflix US: {title}{s_txt}\n\n#{tag} #Netflix #WhatToWatch #NetflixTop10 #weekend #reddenva")
+    cap = (f"🍿 지난주 한국 넷플릭스 시리즈 1위: 《{title}》{s_txt}\n\n" + tags.line("kr", "넷플릭스추천", tag, "넷플릭스", "드라마추천") if ko else
+           f"🍿 Last week's #1 series on Netflix US: {title}{s_txt}\n\n" + tags.line("us", "WhatToWatch", tag, "Netflix", "NetflixTop10"))
     return c, cap
 
 

@@ -4,6 +4,7 @@
 결과: out/deriv-us-YYYY-MM-DD-1.jpg, -2.jpg, out/deriv-us-latest.json (image_url, image_url2)
 """
 import argparse, datetime as dt, io, json, os, subprocess, time
+import tags
 from datetile import stamp_png
 from zoneinfo import ZoneInfo
 import requests
@@ -186,7 +187,7 @@ def render(D, out1, out2):
                    "margin": [round(debit[-1], 2), round((debit[-1] - debit[-2]) / debit[-2] * 100, 1), f"{fmo[-1]:%b %Y}"],
                    "cards": [os.path.abspath(out1), os.path.abspath(out2)]})
     cap = (f"📊 Thursday Derivatives Briefing · S&P 500 futures, basis, VIX, CFTC positioning, margin debt · as of {lab(BASE)}\n\n"
-           "#SP500 #ESfutures #futures #derivatives #VIX #COT #margindebt #reddenva")
+           + tags.line("us", "stockmarket", "SP500", "futures", "VIX"))
     return cap
 
 

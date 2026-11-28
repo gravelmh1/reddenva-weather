@@ -2,6 +2,7 @@
 한국판=한국 소식 / 미국판=미국 소식. 무료 RSS에서 지난 7일 기사를 모아 Gemini가 3개를 고르고 요약(근거 글에 있는 내용만).
 사용: python news.py --region kr|us [--dry-run] [--force]"""
 import argparse, datetime as dt, email.utils, json, os, re, time, urllib.parse
+import tags
 import xml.etree.ElementTree as ET
 from zoneinfo import ZoneInfo
 import requests
@@ -200,11 +201,11 @@ def build(region, j, items, day):
     if ko:
         c = dict(top=f"WEEKLY GOOD NEWS · {d:%Y.%m.%d} ({'월화수목금토일'[d.weekday()]})", handle="@reddenva.kr", badge="이번 주 좋은 뉴스", title="이번 주 TOP 3", items=rows,
                  head="", author=who, quote=q, foot=["공개 보도를 요약했어요.", "AI 요약이라 오류가 있을 수 있어요."])
-        cap = f"📰 이번 주 좋은 뉴스 TOP 3 · {d:%Y.%m.%d}\n\n#좋은뉴스 #훈훈한소식 #긍정뉴스 #미담 #레드덴바"
+        cap = f"📰 이번 주 좋은 뉴스 TOP 3 · {d:%Y.%m.%d}\n\n" + tags.line("kr", "좋은뉴스", "훈훈한소식", "긍정뉴스", "미담")
     else:
         c = dict(top=f"WEEKLY GOOD NEWS · {d:%b %d, %Y} ({d:%a})".upper(), handle="@reddenva.us", badge="This week's good news", title="This Week's Top 3", items=rows,
                  head="", author=who, quote=q, foot=["Summarized from public reports.", "AI summary may contain errors."])
-        cap = f"📰 This week's good news: Top 3 · {d:%b %d, %Y}\n\n#goodnews #positivenews #uplifting #kindness #reddenva"
+        cap = f"📰 This week's good news: Top 3 · {d:%b %d, %Y}\n\n" + tags.line("us", "goodnews", "positivenews", "uplifting", "kindness")
     return c, cap
 
 

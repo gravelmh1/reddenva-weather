@@ -2,6 +2,7 @@
 import os
 import time
 import requests
+import tags
 
 IG = "https://graph.instagram.com/v21.0"
 FB = "https://graph.facebook.com/v21.0"  # EAA… 토큰(시스템 사용자, 만료 없음)은 이쪽 주소를 쓴다
@@ -26,7 +27,7 @@ def _post(url, data, token, retries=3):
 def instagram(region: str, image_url: str, caption: str) -> str:
     uid, token = os.environ[f"IG_USER_ID_{region.upper()}"], os.environ[f"IG_TOKEN_{region.upper()}"]
     B = ig_base(token)
-    c = _post(f"{B}/{uid}/media", {"image_url": image_url, "caption": caption}, token)["id"]
+    c = _post(f"{B}/{uid}/media", {"image_url": image_url, "caption": tags.for_instagram(caption)}, token)["id"]
     _ig_wait(c, token)
     return _post(f"{B}/{uid}/media_publish", {"creation_id": c}, token)["id"]
 
@@ -64,7 +65,7 @@ def instagram_carousel(region: str, image_urls: list, caption: str) -> str:
     for u in image_urls:
         k = _post(f"{B}/{uid}/media", {"image_url": u, "is_carousel_item": "true"}, token)["id"]
         _ig_wait(k, token); kids.append(k)
-    c = _post(f"{B}/{uid}/media", {"media_type": "CAROUSEL", "children": ",".join(kids), "caption": caption}, token)["id"]
+    c = _post(f"{B}/{uid}/media", {"media_type": "CAROUSEL", "children": ",".join(kids), "caption": tags.for_instagram(caption)}, token)["id"]
     _ig_wait(c, token)
     return _post(f"{B}/{uid}/media_publish", {"creation_id": c}, token)["id"]
 
@@ -79,9 +80,22 @@ def fit_threads(text: str, limit: int = 500) -> str:
     return out if len(out) <= limit else out[: limit - 1].rstrip() + "…"
 
 
+def _th_container(uid, token, data, caption):
+    """Threads 글 컨테이너. 해시태그 줄 대신 대표 태그 1개를 주제 태그로 붙인다.
+    주제 태그 때문에 실패하면(API 변경 등) 태그 없이 한 번 더 시도해서 게시는 꼭 되게 한다."""
+    text, topic = tags.for_threads(caption)
+    body = dict(data, text=fit_threads(text))
+    if topic:
+        try:
+            return _post(f"{TH}/{uid}/threads", dict(body, topic_tag=topic), token, retries=1)["id"]
+        except RuntimeError as e:
+            print(f"Threads 주제 태그({topic}) 실패 → 태그 없이 다시: {e}")
+    return _post(f"{TH}/{uid}/threads", body, token)["id"]
+
+
 def threads(region: str, image_url: str, text: str) -> str:
     uid, token = os.environ[f"THREADS_USER_ID_{region.upper()}"], os.environ[f"THREADS_TOKEN_{region.upper()}"]
-    c = _post(f"{TH}/{uid}/threads", {"media_type": "IMAGE", "image_url": image_url, "text": fit_threads(text)}, token)["id"]
+    c = _th_container(uid, token, {"media_type": "IMAGE", "image_url": image_url}, text)
     time.sleep(10)  # 컨테이너 준비 대기
     pid = _post(f"{TH}/{uid}/threads_publish", {"creation_id": c}, token)["id"]
     return pid
@@ -92,7 +106,7 @@ def threads_carousel(region: str, image_urls: list, text: str) -> str:
     uid, token = os.environ[f"THREADS_USER_ID_{region.upper()}"], os.environ[f"THREADS_TOKEN_{region.upper()}"]
     kids = [_post(f"{TH}/{uid}/threads", {"media_type": "IMAGE", "image_url": u, "is_carousel_item": "true"}, token)["id"] for u in image_urls]
     time.sleep(10)
-    c = _post(f"{TH}/{uid}/threads", {"media_type": "CAROUSEL", "children": ",".join(kids), "text": fit_threads(text)}, token)["id"]
+    c = _th_container(uid, token, {"media_type": "CAROUSEL", "children": ",".join(kids)}, text)
     time.sleep(10)
     pid = _post(f"{TH}/{uid}/threads_publish", {"creation_id": c}, token)["id"]
     return pid

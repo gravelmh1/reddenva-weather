@@ -5,6 +5,7 @@
 - 한국판이 먼저 고른 사진을 state/facts_pick.json 에 남기고, 미국판은 같은 주면 그대로 쓴다.
 """
 import argparse, base64, datetime as dt, io, json, os, re, subprocess, time
+import tags
 from zoneinfo import ZoneInfo
 import requests
 from PIL import Image
@@ -120,8 +121,8 @@ def build(region, pick, day, photo):
              badge="신기한 동물 사실" if ko else "Weird animal fact", name=kname if ko else en, lines=lk if ko else le, aside=pick[f"aside_{L}"],
              foot=[("사진: " if ko else "Photo: ") + credit, "레드덴바 · 매주 토요일, 아는 척 동물 상식" if ko else "Red Denva · Every Saturday, one weird animal fact"])
     tag = re.sub(r"[^0-9A-Za-z가-힣]", "", kname if ko else en)
-    cap = (f"🦦 {kname}: {lk[0]}\n\n#{tag} #동물상식 #신기한사실 #토요일 #아는척 #레드덴바" if ko else
-           f"🦦 {en}: {le[0]}\n\n#{tag} #animalfacts #funfacts #saturday #didyouknow #reddenva")
+    cap = (f"🦦 {kname}: {lk[0]}\n\n" + tags.line("kr", "동물상식", tag, "신기한사실", "동물") if ko else
+           f"🦦 {en}: {le[0]}\n\n" + tags.line("us", "animalfacts", tag, "didyouknow", "funfacts"))
     return c, cap
 
 

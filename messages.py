@@ -1,6 +1,7 @@
 """숫자를 날씨 전문가 톤의 문구와 캐릭터 포즈로 바꾼다. (LLM 없이 규칙으로 동작 = 토큰 0)"""
 import datetime as dt
 from weather import to_c
+import tags as T
 
 WD_KO = "월화수목금토일"
 WD_EN = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -192,11 +193,15 @@ def build(f: dict, region: str, city: str, now: dt.datetime) -> dict:
     if lang == "ko":
         wd = WD_KO[now.weekday()]
         top = f"{city} {now.month}/{now.day}({wd}) 최고 {t['hi']}° · 최저 {t['lo']}°"
-        tags = "#서울날씨 #출근길날씨 #오늘의날씨 #날씨 #레드덴바"
+        cond = ("천둥번개" if f["grp"] == "thunder" else "눈오는날" if f["grp"] == "snow" else "비오는날" if f["rain_day"] >= 40 else
+                "폭염" if f["hi_c"] >= 33 else "한파" if f["lo_c"] <= -5 else "옷차림" if f["lo_c"] <= 5 else "날씨")
+        tags = T.line("kr", "서울날씨", "오늘날씨", "출근길날씨", cond)
     else:
         wd = WD_EN[now.weekday()]
         top = f"{city} {wd} {now.month}/{now.day}: high {t['hi']}° · low {t['lo']}°"
-        tags = "#LAWeather #LosAngeles #MorningCommute #TodayWeather #RedDenva"
+        cond = ("LArain" if f["grp"] in ("rain", "thunder") or f["rain_day"] >= 40 else "heatwave" if f["hi_c"] >= 32 else
+                "SantaAnaWinds" if big_wind else "SoCalWeather")
+        tags = T.line("us", "LAweather", "LosAngeles", "SoCal", cond)
     body = "\n".join(["· " + (f"{a} {b}" if a == "어제보다" else f"{a}: {b}") for a, b in rows])
     caption = f"{top}\n\n{tags}"  # 정보는 카드에 다 있으니 캡션은 검색용 핵심 한 줄 + 해시태그만
     return dict(headline=head, rows=rows, card_rows=card_rows, compare=cmp_card, pose=pose, caption=caption, lang=lang)
