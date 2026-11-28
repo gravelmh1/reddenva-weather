@@ -1,6 +1,6 @@
 {
  "region": "kr",
- "updated": "2026-11-28T04:01:35Z",
+ "updated": "2026-11-28T06:57:35Z",
  "categories": [
   {
    "series": "books",
@@ -17,6 +17,10 @@
   {
    "series": "animal",
    "label": "아기 동물"
+  },
+  {
+   "series": "animal",
+   "label": "오늘의 아기 동물"
   },
   {
    "series": "deriv",
@@ -53,6 +57,17 @@
  ],
  "items": [
   {
+   "series": "animal",
+   "label": "오늘의 아기 동물",
+   "date": "2026-11-28",
+   "date_label": "2026.11.28 (토)",
+   "title": "오늘의 아기 동물: 아기 강아지",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/baby-kr-2026-11-28.jpg"
+   ]
+  },
+  {
    "series": "facts",
    "label": "동물 상식",
    "date": "2026-11-28",
@@ -72,6 +87,17 @@
    "text": "",
    "images": [
     "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/wrap-kr-2026-11-28.jpg"
+   ]
+  },
+  {
+   "series": "animal",
+   "label": "오늘의 아기 동물",
+   "date": "2026-11-27",
+   "date_label": "2026.11.27 (금)",
+   "title": "오늘의 아기 동물: 아기 강아지",
+   "text": "그냥 가만히 앉아 있음. 별다른 뜻은 없음.",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/baby-kr-2026-11-27.jpg"
    ]
   },
   {

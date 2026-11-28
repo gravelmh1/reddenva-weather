@@ -1,6 +1,6 @@
 """Red Denva 시리즈 목록(피드) 만들기.
 
-out/ 안의 주간 카드 그림(책·좋은 뉴스·아기 동물·파생 브리핑·주말 여행)을 모아
+out/ 안의 카드 그림(책·좋은 뉴스·아기 동물(매일)·파생 브리핑·주말 여행 등)을 모아
 out/feed-{region}.json 으로 정리한다. 날씨는 넣지 않는다.
 블로그(red-denva-market-brief)가 이 파일을 읽어 카테고리 카드로 보여준다.
 
@@ -19,6 +19,7 @@ SERIES = {
     "news": ("news", "좋은 뉴스", "Good news"),
     "dart": ("coin", "동전 던지기", "Coin flip"),
     "puppy": ("animal", "아기 동물", "Baby animal"),
+    "baby": ("animal", "오늘의 아기 동물", "Today's baby animal"),  # 매일 10시 영상 (baby-daily.yml)
     "deriv": ("deriv", "파생 브리핑", "Derivatives brief"),
     "trip": ("trip", "주말 여행", "Weekend trip"),
     "facts": ("facts", "동물 상식", "Animal facts"),
