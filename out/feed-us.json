@@ -1,6 +1,6 @@
 {
  "region": "us",
- "updated": "2026-11-28T14:05:49Z",
+ "updated": "2026-11-28T14:32:03Z",
  "categories": [
   {
    "series": "books",
@@ -56,6 +56,17 @@
   }
  ],
  "items": [
+  {
+   "series": "brief",
+   "label": "Weekly Recap",
+   "date": "2026-11-28",
+   "date_label": "Sat, Nov 28, 2026",
+   "title": "Everyone's thrilled. I'll be lying down.",
+   "text": "",
+   "images": [
+    "https://raw.githubusercontent.com/gravelmh1/reddenva-weather/main/out/wrap-us-2026-11-28.jpg"
+   ]
+  },
   {
    "series": "trip",
    "label": "Weekend trip",
