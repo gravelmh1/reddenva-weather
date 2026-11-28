@@ -1,30 +1,34 @@
 {
  "used": [
-  "pbv:222837"
+  "pbv:222837",
+  "pbv:127159"
+ ],
+ "recent": [
+  "beagle puppy"
  ],
  "pick": {
-  "week": "kr-2026-11-27",
-  "id": "pbv:222837",
-  "artist": "goutamdasg6",
+  "week": "kr-2026-11-28",
+  "id": "pbv:127159",
+  "artist": "Somo_Photography",
   "license": "",
   "src": "Pixabay",
-  "focus_x": 0.45,
-  "focus_y": 0.52,
+  "focus_x": 0.58,
+  "focus_y": 0.58,
   "name_ko": "아기 강아지",
   "name_en": "Puppy",
   "lines_ko": [
-   "그냥 가만히 앉아 있음.",
-   "별다른 뜻은 없음."
+   "바다를 배경으로 서 있는 중.",
+   "아침 노을을 즐기는 모습."
   ],
   "lines_en": [
-   "Sitting completely still.",
-   "No hidden meaning."
+   "Standing proudly by the sea.",
+   "Enjoying the morning sunrise."
   ],
-  "aside_ko": "뜻이 없네",
-  "aside_en": "No meaning",
-  "video": "https://cdn.pixabay.com/video/2024/07/24/222837_large.mp4",
-  "vw": 1920,
-  "vh": 1080,
-  "dur": 14
+  "aside_ko": "심쿵",
+  "aside_en": "Adorable",
+  "video": "https://cdn.pixabay.com/video/2022/08/08/127159-737736891_large.mp4",
+  "vw": 1080,
+  "vh": 1920,
+  "dur": 17
  }
 }
