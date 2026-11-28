@@ -547,8 +547,12 @@ def main():
         d["wx"] = None if a.kind == "ahead" else safe(today_wx, a.region, wd, "tomorrow" if a.kind == "close" else "today"); print("날씨", d["wx"])
         if d["wx"]: w = d["wx"]; d["facts"][f"{w['when']} {w['city']} 날씨" if a.region == "kr" else f"{w['city']} weather {w['when'].lower()}"] = f"{w['sky']} {w['hi']}°/{w['lo']}° 강수 {w['rain']}%"
         d["comment"] = quip(a.region, a.kind, d["facts"], d["mood"])
-        try: d["news"] = [] if a.kind == "ahead" else news3(a.region, a.kind, now, d["facts"])
-        except Exception as e: print("뉴스 건너뜀:", type(e).__name__, e); d["news"] = []
+        d["news"] = []
+        for k in range(0 if a.kind == "ahead" else 3):  # 구글 뉴스가 가끔 503 → 30초·60초 쉬고 다시
+            try: d["news"] = news3(a.region, a.kind, now, d["facts"]); break
+            except Exception as e:
+                print("뉴스 실패:", type(e).__name__, e)
+                if k < 2: time.sleep(30 * (k + 1))
         NT = {"morning": ("간밤 미국 주요 뉴스", "Top headlines"), "close": ("오늘 장중 핵심 뉴스", "Top headlines"), "wrap": ("이번 주 핵심 뉴스", "This week's big stories")}
         if d["news"]: d["sections"].append({"type": "news", "title": NT[a.kind][0 if a.region == "kr" else 1], "items": d["news"]})
         d.update(day=day.isoformat(), handle=f"@reddenva.{a.region}", made=now.isoformat())
